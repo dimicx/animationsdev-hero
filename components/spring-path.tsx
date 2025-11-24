@@ -97,90 +97,7 @@ export function SpringPath() {
   return (
     <motion.g variants={fadeScaleVariants} className="origin-bottom-left!">
       <motion.g
-        variants={{
-          initial: {},
-          animate: {
-            transition: {
-              staggerChildren: 0.1,
-              delayChildren: 0.225,
-            },
-          },
-        }}
-        initial="initial"
-        animate="animate"
-      >
-        <motion.g
-          animate={{
-            transform: ["translateY(-2px)", "translateY(3px)"],
-            transition: {
-              delay: 0.4,
-              duration: 3,
-              ease: "easeInOut",
-              repeat: Infinity,
-              repeatType: "reverse",
-            },
-          }}
-        >
-          <motion.g
-            variants={{
-              initial: {
-                transform: "translateX(40px) translateY(-60px) scale(0)",
-                opacity: 0,
-              },
-              animate: {
-                transform: "translateX(0px) translateY(0px) scale(1)",
-                opacity: 1,
-              },
-            }}
-            className="filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)]"
-          >
-            <circle
-              cx="201.927"
-              cy="293.495"
-              r="9.417"
-              transform="rotate(-6.595 201.927 293.495)"
-              className="fill-[#F8F8F8] dark:fill-[#252525]"
-            ></circle>
-          </motion.g>
-        </motion.g>
-        <motion.g
-          animate={{
-            transform: ["translateY(-2px)", "translateY(3px)"],
-            transition: {
-              delay: 1,
-              duration: 3,
-              ease: "easeInOut",
-              repeat: Infinity,
-              repeatType: "reverse",
-            },
-          }}
-        >
-          <motion.g
-            variants={{
-              initial: {
-                transform: "translateX(40px) translateY(-60px) scale(0)",
-                opacity: 0,
-              },
-              animate: {
-                transform: "translateX(0px) translateY(0px) scale(1)",
-                opacity: 1,
-              },
-            }}
-            className="filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)]"
-          >
-            <circle
-              cx="184.926"
-              cy="314.008"
-              r="4.913"
-              transform="rotate(-6.595 184.926 314.008)"
-              className="fill-[#F8F8F8] dark:fill-[#252525]"
-            ></circle>
-          </motion.g>
-        </motion.g>
-      </motion.g>
-
-      <motion.g
-        onHoverStart={() => {
+        onMouseEnter={() => {
           handleMouseEnter();
           setCurrentPath(forwardPathString);
           setForwardCompleted(false);
@@ -192,7 +109,7 @@ export function SpringPath() {
             setForwardCompleted(true);
           });
         }}
-        onHoverEnd={() => {
+        onMouseLeave={() => {
           handleMouseLeave();
           const currentProgress = progress.get();
 
@@ -300,6 +217,89 @@ export function SpringPath() {
             style={{ opacity: ballOpacity }}
             className="fill-[#989898] dark:fill-[#D6D6D6]"
           />
+        </motion.g>
+      </motion.g>
+
+      <motion.g
+        variants={{
+          initial: {},
+          animate: {
+            transition: {
+              staggerChildren: 0.1,
+              delayChildren: 0.225,
+            },
+          },
+        }}
+        initial="initial"
+        animate="animate"
+      >
+        <motion.g
+          animate={{
+            transform: ["translateY(-2px)", "translateY(3px)"],
+            transition: {
+              delay: 0.4,
+              duration: 3,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse",
+            },
+          }}
+        >
+          <motion.g
+            variants={{
+              initial: {
+                transform: "translateX(40px) translateY(-60px) scale(0)",
+                opacity: 0,
+              },
+              animate: {
+                transform: "translateX(0px) translateY(0px) scale(1)",
+                opacity: 1,
+              },
+            }}
+            className="filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)]"
+          >
+            <circle
+              cx="201.927"
+              cy="293.495"
+              r="9.417"
+              transform="rotate(-6.595 201.927 293.495)"
+              className="fill-[#F8F8F8] dark:fill-[#252525]"
+            ></circle>
+          </motion.g>
+        </motion.g>
+        <motion.g
+          animate={{
+            transform: ["translateY(-2px)", "translateY(3px)"],
+            transition: {
+              delay: 1,
+              duration: 3,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse",
+            },
+          }}
+        >
+          <motion.g
+            variants={{
+              initial: {
+                transform: "translateX(40px) translateY(-60px) scale(0)",
+                opacity: 0,
+              },
+              animate: {
+                transform: "translateX(0px) translateY(0px) scale(1)",
+                opacity: 1,
+              },
+            }}
+            className="filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)]"
+          >
+            <circle
+              cx="184.926"
+              cy="314.008"
+              r="4.913"
+              transform="rotate(-6.595 184.926 314.008)"
+              className="fill-[#F8F8F8] dark:fill-[#252525]"
+            ></circle>
+          </motion.g>
         </motion.g>
       </motion.g>
     </motion.g>

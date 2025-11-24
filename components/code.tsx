@@ -94,9 +94,8 @@ export function Code() {
   }, [controls, codePathProgress]);
   const handleMouseLeave = useCallback(() => {
     controls.start("initial");
-    animate(codePathProgress, [2, 1, 0], {
+    animate(codePathProgress, 0, {
       duration: 0.6,
-      times: [0, 0.3, 0.7],
       ease: "easeOut",
     });
   }, [controls, codePathProgress]);
