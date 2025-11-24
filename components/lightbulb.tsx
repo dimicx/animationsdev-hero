@@ -1,6 +1,6 @@
 import { motion, useAnimation, Variants } from "motion/react";
 import { useCallback } from "react";
-import { fadeScaleVariants } from "@/lib/animation-variants";
+import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 
 const wholeVariants: Variants = {
   initial: {
@@ -17,6 +17,7 @@ const wholeVariants: Variants = {
       duration: 0.8,
       times: [0, 0.3, 0.7, 1],
       ease: "easeInOut",
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
@@ -37,6 +38,7 @@ const bulbVariants: Variants = {
     transition: {
       duration: 0.7,
       times: [0, 0.2, 0.5, 0.7],
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
@@ -50,6 +52,7 @@ const stemVariants: Variants = {
     transition: {
       duration: 0.7,
       times: [0, 0.2, 0.5, 0.7],
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
@@ -59,16 +62,20 @@ const bulbMaskVariants: Variants = {
     y: "0%",
     x: "0%",
     rotate: "0deg",
+    opacity: 1,
   },
   animate: {
     y: ["0%", "20%", "20%", "-10%", "0%"],
     x: ["0%", "20%", "20%", "-10%", "0%"],
     rotate: ["0deg", "20deg", "20deg", "-10deg", "0deg"],
-    opacity: [0.1, 0.1, 1, 1, 1],
+    opacity: [1, 0, 0, 1, 1],
     transition: {
-      delay: 0.2,
-      duration: 0.6,
+      duration: 0.7,
       times: [0, 0.2, 0.3, 0.7, 1],
+      delay: 0.2,
+      opacity: {
+        delay: UNIVERSAL_DELAY,
+      },
     },
   },
 };
@@ -76,14 +83,26 @@ const bulbMaskVariants: Variants = {
 const rayVariants: Variants = {
   initial: { pathLength: 1, strokeOpacity: 0.5 },
   animate: (i: number) => ({
-    pathLength: [1, 1, 0, 1],
-    strokeOpacity: [0, 0, 0.5, 0.5],
+    pathLength: [1, 1, 0, 0, 1],
+    strokeOpacity: [0.5, 0, 0, 0.5, 0.5],
     transition: {
-      delay: 0.2 + i * 0.05,
+      delay: UNIVERSAL_DELAY + 0.2 + i * 0.05,
       duration: 0.7,
-      times: [0, 0.2, 0.2, 0.5],
+      times: [0, 0, 0.2, 0.2, 0.5],
     },
   }),
+};
+
+const raysOpacityVariants: Variants = {
+  initial: { opacity: 1 },
+  animate: {
+    opacity: [1, 0, 0, 1],
+    transition: {
+      delay: UNIVERSAL_DELAY,
+      duration: 0.4,
+      times: [0, 0.1, 0.9, 1],
+    },
+  },
 };
 
 export function Lightbulb() {
@@ -149,13 +168,16 @@ export function Lightbulb() {
               <defs>
                 <mask id="bulb-mask">
                   <rect width="100%" height="100%" fill="white" />
-                  <motion.path
+                  <motion.g
                     variants={bulbMaskVariants}
                     initial="initial"
                     animate={controls}
-                    d="M398.773 55.476a1.843 1.843 0 0 0-2.181 2.97l.181.144a3.08 3.08 0 0 1 .974 3.108 1.842 1.842 0 1 0 3.565.932 6.76 6.76 0 0 0-2.539-7.154"
-                    fill="black"
-                  />
+                  >
+                    <path
+                      d="M398.773 55.476a1.843 1.843 0 0 0-2.181 2.97l.181.144a3.08 3.08 0 0 1 .974 3.108 1.842 1.842 0 1 0 3.565.932 6.76 6.76 0 0 0-2.539-7.154"
+                      fill="black"
+                    />
+                  </motion.g>
                 </mask>
               </defs>
               {/* stem */}
@@ -179,7 +201,11 @@ export function Lightbulb() {
             </g>
 
             {/* light rays reworked as lines to animate pathLength */}
-            <g>
+            <motion.g
+              variants={raysOpacityVariants}
+              initial="initial"
+              animate={controls}
+            >
               <motion.line
                 variants={rayVariants}
                 initial="initial"
@@ -236,7 +262,7 @@ export function Lightbulb() {
                 strokeLinecap="round"
                 className="stroke-[#989898] dark:stroke-[#D6D6D6]"
               />
-            </g>
+            </motion.g>
           </motion.g>
         </motion.g>
       </motion.g>

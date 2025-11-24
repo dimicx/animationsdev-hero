@@ -10,3 +10,5 @@ export const fadeScaleVariants: Variants = {
     scale: 1,
   },
 };
+
+export const UNIVERSAL_DELAY = 0.1;

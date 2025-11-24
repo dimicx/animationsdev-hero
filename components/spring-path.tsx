@@ -9,7 +9,7 @@ import {
   useAnimation,
 } from "motion/react";
 import { useCallback, useMemo, useState } from "react";
-import { fadeScaleVariants } from "@/lib/animation-variants";
+import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 
 const pathVariants: Variants = {
   initial: {
@@ -20,6 +20,7 @@ const pathVariants: Variants = {
     transition: {
       duration: 0.8,
       ease: bounceEasing,
+      delay: UNIVERSAL_DELAY,
     },
   }),
 };
@@ -33,6 +34,7 @@ const secondaryCircleVariants: Variants = {
     transition: {
       duration: 0.25,
       ease: "easeOut",
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
@@ -43,6 +45,9 @@ const rotateVariants: Variants = {
   },
   animate: {
     transform: "rotate(7deg)",
+    transition: {
+      delay: UNIVERSAL_DELAY,
+    },
   },
 };
 
@@ -105,6 +110,7 @@ export function SpringPath() {
           animate(progress, forwardPathData.length, {
             duration: 0.8,
             ease: bounceEasing || "linear",
+            delay: UNIVERSAL_DELAY,
           }).then(() => {
             setForwardCompleted(true);
           });

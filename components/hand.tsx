@@ -7,19 +7,31 @@ import {
   useMotionValue,
   Variants,
 } from "motion/react";
-import { fadeScaleVariants } from "@/lib/animation-variants";
+import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 
 const rayVariants: Variants = {
   initial: { pathLength: 1, strokeOpacity: 0.5 },
   animate: (i: number) => ({
-    pathLength: [1, 1, 0, 1],
-    strokeOpacity: [0, 0, 0.5, 0.5],
+    pathLength: [1, 1, 0, 0, 1],
+    strokeOpacity: [0.5, 0, 0, 0.5, 0.5],
     transition: {
-      delay: 0.3 + i * 0.05,
+      delay: UNIVERSAL_DELAY + 0.3 + i * 0.05,
       duration: 0.7,
-      times: [0, 0.2, 0.2, 0.5],
+      times: [0, 0, 0.2, 0.2, 0.5],
     },
   }),
+};
+
+const raysOpacityVariants: Variants = {
+  initial: { opacity: 1 },
+  animate: {
+    opacity: [1, 0, 0, 1],
+    transition: {
+      delay: UNIVERSAL_DELAY,
+      duration: 0.45,
+      times: [0, 0.1, 0.9, 1],
+    },
+  },
 };
 
 const handVariants: Variants = {
@@ -37,6 +49,7 @@ const handVariants: Variants = {
       duration: 1,
       times: [0, 0.2, 0.4, 0.75],
       ease: "easeInOut",
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
@@ -57,7 +70,7 @@ export function Hand() {
     controls.start("animate");
     animate(handPathProgress, [0, 1, 2], {
       duration: 0.2,
-      delay: 0.3,
+      delay: UNIVERSAL_DELAY + 0.3,
       ease: "easeInOut",
     });
   }, [controls, handPathProgress]);
@@ -115,7 +128,11 @@ export function Hand() {
           ></motion.path>
         </motion.g>
 
-        <motion.g>
+        <motion.g
+          variants={raysOpacityVariants}
+          initial="initial"
+          animate={controls}
+        >
           <motion.line
             variants={rayVariants}
             initial="initial"

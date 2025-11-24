@@ -1,6 +1,6 @@
 import { motion, useAnimation, Variants } from "motion/react";
 import { useCallback } from "react";
-import { fadeScaleVariants } from "@/lib/animation-variants";
+import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 
 const clockVariants: Variants = {
   initial: {
@@ -8,17 +8,19 @@ const clockVariants: Variants = {
     x: 0,
   },
   animate: {
-    y: -2,
-    x: [-1, 1, -1, 1, -1, 0],
+    y: [0, -2],
+    x: [0, -1, 1, -1, 1, -1, 0],
     transition: {
       y: {
         duration: 0.2,
         ease: "easeOut",
+        delay: UNIVERSAL_DELAY,
       },
       x: {
         duration: 0.3,
         repeat: Infinity,
         ease: "linear",
+        delay: UNIVERSAL_DELAY,
       },
     },
   },
@@ -31,17 +33,17 @@ const bellVariants: Variants = {
     rotate: 0,
   },
   animate: (i: number) => ({
-    y: [0, -2, -4.5],
-    x: i === 0 ? [-2.5, 2, -2, 2.5, -2, 0] : [-1, 1, -1, 1, -1, 0],
-    rotate: i === 0 ? 0 : -2,
+    y: [0, -3, -4.5],
+    x: i === 0 ? [0, -2.5, 2, -2, 2.5, -2, 0] : [0, -1, 1, -1, 1, -1, 0],
+    rotate: i === 0 ? 0 : [0, -2],
     transition: {
       y: {
-        delay: i * 0.05,
+        delay: UNIVERSAL_DELAY + i * 0.05,
         duration: 3,
         ease: "easeOut",
       },
       x: {
-        delay: i * 0.05,
+        delay: UNIVERSAL_DELAY + i * 0.05,
         duration: 0.3,
         repeat: Infinity,
         ease: "linear",
@@ -49,6 +51,7 @@ const bellVariants: Variants = {
       rotate: {
         duration: 0.2,
         ease: "easeOut",
+        delay: UNIVERSAL_DELAY,
       },
     },
   }),

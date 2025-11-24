@@ -7,7 +7,7 @@ import {
   Variants,
 } from "motion/react";
 import { useFlubber } from "@/lib/flubber";
-import { fadeScaleVariants } from "@/lib/animation-variants";
+import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 
 const rotateVariants: Variants = {
   initial: {
@@ -15,6 +15,9 @@ const rotateVariants: Variants = {
   },
   animate: {
     transform: "rotate(10deg)",
+    transition: {
+      delay: 0.1,
+    },
   },
 };
 
@@ -32,6 +35,7 @@ const caretLeftVariants: Variants = {
       duration: 0.6,
       times: [0, 0.3, 0.8],
       ease: "easeInOut",
+      delay: 0.1,
     },
   },
 };
@@ -50,6 +54,7 @@ const caretRightVariants: Variants = {
       duration: 0.6,
       times: [0, 0.3, 0.8],
       ease: "easeInOut",
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
@@ -68,6 +73,7 @@ const slashVariants: Variants = {
       duration: 0.6,
       times: [0, 0.3, 0.8],
       ease: "easeInOut",
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
@@ -90,6 +96,7 @@ export function Code() {
       duration: 0.6,
       times: [0, 0.3, 0.8],
       ease: "easeInOut",
+      delay: UNIVERSAL_DELAY,
     });
   }, [controls, codePathProgress]);
   const handleMouseLeave = useCallback(() => {

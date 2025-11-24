@@ -1,6 +1,6 @@
 import { motion, useAnimation, Variants } from "motion/react";
 import { useCallback } from "react";
-import { fadeScaleVariants } from "@/lib/animation-variants";
+import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 
 const timelineTimes = [0, 0.2, 0.35, 0.65, 0.8, 1];
 const timelineDuration = 2;
@@ -15,6 +15,7 @@ const timelineOneVariants: Variants = {
       duration: timelineDuration,
       times: timelineTimes,
       ease: "easeInOut",
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
@@ -37,6 +38,7 @@ const timelineTwoVariants: Variants = {
       duration: timelineDuration,
       times: timelineTimes,
       ease: "easeInOut",
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
@@ -59,6 +61,7 @@ const timelineThreeVariants: Variants = {
       duration: timelineDuration,
       times: timelineTimes,
       ease: "easeInOut",
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
@@ -76,6 +79,7 @@ const timelineContainerVariants: Variants = {
     ],
     transition: {
       duration: 0.5,
+      delay: UNIVERSAL_DELAY,
     },
   },
 };
