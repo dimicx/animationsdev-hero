@@ -131,7 +131,7 @@ export function SpringPath() {
               setForwardCompleted(false);
               // Fade back in
               animate(ballOpacity, 1, {
-                delay: 0.125,
+                delay: 0.28,
                 duration: 0.125,
                 ease: "easeOut",
               });
