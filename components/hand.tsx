@@ -7,17 +7,7 @@ import {
   useMotionValue,
   Variants,
 } from "motion/react";
-
-const variants: Variants = {
-  initial: {
-    opacity: 0,
-    scale: 0,
-  },
-  animate: {
-    opacity: 1,
-    scale: 1,
-  },
-};
+import { fadeScaleVariants } from "@/lib/animation-variants";
 
 const rayVariants: Variants = {
   initial: { pathLength: 1, strokeOpacity: 0.5 },
@@ -78,7 +68,7 @@ export function Hand() {
 
   return (
     <motion.g
-      variants={variants}
+      variants={fadeScaleVariants}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className="origin-bottom!"

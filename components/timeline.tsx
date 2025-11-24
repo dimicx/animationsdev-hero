@@ -1,16 +1,6 @@
 import { motion, useAnimation, Variants } from "motion/react";
 import { useCallback } from "react";
-
-const variants: Variants = {
-  initial: {
-    opacity: 0,
-    scale: 0,
-  },
-  animate: {
-    opacity: 1,
-    scale: 1,
-  },
-};
+import { fadeScaleVariants } from "@/lib/animation-variants";
 
 const timelineTimes = [0, 0.2, 0.35, 0.65, 0.8, 1];
 const timelineDuration = 2;
@@ -103,7 +93,7 @@ export function Timeline() {
 
   return (
     <motion.g
-      variants={variants}
+      variants={fadeScaleVariants}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className="origin-bottom!"

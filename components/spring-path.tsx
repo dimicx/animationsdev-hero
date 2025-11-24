@@ -8,18 +8,8 @@ import {
   animate,
   useAnimation,
 } from "motion/react";
-import { useCallback, useState } from "react";
-
-const variants: Variants = {
-  initial: {
-    opacity: 0,
-    scale: 0,
-  },
-  animate: {
-    opacity: 1,
-    scale: 1,
-  },
-};
+import { useCallback, useMemo, useState } from "react";
+import { fadeScaleVariants } from "@/lib/animation-variants";
 
 const pathVariants: Variants = {
   initial: {
@@ -67,18 +57,23 @@ export function SpringPath() {
   const progress = useMotionValue(0);
   const ballOpacity = useMotionValue(1);
 
+  // Cache the path data to avoid recreating the SVG element on every frame
+  const currentPathData = useMemo(
+    () => getPathData(currentPath),
+    [currentPath]
+  );
+  const forwardPathData = useMemo(() => getPathData(forwardPathString), []);
+
   // Transform progress to cx and cy
   const cx = useTransform(progress, (p) => {
-    const { path } = getPathData(currentPath);
-    if (!path || p === 0) return 212.157;
-    const point = path.getPointAtLength(p);
+    if (!currentPathData.path || p === 0) return 212.157;
+    const point = currentPathData.path.getPointAtLength(p);
     return point.x;
   });
 
   const cy = useTransform(progress, (p) => {
-    const { path } = getPathData(currentPath);
-    if (!path || p === 0) return 190.615;
-    const point = path.getPointAtLength(p);
+    if (!currentPathData.path || p === 0) return 190.615;
+    const point = currentPathData.path.getPointAtLength(p);
     return point.y;
   });
 
@@ -94,10 +89,13 @@ export function SpringPath() {
   }, [controls]);
 
   // Generate physics-based easing from the bounce path
-  const bounceEasing = generateBounceEasing(forwardPathString);
+  const bounceEasing = useMemo(
+    () => generateBounceEasing(forwardPathString),
+    []
+  );
 
   return (
-    <motion.g variants={variants} className="origin-bottom-left!">
+    <motion.g variants={fadeScaleVariants} className="origin-bottom-left!">
       <motion.g
         variants={{
           initial: {},
@@ -187,8 +185,7 @@ export function SpringPath() {
           setCurrentPath(forwardPathString);
           setForwardCompleted(false);
           progress.set(0);
-          const { length } = getPathData(forwardPathString);
-          animate(progress, length, {
+          animate(progress, forwardPathData.length, {
             duration: 0.8,
             ease: bounceEasing || "linear",
           }).then(() => {
@@ -219,8 +216,7 @@ export function SpringPath() {
           } else {
             // Forward animation not completed, reverse on same path
             animate(progress, 0, {
-              duration:
-                (currentProgress / getPathData(forwardPathString).length) * 0.5,
+              duration: (currentProgress / forwardPathData.length) * 0.5,
               ease: "easeOut",
             });
           }

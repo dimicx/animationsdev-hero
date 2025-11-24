@@ -7,17 +7,7 @@ import {
   Variants,
 } from "motion/react";
 import { useFlubber } from "@/lib/flubber";
-
-const variants: Variants = {
-  initial: {
-    opacity: 0,
-    scale: 0,
-  },
-  animate: {
-    opacity: 1,
-    scale: 1,
-  },
-};
+import { fadeScaleVariants } from "@/lib/animation-variants";
 
 const rotateVariants: Variants = {
   initial: {
@@ -113,7 +103,7 @@ export function Code() {
 
   return (
     <motion.g
-      variants={variants}
+      variants={fadeScaleVariants}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className="origin-bottom-left!"

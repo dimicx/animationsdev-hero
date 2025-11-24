@@ -1,16 +1,6 @@
 import { motion, useAnimation, Variants } from "motion/react";
 import { useCallback } from "react";
-
-const variants: Variants = {
-  initial: {
-    opacity: 0,
-    scale: 0,
-  },
-  animate: {
-    opacity: 1,
-    scale: 1,
-  },
-};
+import { fadeScaleVariants } from "@/lib/animation-variants";
 
 const clockVariants: Variants = {
   initial: {
@@ -70,7 +60,7 @@ export function Clock() {
 
   return (
     <motion.g
-      variants={variants}
+      variants={fadeScaleVariants}
       className="origin-bottom-right!"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
