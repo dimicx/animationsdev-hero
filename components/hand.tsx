@@ -17,7 +17,7 @@ const rayVariants: Variants = {
     transition: {
       delay: UNIVERSAL_DELAY + 0.3 + i * 0.05,
       duration: 0.7,
-      times: [0, 0, 0.2, 0.2, 0.5],
+      times: [0, 0, 0.1, 0.1, 0.4],
     },
   }),
 };
@@ -46,7 +46,7 @@ const handVariants: Variants = {
       "translateX(-11%) translateY(4%) rotate(25deg) scale(1)",
     ],
     transition: {
-      duration: 1,
+      duration: 0.9,
       times: [0, 0.2, 0.4, 0.75],
       ease: "easeInOut",
       delay: UNIVERSAL_DELAY,
@@ -69,15 +69,19 @@ export function Hand() {
   const handleMouseEnter = useCallback(() => {
     controls.start("animate");
     animate(handPathProgress, [0, 1, 2], {
-      duration: 0.2,
-      delay: UNIVERSAL_DELAY + 0.3,
+      duration: 0.5,
+      times: [0, 0.7, 1],
+      delay: UNIVERSAL_DELAY,
       ease: "easeInOut",
     });
   }, [controls, handPathProgress]);
 
   const handleMouseLeave = useCallback(() => {
     controls.start("initial");
-  }, [controls]);
+    animate(handPathProgress, 0, {
+      duration: 0,
+    });
+  }, [controls, handPathProgress]);
 
   return (
     <motion.g
