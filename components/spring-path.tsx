@@ -1,3 +1,5 @@
+import { getPathData } from "@/lib/get-path-data";
+import { generateBounceEasing } from "@/lib/generate-bounce-easing";
 import {
   motion,
   Variants,
@@ -23,13 +25,13 @@ const pathVariants: Variants = {
   initial: {
     pathLength: 1,
   },
-  animate: {
-    pathLength: [1, 0.01],
+  animate: ({ bounceEasing }: { bounceEasing: (t: number) => number }) => ({
+    pathLength: [1, bounceEasing(0.01)],
     transition: {
-      duration: 1,
-      ease: "easeOut",
+      duration: 0.8,
+      ease: bounceEasing,
     },
-  },
+  }),
 };
 
 const secondaryCircleVariants: Variants = {
@@ -57,28 +59,13 @@ const rotateVariants: Variants = {
 const forwardPathString =
   "M212.5 190.5C212.5 190.5 227.9 196 233.5 210C239.1 224 241.5 240 241.5 240C241.5 240 235.542 204.103 251 201.5C266.86 198.83 271 237.5 271 237.5C271 237.5 268.08 209.741 278.5 211.5C286.136 212.789 289.5 228 289.5 228";
 
-const returnPathString =
-  "M212 191C212 191 249.5 166.501 264 180.001C278.5 193.501 289.5 228 289.5 228";
-
-// Helper to get path data - will run on client
-function getPathData(pathString: string) {
-  if (typeof document === "undefined") return { length: 0, path: null };
-
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("d", pathString);
-
-  return {
-    length: path.getTotalLength(),
-    path: path,
-  };
-}
-
 export function SpringPath() {
   const controls = useAnimation();
 
   const [currentPath, setCurrentPath] = useState(forwardPathString);
   const [forwardCompleted, setForwardCompleted] = useState(false);
   const progress = useMotionValue(0);
+  const ballOpacity = useMotionValue(1);
 
   // Transform progress to cx and cy
   const cx = useTransform(progress, (p) => {
@@ -105,6 +92,9 @@ export function SpringPath() {
       ease: "easeOut",
     });
   }, [controls]);
+
+  // Generate physics-based easing from the bounce path
+  const bounceEasing = generateBounceEasing(forwardPathString);
 
   return (
     <motion.g variants={variants} className="origin-bottom-left!">
@@ -199,8 +189,8 @@ export function SpringPath() {
           progress.set(0);
           const { length } = getPathData(forwardPathString);
           animate(progress, length, {
-            duration: 1,
-            ease: "easeOut",
+            duration: 0.8,
+            ease: bounceEasing || "linear",
           }).then(() => {
             setForwardCompleted(true);
           });
@@ -210,13 +200,21 @@ export function SpringPath() {
           const currentProgress = progress.get();
 
           if (forwardCompleted) {
-            // Forward animation completed, use return path
-            setCurrentPath(returnPathString);
-            const { length } = getPathData(returnPathString);
-            progress.set(length);
-            animate(progress, 0, {
-              duration: 0.45,
+            // Forward animation completed, fade out and reset to initial position
+            animate(ballOpacity, 0, {
+              duration: 0.125,
               ease: "easeOut",
+            }).then(() => {
+              // Reset position instantly while invisible
+              progress.set(0);
+              setCurrentPath(forwardPathString);
+              setForwardCompleted(false);
+              // Fade back in
+              animate(ballOpacity, 1, {
+                delay: 0.125,
+                duration: 0.125,
+                ease: "easeOut",
+              });
             });
           } else {
             // Forward animation not completed, reverse on same path
@@ -271,7 +269,7 @@ export function SpringPath() {
               variants={pathVariants}
               initial="initial"
               animate={controls}
-              custom={0}
+              custom={{ bounceEasing }}
               d="M288.5 223.5C288.5 223.5 286.5 211.5 278.5 211.5C270.5 211.5 272 236 271 236C270 236 267 201.5 253 201.5C236.611 201.5 242.5 239.5 241.5 239.5C240.892 239.5 240.5 227 233.5 210C230.132 201.821 225 198 225 198"
             />
           </g>
@@ -303,6 +301,7 @@ export function SpringPath() {
             cx={cx}
             cy={cy}
             r="8.189"
+            style={{ opacity: ballOpacity }}
             className="fill-[#989898] dark:fill-[#D6D6D6]"
           />
         </motion.g>
