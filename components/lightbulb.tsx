@@ -42,6 +42,17 @@ const bulbVariants: Variants = {
       times: [0, 0.2, 0.5, 0.7],
     },
   },
+  idle: {
+    opacity: [1, 0.2, 0.8, 0.2, 0.2, 1],
+    transition: {
+      duration: 0.7,
+      times: [0, 0.05, 0.1, 0.2, 0.5, 0.7],
+      delay: REPEAT_DELAY,
+      repeat: Infinity,
+      repeatType: "loop",
+      repeatDelay: REPEAT_DELAY,
+    },
+  },
 };
 
 const stemVariants: Variants = {
@@ -53,6 +64,17 @@ const stemVariants: Variants = {
     transition: {
       duration: 0.7,
       times: [0, 0.2, 0.5, 0.7],
+    },
+  },
+  idle: {
+    opacity: [1, 0.3, 0.3, 1],
+    transition: {
+      duration: 0.7,
+      times: [0, 0.2, 0.5, 0.7],
+      delay: REPEAT_DELAY,
+      repeat: Infinity,
+      repeatType: "loop",
+      repeatDelay: REPEAT_DELAY,
     },
   },
 };
