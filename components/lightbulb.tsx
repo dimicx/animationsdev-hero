@@ -97,13 +97,10 @@ const bulbMaskVariants: Variants = {
     },
   },
   idle: {
-    y: ["0%", "0%", "20%", "20%", "-10%", "0%"],
-    x: ["0%", "0%", "20%", "20%", "-10%", "0%"],
-    rotate: ["0deg", "0deg", "20deg", "20deg", "-10deg", "0deg"],
-    opacity: [1, 0, 0, 0, 1, 1],
+    opacity: [1, 0, 0, 0, 0, 1],
     transition: {
       duration: 0.7,
-      times: [0, 0.2, 0.3, 0.5, 0.8, 1],
+      times: [0, 0.05, 0.1, 0.2, 0.5, 0.7],
       delay: REPEAT_DELAY,
       repeat: Infinity,
       repeatType: "loop",
