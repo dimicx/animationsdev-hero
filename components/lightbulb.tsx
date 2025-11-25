@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 
-const REPEAT_DELAY = 10;
+const REPEAT_DELAY = 8;
 
 const wholeVariants: Variants = {
   initial: {

@@ -71,8 +71,8 @@ const bellsVariants: Variants = {
       ease: "easeOut",
       repeat: Infinity,
       repeatType: "loop",
-      repeatDelay: 5,
-      delay: 5,
+      repeatDelay: 4,
+      delay: 4,
     },
   },
 };

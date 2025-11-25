@@ -8,7 +8,7 @@ import {
   animate,
   useAnimation,
 } from "motion/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 
@@ -71,16 +71,9 @@ export function SpringPath() {
   const controls = useAnimation();
   const idleControls = useAnimation();
 
-  const [currentPath, setCurrentPath] = useState(forwardPathString);
-  const [forwardCompleted, setForwardCompleted] = useState(false);
+  const forwardCompleted = useRef(false);
   const progress = useMotionValue(0);
   const ballOpacity = useMotionValue(1);
-
-  // Cache the path data to avoid recreating the SVG element on every frame
-  const currentPathData = useMemo(
-    () => getPathData(currentPath),
-    [currentPath]
-  );
   const forwardPathData = useMemo(() => getPathData(forwardPathString), []);
 
   // Generate physics-based easing from the bounce path
@@ -91,14 +84,14 @@ export function SpringPath() {
 
   // Transform progress to cx and cy
   const cx = useTransform(progress, (p) => {
-    if (!currentPathData.path || p === 0) return 212.157;
-    const point = currentPathData.path.getPointAtLength(p);
+    if (!forwardPathData.path || p === 0) return 212.157;
+    const point = forwardPathData.path.getPointAtLength(p);
     return point.x;
   });
 
   const cy = useTransform(progress, (p) => {
-    if (!currentPathData.path || p === 0) return 190.615;
-    const point = currentPathData.path.getPointAtLength(p);
+    if (!forwardPathData.path || p === 0) return 190.615;
+    const point = forwardPathData.path.getPointAtLength(p);
     return point.y;
   });
 
@@ -116,20 +109,19 @@ export function SpringPath() {
     onHoverStart: () => {
       idleControls.start("initial");
       controls.start("animate");
-      setCurrentPath(forwardPathString);
-      setForwardCompleted(false);
+      forwardCompleted.current = false;
       progress.set(0);
       animate(progress, forwardPathData.length, {
         duration: 0.8,
         ease: bounceEasing || "linear",
       }).then(() => {
-        setForwardCompleted(true);
+        forwardCompleted.current = true;
       });
     },
     onHoverEnd: async () => {
       const currentProgress = progress.get();
 
-      if (forwardCompleted) {
+      if (forwardCompleted.current) {
         // Forward animation completed, fade out and reset to initial position
         animate(ballOpacity, 0, {
           duration: 0.125,
@@ -137,8 +129,7 @@ export function SpringPath() {
         }).then(() => {
           // Reset position instantly while invisible
           progress.set(0);
-          setCurrentPath(forwardPathString);
-          setForwardCompleted(false);
+          forwardCompleted.current = false;
           // Fade back in
           animate(ballOpacity, 1, {
             delay: 0.28,
