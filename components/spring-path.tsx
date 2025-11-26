@@ -104,6 +104,49 @@ export function SpringPath() {
     return point.y;
   });
 
+  // Helper function to calculate squash/stretch scale based on velocity
+  const getVelocityScale = useCallback(
+    (p: number, isXAxis: boolean): number => {
+      if (!forwardPathData.path || p === 0) return 1;
+
+      // Sample Y velocity by comparing neighboring points
+      const delta = 2;
+      const point1 = forwardPathData.path.getPointAtLength(
+        Math.max(0, p - delta)
+      );
+      const point2 = forwardPathData.path.getPointAtLength(
+        Math.min(forwardPathData.length, p + delta)
+      );
+      const velocityY = point2.y - point1.y;
+
+      const squashAmount = Math.min(Math.abs(velocityY) / 30, 0.35);
+
+      // X-axis: squash horizontally when moving down, stretch when moving up
+      // Y-axis: opposite (stretch vertically when moving down, squash when moving up)
+      const calculatedScale = isXAxis
+        ? velocityY > 0
+          ? 1 + squashAmount
+          : 1 - squashAmount
+        : velocityY > 0
+        ? 1 - squashAmount
+        : 1 + squashAmount;
+
+      // Fade to scale 1 in the last 5% of the path
+      const threshold = forwardPathData.length * 0.95;
+      if (p >= threshold) {
+        const fadeOut =
+          1 - (p - threshold) / (forwardPathData.length - threshold);
+        return calculatedScale * fadeOut + 1 * (1 - fadeOut);
+      }
+
+      return calculatedScale;
+    },
+    [forwardPathData.path, forwardPathData.length]
+  );
+
+  const ballScaleX = useTransform(progress, (p) => getVelocityScale(p, true));
+  const ballScaleY = useTransform(progress, (p) => getVelocityScale(p, false));
+
   const startAnimations = useCallback(() => {
     controls.start("initial");
     idleControls.start("animate");
@@ -256,7 +299,11 @@ export function SpringPath() {
               cx={cx}
               cy={cy}
               r="8.189"
-              style={{ opacity: ballOpacity }}
+              style={{
+                opacity: ballOpacity,
+                scaleX: ballScaleX,
+                scaleY: ballScaleY,
+              }}
               className="fill-[#989898] dark:fill-[#D6D6D6]"
             />
           </motion.g>
