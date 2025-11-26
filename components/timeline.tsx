@@ -4,7 +4,7 @@ import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 
 const timelineTimes = [0, 0.2, 0.35, 0.65, 0.8, 1];
-const timelineDuration = 2;
+const timelineDuration = 1.7;
 
 const timelineOneVariants: Variants = {
   initial: {
@@ -47,6 +47,7 @@ const timelineTwoVariants: Variants = {
       "translateY(0%) translateX(0%)",
     ],
     transition: {
+      delay: 0.1,
       duration: timelineDuration,
       times: timelineTimes,
       ease: "easeInOut",
@@ -81,6 +82,7 @@ const timelineThreeVariants: Variants = {
       "translateY(0%) translateX(0%)",
     ],
     transition: {
+      delay: 0.13,
       duration: timelineDuration,
       times: timelineTimes,
       ease: "easeInOut",
