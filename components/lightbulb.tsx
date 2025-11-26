@@ -69,7 +69,7 @@ const bulbVariants: Variants = {
     transition: {
       duration: 0.7,
       times: [0, 0.05, 0.1, 0.2, 0.5, 0.7],
-      delay: REPEAT_DELAY,
+      delay: REPEAT_DELAY / 2,
       repeat: Infinity,
       repeatType: "loop",
       repeatDelay: REPEAT_DELAY,
@@ -93,7 +93,7 @@ const stemVariants: Variants = {
     transition: {
       duration: 0.7,
       times: [0, 0.05, 0.1, 0.2, 0.5, 0.7],
-      delay: REPEAT_DELAY,
+      delay: REPEAT_DELAY / 2,
       repeat: Infinity,
       repeatType: "loop",
       repeatDelay: REPEAT_DELAY,
@@ -123,7 +123,7 @@ const bulbMaskVariants: Variants = {
     transition: {
       duration: 0.7,
       times: [0, 0.05, 0.1, 0.2, 0.5, 0.7],
-      delay: REPEAT_DELAY,
+      delay: REPEAT_DELAY / 2,
       repeat: Infinity,
       repeatType: "loop",
       repeatDelay: REPEAT_DELAY,
@@ -146,7 +146,7 @@ const rayVariants: Variants = {
     pathLength: [1, 1, 0, 0, 1],
     strokeOpacity: [0.5, 0, 0, 0.5, 0.5],
     transition: {
-      delay: REPEAT_DELAY + 0.2 + i * 0.05,
+      delay: REPEAT_DELAY / 2 + 0.2 + i * 0.05,
       duration: 0.7,
       times: [0, 0, 0.2, 0.2, 0.5],
       repeat: Infinity,
@@ -168,7 +168,7 @@ const raysOpacityVariants: Variants = {
   idle: {
     opacity: [1, 0, 0, 1],
     transition: {
-      delay: REPEAT_DELAY,
+      delay: REPEAT_DELAY / 2,
       duration: 0.7,
       times: [0, 0.1, 0.5, 0.6],
       repeat: Infinity,

@@ -3,6 +3,7 @@ import { useFlubber } from "@/lib/flubber";
 import {
   animate,
   motion,
+  Transition,
   useAnimation,
   useMotionValue,
   Variants,
@@ -33,7 +34,7 @@ const backgroundVariants: Variants = {
       repeat: Infinity,
       repeatType: "loop",
       repeatDelay: REPEAT_DELAY,
-      delay: REPEAT_DELAY,
+      delay: REPEAT_DELAY / 2,
     },
   },
 };
@@ -53,7 +54,7 @@ const rayVariants: Variants = {
     pathLength: [1, 1, 0, 0, 1],
     strokeOpacity: [0.5, 0, 0, 0.5, 0.5],
     transition: {
-      delay: REPEAT_DELAY + (0.2 + i * 0.05),
+      delay: REPEAT_DELAY / 2 + (0.2 + i * 0.05),
       duration: 0.65,
       times: [0, 0, 0.1, 0.1, 0.4],
       repeat: Infinity,
@@ -80,7 +81,7 @@ const raysOpacityVariants: Variants = {
       repeat: Infinity,
       repeatType: "loop",
       repeatDelay: REPEAT_DELAY,
-      delay: REPEAT_DELAY,
+      delay: REPEAT_DELAY / 2,
     },
   },
 };
@@ -110,6 +111,16 @@ const handPaths = [
   "M58.54 194.442c1.697.182 2.766-1.777 1.696-3.105l-10.972-13.618a3.686 3.686 0 0 1 5.739-4.624l3.344 4.15a3.97 3.97 0 0 0 4.212 1.319l8.106-2.383a9.826 9.826 0 0 1 11.536 4.985l2.764 5.452a7.94 7.94 0 0 1-2.1 9.775l-8.207 6.611a7.94 7.94 0 0 1-6.846 1.536l-12.624-3.048a3.7 3.7 0 0 1 1.264-7.275z",
 ];
 
+const handProgressTransition: Transition = {
+  duration: 0.65,
+  times: [0, 0.4, 0.65],
+  ease: "easeInOut",
+  repeat: Infinity,
+  repeatType: "loop",
+  repeatDelay: REPEAT_DELAY,
+  delay: REPEAT_DELAY / 2,
+};
+
 export function Hand() {
   const controls = useAnimation();
   const handPathProgress = useMotionValue(0);
@@ -117,15 +128,7 @@ export function Hand() {
 
   const startAnimations = useCallback(() => {
     controls.start("idle");
-    animate(handPathProgress, [0, 1, 2], {
-      duration: 0.65,
-      times: [0, 0.4, 0.65],
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatType: "loop",
-      repeatDelay: REPEAT_DELAY,
-      delay: REPEAT_DELAY,
-    });
+    animate(handPathProgress, [0, 1, 2], handProgressTransition);
   }, [controls, handPathProgress]);
 
   useEffect(() => {
@@ -148,15 +151,7 @@ export function Hand() {
       handPathProgress.set(0);
       await controls.start("initial");
       controls.start("idle");
-      animate(handPathProgress, [0, 1, 2], {
-        duration: 0.65,
-        times: [0, 0.4, 0.65],
-        ease: "easeInOut",
-        repeat: Infinity,
-        repeatType: "loop",
-        repeatDelay: REPEAT_DELAY,
-        delay: REPEAT_DELAY,
-      });
+      animate(handPathProgress, [0, 1, 2], handProgressTransition);
     },
   });
 

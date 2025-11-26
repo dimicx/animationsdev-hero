@@ -78,7 +78,7 @@ const bellVariants: Variants = {
   }),
 };
 
-const bellsVariants: Variants = {
+const idleBellsVariants: Variants = {
   initial: {
     transform: "translateX(0%) translateY(0%) rotate(0deg)",
   },
@@ -95,7 +95,7 @@ const bellsVariants: Variants = {
       repeat: Infinity,
       repeatType: "loop",
       repeatDelay: 4,
-      delay: 4,
+      delay: 2,
     },
   },
 };
@@ -198,7 +198,7 @@ export function Clock() {
 
         {/* bells */}
         <motion.g
-          variants={bellsVariants}
+          variants={idleBellsVariants}
           initial="initial"
           animate={idleControls}
         >
