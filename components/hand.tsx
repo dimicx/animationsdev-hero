@@ -24,6 +24,18 @@ const backgroundVariants: Variants = {
       ease: "easeOut",
     },
   },
+  idle: {
+    scale: [1, 1, 0.97, 1, 1],
+    transition: {
+      duration: 0.65,
+      times: [0, 0.25, 0.4, 0.6, 1],
+      ease: "easeOut",
+      repeat: Infinity,
+      repeatType: "loop",
+      repeatDelay: REPEAT_DELAY,
+      delay: REPEAT_DELAY,
+    },
+  },
 };
 
 const rayVariants: Variants = {
