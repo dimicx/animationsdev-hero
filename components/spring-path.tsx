@@ -89,6 +89,7 @@ const forwardPathString =
 export function SpringPath() {
   const controls = useAnimation();
   const idleControls = useAnimation();
+  const backgroundControls = useAnimation();
 
   const forwardCompleted = useRef(false);
   const progress = useMotionValue(0);
@@ -171,6 +172,7 @@ export function SpringPath() {
     delay: UNIVERSAL_DELAY,
     onHoverStart: () => {
       idleControls.start("initial");
+      backgroundControls.start("animate");
       controls.start("animate");
       forwardCompleted.current = false;
       progress.set(0);
@@ -195,7 +197,7 @@ export function SpringPath() {
           forwardCompleted.current = false;
           // Fade back in
           animate(ballOpacity, 1, {
-            delay: 0.28,
+            delay: 0.2,
             duration: 0.125,
             ease: "easeOut",
           });
@@ -208,6 +210,7 @@ export function SpringPath() {
         });
       }
 
+      backgroundControls.start("initial");
       await controls.start("initial", {
         duration: 0.4,
         ease: "easeOut",
@@ -238,7 +241,7 @@ export function SpringPath() {
         <motion.g
           variants={backgroundVariants}
           initial="initial"
-          animate={controls}
+          animate={backgroundControls}
         >
           <motion.g
             initial={{

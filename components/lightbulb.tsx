@@ -188,7 +188,7 @@ export function Lightbulb() {
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     onHoverStart: async () => {
-      await controls.start("initial", { duration: 0 });
+      controls.start("initial", { duration: 0 });
       controls.start("animate");
     },
     onHoverEnd: async () => {
