@@ -39,29 +39,40 @@ const backgroundVariants: Variants = {
   },
 };
 
+const idleRayPathLengths = [1, 0.45, 0.1];
+
 const rayVariants: Variants = {
-  initial: { pathLength: 1, strokeOpacity: 0.5 },
-  animate: (i: number) => ({
-    pathLength: [1, 1, 0, 0, 1],
-    strokeOpacity: [0.5, 0, 0, 0.5, 0.5],
-    transition: {
-      delay: 0.3 + i * 0.05,
-      duration: 0.65,
-      times: [0, 0, 0.1, 0.1, 0.4],
-    },
+  initial: (i: number) => ({
+    pathLength: idleRayPathLengths[i],
+    strokeOpacity: 0.5,
   }),
-  idle: (i: number) => ({
-    pathLength: [1, 1, 0, 0, 1],
-    strokeOpacity: [0.5, 0, 0, 0.5, 0.5],
-    transition: {
-      delay: REPEAT_DELAY / 2 + (0.2 + i * 0.05),
-      duration: 0.65,
-      times: [0, 0, 0.1, 0.1, 0.4],
-      repeat: Infinity,
-      repeatType: "loop",
-      repeatDelay: REPEAT_DELAY,
-    },
-  }),
+  animate: (i: number) => {
+    const pathLength = idleRayPathLengths[i];
+    return {
+      pathLength: [pathLength, 1, 1, 0, 0, 1],
+      strokeOpacity: [0, 0.5, 0, 0, 0.5, 0.5],
+      transition: {
+        delay: 0.3 + i * 0.05,
+        duration: 0.65,
+        times: [0, 0, 0, 0.1, 0.1, 0.4],
+      },
+    };
+  },
+  idle: (i: number) => {
+    const pathLength = idleRayPathLengths[i];
+    return {
+      pathLength: [pathLength, pathLength, 0, 0, pathLength],
+      strokeOpacity: [0.5, 0, 0, 0.5, 0.5],
+      transition: {
+        delay: REPEAT_DELAY / 2 + (0.2 + i * 0.05),
+        duration: 0.65,
+        times: [0, 0, 0.1, 0.2, 0.4],
+        repeat: Infinity,
+        repeatType: "loop",
+        repeatDelay: REPEAT_DELAY,
+      },
+    };
+  },
 };
 
 const raysOpacityVariants: Variants = {
@@ -225,11 +236,11 @@ export function Hand() {
             variants={rayVariants}
             initial="initial"
             animate={controls}
-            custom={0}
-            x1="62.8502"
+            custom={2}
+            x1="62.8541"
             y1="162.459"
-            x2="63.2378"
-            y2="161.429"
+            x2="64.5595"
+            y2="157.929"
             strokeOpacity="0.5"
             strokeWidth="3.7"
             strokeLinecap="round"
@@ -240,10 +251,10 @@ export function Hand() {
             initial="initial"
             animate={controls}
             custom={1}
-            x1="53.0534"
+            x1="53.0553"
             y1="161.328"
-            x2="52.6523"
-            y2="158.709"
+            x2="52.3227"
+            y2="156.544"
             strokeOpacity="0.5"
             strokeWidth="3.7"
             strokeLinecap="round"
@@ -253,10 +264,10 @@ export function Hand() {
             variants={rayVariants}
             initial="initial"
             animate={controls}
-            custom={2}
-            x1="44.0431"
+            custom={0}
+            x1="44.047"
             y1="165.362"
-            x2="41.002"
+            x2="41.0059"
             y2="161.592"
             strokeOpacity="0.5"
             strokeWidth="3.7"
