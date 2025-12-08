@@ -1,5 +1,5 @@
 import { motion, useAnimation, Variants } from "motion/react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import useIsMobile from "@/lib/use-is-mobile";
@@ -251,25 +251,32 @@ const raysOpacityVariants: Variants = {
 export function Lightbulb() {
   const { isMobile } = useIsMobile();
   const controls = useAnimation();
+  const hasAnimatedMobile = useRef(false);
 
   useEffect(() => {
     controls.start("idle");
   }, [controls]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
-    delay: UNIVERSAL_DELAY,
+    delay: isMobile ? 0 : UNIVERSAL_DELAY,
     onHoverStart: async () => {
       await controls.start("initial", { duration: 0 });
-      controls.start("animate");
+      await controls.start("animate");
+      if (isMobile && !hasAnimatedMobile.current) {
+        hasAnimatedMobile.current = true;
+      }
     },
     onHoverEnd: async () => {
+      if (isMobile && hasAnimatedMobile.current) {
+        hasAnimatedMobile.current = false;
+      }
       await controls.start("initial");
       await controls.start("idle");
     },
   });
 
   const onClick = useCallback(async () => {
-    if (isMobile) return;
+    if (isMobile && !hasAnimatedMobile.current) return;
     controls.start("click");
   }, [controls, isMobile]);
 
