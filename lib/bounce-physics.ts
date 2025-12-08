@@ -6,7 +6,7 @@ export function bounceEase(x: number): number {
   // Bounce timing points - 3 ground hits matching the path
   const b1 = 0.25; // First ground hit
   const b2 = 0.55; // Second ground hit
-  const b3 = 0.82; // Third ground hit (final position)
+  const b3 = 0.77; // Third ground hit (final position) - faster for smaller bounce
 
   // Bounce heights (how high the ball goes after each bounce, as fraction of original)
   const h1 = 0.7; // First bounce: 70% height
@@ -46,7 +46,7 @@ export function bounceVelocity(x: number, delta: number = 0.01): number {
 }
 
 // Bounce timing points (must match bounceEase) - 3 ground hits
-const BOUNCE_POINTS = [0.25, 0.55, 0.82];
+const BOUNCE_POINTS = [0.25, 0.55, 0.77];
 
 /**
  * Returns true if the ball is at or near a bounce point (ground contact).
@@ -105,9 +105,9 @@ export function getSquashStretchAtProgress(
   const atBounce = isAtBouncePoint(progress, 0.04);
 
   // Final settle phase - after the light bounce up comes back down
-  // settleT goes from 0 to 1 during progress 0.82 to 1.0
-  if (progress > 0.82) {
-    const settleT = (progress - 0.82) / (1 - 0.82);
+  // settleT goes from 0 to 1 during progress 0.77 to 1.0
+  if (progress > 0.77) {
+    const settleT = (progress - 0.77) / (1 - 0.77);
 
     // Final squash when ball lands from the light bounce (around settleT 0.85-0.95)
     // The light bounce peaks at settleT ~0.5, comes down after

@@ -162,12 +162,12 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
   const cy = useTransform(progress, (p) => {
     const easedY = bounceEase(p);
 
-    // Third ground hit (0.82) should be higher - ball doesn't fall as far
+    // Third ground hit (0.77) should be higher - ball doesn't fall as far
     const THIRD_HIT_Y = 234; // Higher than GROUND_Y (240)
 
-    // After third ground hit (0.82), light bounce UP then settle to END_Y
-    if (p > 0.82) {
-      const settleT = (p - 0.82) / (1 - 0.82); // 0 to 1 during settle phase
+    // After third ground hit (0.77), light bounce UP then settle to END_Y
+    if (p > 0.77) {
+      const settleT = (p - 0.77) / (1 - 0.77); // 0 to 1 during settle phase
       // Base transition from third hit to END_Y
       const baseY = THIRD_HIT_Y + (END_Y - THIRD_HIT_Y) * settleT;
       // Light bounce UP (peaks early, decays to 0)
@@ -175,9 +175,9 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
       return baseY - bounceUp;
     }
 
-    // For second bounce (between 0.55 and 0.82), gradually raise the ground level
+    // For second bounce (between 0.55 and 0.77), gradually raise the ground level
     if (p > 0.55) {
-      const liftT = (p - 0.55) / (0.82 - 0.55); // 0 to 1 during second bounce
+      const liftT = (p - 0.55) / (0.77 - 0.55); // 0 to 1 during second bounce
       const groundLevel = GROUND_Y + (THIRD_HIT_Y - GROUND_Y) * liftT;
       return START_Y + easedY * (groundLevel - START_Y);
     }
