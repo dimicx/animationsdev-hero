@@ -39,10 +39,9 @@ const backgroundVariants: Variants = {
     },
   },
   click: {
-    transform: ["scale(1)", "scale(1)", "scale(0.97)", "scale(1)"],
+    transform: ["scale(1)", "scale(0.97)", "scale(1)"],
     transition: {
-      duration: 0.5,
-      times: [0, 0.6, 0.75, 1],
+      duration: 0.35,
       ease: "easeOut",
     },
   },
@@ -88,8 +87,8 @@ const rayVariants: Variants = {
       pathLength: [pathLength, 1, 1, 0.01, 0.01, 1],
       strokeOpacity: [0, 0.5, 0, 0, 0.5, 0.5],
       transition: {
-        delay: 0.3 + (i === 1 ? 0 : 0.075),
-        duration: 0.65,
+        delay: 0.15 + (i === 1 ? 0 : 0.05),
+        duration: 0.5,
         times: [0, 0, 0, 0.1, 0.1, 0.4],
       },
     };
@@ -114,13 +113,6 @@ const raysOpacityVariants: Variants = {
       repeatType: "loop",
       repeatDelay: REPEAT_DELAY,
       delay: REPEAT_DELAY / 2,
-    },
-  },
-  click: {
-    opacity: [1, 0, 0, 1],
-    transition: {
-      duration: 0.45,
-      times: [0, 0.1, 0.9, 1],
     },
   },
 };
@@ -150,7 +142,7 @@ const handVariants: Variants = {
       "translateX(-11%) translateY(8%) rotate(25deg) scale(1)",
     ],
     transition: {
-      duration: 0.65,
+      duration: 0.4,
       times: [0, 0.2, 0.4, 0.75],
       ease: "easeInOut",
     },
@@ -220,7 +212,7 @@ export function Hand() {
     }
     handPathProgress.set(0);
     animate(handPathProgress, [0, 1, 2], {
-      duration: 0.5,
+      duration: 0.35,
       times: [0, 0.7, 1],
       ease: "easeInOut",
     });
@@ -228,7 +220,7 @@ export function Hand() {
   }, [controls, handPathProgress]);
 
   const { handleClick } = useClickTimeout({
-    delay: 1000,
+    delay: 500,
     onClick: onClick,
   });
 
