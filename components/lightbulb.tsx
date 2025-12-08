@@ -2,7 +2,6 @@ import { motion, useAnimation, Variants } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
 import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
-import useIsMobile from "@/lib/use-is-mobile";
 
 const REPEAT_DELAY = 8;
 
@@ -248,8 +247,7 @@ const raysOpacityVariants: Variants = {
   },
 };
 
-export function Lightbulb() {
-  const { isMobile } = useIsMobile();
+export function Lightbulb({ isMobile }: { isMobile: boolean }) {
   const controls = useAnimation();
   const hasAnimatedMobile = useRef(false);
 

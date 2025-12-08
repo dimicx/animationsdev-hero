@@ -9,8 +9,11 @@ import { Hand } from "@/components/hand";
 import { Lightbulb } from "@/components/lightbulb";
 import { SpringPath } from "@/components/spring-path";
 import { Timeline } from "@/components/timeline";
+import useIsMobile from "@/lib/use-is-mobile";
 
 export function Scene() {
+  const { isMobile } = useIsMobile();
+
   return (
     <MotionConfig
       transition={{
@@ -36,12 +39,12 @@ export function Scene() {
           initial="initial"
           animate="animate"
         >
-          <Code />
-          <SpringPath />
-          <Hand />
-          <Clock />
-          <Timeline />
-          <Lightbulb />
+          <Code isMobile={isMobile} />
+          <SpringPath isMobile={isMobile} />
+          <Hand isMobile={isMobile} />
+          <Clock isMobile={isMobile} />
+          <Timeline isMobile={isMobile} />
+          <Lightbulb isMobile={isMobile} />
           <Defs />
         </motion.svg>
       </div>

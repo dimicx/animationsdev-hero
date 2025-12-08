@@ -10,7 +10,6 @@ import {
 } from "motion/react";
 import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
-import useIsMobile from "@/lib/use-is-mobile";
 
 const REPEAT_DELAY = 6;
 
@@ -165,8 +164,7 @@ const handProgressTransition: Transition = {
   delay: REPEAT_DELAY / 2,
 };
 
-export function Hand() {
-  const { isMobile } = useIsMobile();
+export function Hand({ isMobile }: { isMobile: boolean }) {
   const controls = useAnimation();
   const handPathProgress = useMotionValue(0);
   const handPath = useFlubber(handPathProgress, handPaths);

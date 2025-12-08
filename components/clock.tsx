@@ -100,7 +100,7 @@ const idleBellsVariants: Variants = {
   },
 };
 
-export function Clock() {
+export function Clock({ isMobile }: { isMobile: boolean }) {
   const controls = useAnimation();
   const idleControls = useAnimation();
 
@@ -114,7 +114,7 @@ export function Clock() {
   }, [startAnimations]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
-    delay: UNIVERSAL_DELAY,
+    delay: isMobile ? 0 : UNIVERSAL_DELAY,
     onHoverStart: async () => {
       await idleControls.start("initial", { duration: 0.05 });
       controls.start("animate");

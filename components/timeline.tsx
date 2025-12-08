@@ -130,12 +130,12 @@ const timelineContainerVariants: Variants = {
   },
 };
 
-export function Timeline() {
+export function Timeline({ isMobile }: { isMobile: boolean }) {
   const controls = useAnimation();
   const containerControls = useAnimation();
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
-    delay: UNIVERSAL_DELAY,
+    delay: isMobile ? 0 : UNIVERSAL_DELAY,
     onHoverStart: async () => {
       containerControls.start("animate");
       controls.start("animate");

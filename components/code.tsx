@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import {
   animate,
   motion,
@@ -8,6 +7,7 @@ import {
 } from "motion/react";
 import { useFlubber } from "@/lib/flubber";
 import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
+import { useHoverTimeout } from "@/lib/use-hover-timeout";
 
 const rotateVariants: Variants = {
   initial: {
@@ -44,7 +44,6 @@ const caretLeftVariants: Variants = {
       duration: 0.7,
       times: [0, 0.2, 0.55, 1],
       ease: "easeInOut",
-      delay: UNIVERSAL_DELAY / 1000,
     },
   },
 };
@@ -64,7 +63,6 @@ const caretRightVariants: Variants = {
       duration: 0.7,
       times: [0, 0.2, 0.55, 1],
       ease: "easeInOut",
-      delay: UNIVERSAL_DELAY / 1000,
     },
   },
 };
@@ -84,7 +82,6 @@ const slashVariants: Variants = {
       duration: 0.7,
       times: [0, 0.2, 0.55, 1],
       ease: "easeInOut",
-      delay: UNIVERSAL_DELAY / 1000,
     },
   },
 };
@@ -104,7 +101,6 @@ const codePathVariants: Variants = {
       duration: 0.7,
       times: [0, 0.2, 0.55, 1],
       ease: "easeInOut",
-      delay: UNIVERSAL_DELAY / 1000,
     },
   },
 };
@@ -115,28 +111,30 @@ const codePaths = [
   "M396.244 269.906C395.727 266.633 397.962 263.561 401.235 263.045L414.792 260.906C418.065 260.389 421.137 262.624 421.653 265.898L423.414 277.06C423.931 280.333 421.696 283.405 418.423 283.921L404.866 286.06C401.593 286.576 398.521 284.341 398.004 281.068L396.244 269.906Z",
 ];
 
-export function Code() {
+export function Code({ isMobile }: { isMobile: boolean }) {
   const controls = useAnimation();
 
   const codePathProgress = useMotionValue(0);
   const codePath = useFlubber(codePathProgress, codePaths);
 
-  const handleMouseEnter = useCallback(() => {
-    controls.start("animate");
-    animate(codePathProgress, [0, 1, 2], {
-      duration: 0.5,
-      times: [0, 0.3, 0.8],
-      ease: "easeInOut",
-      delay: UNIVERSAL_DELAY / 1000,
-    });
-  }, [controls, codePathProgress]);
-  const handleMouseLeave = useCallback(() => {
-    controls.start("initial");
-    animate(codePathProgress, 0, {
-      duration: 0.5,
-      ease: "easeOut",
-    });
-  }, [controls, codePathProgress]);
+  const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
+    delay: isMobile ? 0 : UNIVERSAL_DELAY,
+    onHoverStart: () => {
+      controls.start("animate");
+      animate(codePathProgress, [0, 1, 2], {
+        duration: 0.5,
+        times: [0, 0.3, 0.8],
+        ease: "easeInOut",
+      });
+    },
+    onHoverEnd: () => {
+      controls.start("initial");
+      animate(codePathProgress, 0, {
+        duration: 0.5,
+        ease: "easeOut",
+      });
+    },
+  });
 
   return (
     <motion.g

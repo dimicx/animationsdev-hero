@@ -137,7 +137,7 @@ const bubblesVariants: Variants = {
   }),
 };
 
-export function SpringPath() {
+export function SpringPath({ isMobile }: { isMobile: boolean }) {
   const controls = useAnimation();
   const idleControls = useAnimation();
   const backgroundControls = useAnimation();
@@ -208,7 +208,7 @@ export function SpringPath() {
   }, [startAnimations]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
-    delay: UNIVERSAL_DELAY,
+    delay: isMobile ? 0 : UNIVERSAL_DELAY,
     onHoverStart: () => {
       // Stop any existing animation
       animationRef.current?.stop();
