@@ -1,5 +1,8 @@
-import { getPathData } from "@/lib/get-path-data";
-import { generateBounceEasing } from "@/lib/generate-bounce-easing";
+import {
+  bounceEase,
+  bounceAcceleratedX,
+  getSquashStretchAtProgress,
+} from "@/lib/bounce-physics";
 import {
   motion,
   Variants,
@@ -8,23 +11,38 @@ import {
   animate,
   useAnimation,
 } from "motion/react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 
-const BOUNCE_DURATION = 0.9;
+const BOUNCE_DURATION = 1.1;
+
+// Ball positions - aligned with path touchpoints
+const START_X = 212;
+const START_Y = 188;
+const END_X = 289.5;
+const END_Y = 228;
+const GROUND_Y = 240;
 
 const pathVariants: Variants = {
   initial: {
     pathLength: 1,
+    strokeOpacity: 1,
   },
-  animate: ({ bounceEasing }: { bounceEasing: (t: number) => number }) => ({
-    pathLength: [1, bounceEasing(0.01)],
+  animate: {
+    pathLength: [1, 0.01],
+    strokeOpacity: [1, 1, 0],
     transition: {
+      delay: 0.03,
       duration: BOUNCE_DURATION,
-      ease: bounceEasing,
+      ease: bounceAcceleratedX, // Path shrinks in sync with X movement
+      strokeOpacity: {
+        duration: BOUNCE_DURATION,
+        ease: "easeOut",
+        times: [0, 0.8, 0.81],
+      },
     },
-  }),
+  },
 };
 
 const secondaryCircleVariants: Variants = {
@@ -40,9 +58,9 @@ const secondaryCircleVariants: Variants = {
       "var(--bg-fill)",
     ],
     transition: {
-      duration: BOUNCE_DURATION,
+      duration: BOUNCE_DURATION - 0.1,
       ease: "easeOut",
-      times: [0, 0.1, 0.99, 1],
+      times: [0, 0.1, 0.85, 0.87],
     },
   },
 };
@@ -55,12 +73,11 @@ const backgroundVariants: Variants = {
     transform: [
       "rotate(0deg) scale(1)",
       "rotate(8deg) scale(0.99)",
-      "rotate(6deg) scale(1)",
       "rotate(7deg) scale(1)",
     ],
     transition: {
       duration: 0.7,
-      times: [0, 0.25, 0.6, 1],
+      times: [0, 0.25, 0.6],
       ease: "easeInOut",
     },
   },
@@ -95,18 +112,16 @@ const bubblesVariants: Variants = {
         ? [
             "translateY(0%) translateX(0%)",
             "translateY(-30%) translateX(-25%)",
-            "translateY(-22%) translateX(-18%)",
             "translateY(-25%) translateX(-20%)",
           ]
         : [
             "translateY(0%) translateX(0%)",
             "translateY(-80%) translateX(28%)",
-            "translateY(-55%) translateX(15%)",
             "translateY(-60%) translateX(20%)",
           ],
     transition: {
       duration: 0.7,
-      times: [0, 0.25, 0.6, 1],
+      times: [0, 0.25, 0.6],
       ease: "easeInOut",
     },
   }),
@@ -122,86 +137,62 @@ const bubblesVariants: Variants = {
   }),
 };
 
-const forwardPathString =
-  "M212.5 190.5C212.5 190.5 227.9 196 233.5 210C239.1 224 241.5 240 241.5 240C241.5 240 235.542 204.103 251 201.5C266.86 198.83 271 237.5 271 237.5C271 237.5 268.08 209.741 278.5 211.5C286.136 212.789 289.5 228 289.5 228";
-
 export function SpringPath() {
   const controls = useAnimation();
   const idleControls = useAnimation();
   const backgroundControls = useAnimation();
 
   const forwardCompleted = useRef(false);
+  const animationRef = useRef<{ stop: () => void } | null>(null);
+
+  // Animation progress (0 to 1)
   const progress = useMotionValue(0);
   const ballOpacity = useMotionValue(1);
-  const settleOffset = useMotionValue(0);
-  const forwardPathData = useMemo(() => getPathData(forwardPathString), []);
 
-  // Generate physics-based easing from the bounce path
-  const bounceEasing = useMemo(
-    () => generateBounceEasing(forwardPathString),
-    []
-  );
-
-  // Transform progress to cx and cy
+  // Transform progress to X position using accelerated X easing
   const cx = useTransform(progress, (p) => {
-    if (!forwardPathData.path || p === 0) return 212.157;
-    const point = forwardPathData.path.getPointAtLength(p);
-    return point.x;
+    const easedX = bounceAcceleratedX(p);
+    return START_X + easedX * (END_X - START_X);
   });
 
-  const cyBase = useTransform(progress, (p) => {
-    if (!forwardPathData.path || p === 0) return 190.615;
-    const point = forwardPathData.path.getPointAtLength(p);
-    return point.y;
+  // Transform progress to Y position using bounce easing
+  const cy = useTransform(progress, (p) => {
+    const easedY = bounceEase(p);
+
+    // Third ground hit (0.82) should be higher - ball doesn't fall as far
+    const THIRD_HIT_Y = 234; // Higher than GROUND_Y (240)
+
+    // After third ground hit (0.82), light bounce UP then settle to END_Y
+    if (p > 0.82) {
+      const settleT = (p - 0.82) / (1 - 0.82); // 0 to 1 during settle phase
+      // Base transition from third hit to END_Y
+      const baseY = THIRD_HIT_Y + (END_Y - THIRD_HIT_Y) * settleT;
+      // Light bounce UP (peaks early, decays to 0)
+      const bounceUp = Math.sin(settleT * Math.PI) * (1 - settleT * 0.3) * 5;
+      return baseY - bounceUp;
+    }
+
+    // For second bounce (between 0.55 and 0.82), gradually raise the ground level
+    if (p > 0.55) {
+      const liftT = (p - 0.55) / (0.82 - 0.55); // 0 to 1 during second bounce
+      const groundLevel = GROUND_Y + (THIRD_HIT_Y - GROUND_Y) * liftT;
+      return START_Y + easedY * (groundLevel - START_Y);
+    }
+
+    // First two ground hits use full GROUND_Y
+    return START_Y + easedY * (GROUND_Y - START_Y);
   });
 
-  // Combine base cy with settle offset for micro-bounce effect at the end
-  const cy = useTransform([cyBase, settleOffset], ([base, offset]) => {
-    return (base as number) + (offset as number);
+  // Squash/stretch based on progress
+  const ballScaleX = useTransform(progress, (p) => {
+    if (p === 0) return 1;
+    return getSquashStretchAtProgress(p, 0.2).scaleX;
   });
 
-  // Helper function to calculate squash/stretch scale based on velocity
-  const getVelocityScale = useCallback(
-    (p: number, isXAxis: boolean): number => {
-      if (!forwardPathData.path || p === 0) return 1;
-
-      // Sample Y velocity by comparing neighboring points
-      const delta = 2;
-      const point1 = forwardPathData.path.getPointAtLength(
-        Math.max(0, p - delta)
-      );
-      const point2 = forwardPathData.path.getPointAtLength(
-        Math.min(forwardPathData.length, p + delta)
-      );
-      const velocityY = point2.y - point1.y;
-
-      const squashAmount = Math.min(Math.abs(velocityY) / 50, 0.2);
-
-      // X-axis: squash horizontally when moving down, stretch when moving up
-      // Y-axis: opposite (stretch vertically when moving down, squash when moving up)
-      const calculatedScale = isXAxis
-        ? velocityY > 0
-          ? 1 + squashAmount
-          : 1 - squashAmount
-        : velocityY > 0
-        ? 1 - squashAmount
-        : 1 + squashAmount;
-
-      // Fade to scale 1 in the last 1% of the path
-      const threshold = forwardPathData.length * 0.99;
-      if (p >= threshold) {
-        const fadeOut =
-          1 - (p - threshold) / (forwardPathData.length - threshold);
-        return calculatedScale * fadeOut + 1 * (1 - fadeOut);
-      }
-
-      return calculatedScale;
-    },
-    [forwardPathData.path, forwardPathData.length]
-  );
-
-  const ballScaleX = useTransform(progress, (p) => getVelocityScale(p, true));
-  const ballScaleY = useTransform(progress, (p) => getVelocityScale(p, false));
+  const ballScaleY = useTransform(progress, (p) => {
+    if (p === 0) return 1;
+    return getSquashStretchAtProgress(p, 0.2).scaleY;
+  });
 
   const startAnimations = useCallback(() => {
     controls.start("initial");
@@ -216,36 +207,41 @@ export function SpringPath() {
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     onHoverStart: () => {
+      // Stop any existing animation
+      animationRef.current?.stop();
+
       idleControls.start("initial");
       backgroundControls.start("animate");
       controls.start("animate");
       forwardCompleted.current = false;
+
+      // Reset progress
       progress.set(0);
-      settleOffset.set(0);
-      animate(progress, forwardPathData.length, {
+
+      // Animate progress from 0 to 1 - the transforms handle the rest!
+      const animation = animate(progress, 1, {
         duration: BOUNCE_DURATION,
-        ease: bounceEasing || "linear",
-      }).then(() => {
+        ease: "linear", // Linear because bounceEase handles the easing
+      });
+
+      animationRef.current = animation;
+
+      animation.then(() => {
         forwardCompleted.current = true;
-        // Add settling micro-bounces at final position
-        animate(settleOffset, [0, -4, 0, -1.5, 0], {
-          duration: 0.5,
-          ease: [0.22, 1, 0.36, 1], // ease-out-quint for natural deceleration
-        });
       });
     },
     onHoverEnd: async () => {
-      const currentProgress = progress.get();
+      // Stop ongoing animation
+      animationRef.current?.stop();
 
       if (forwardCompleted.current) {
-        // Forward animation completed, fade out and reset to initial position
+        // Forward animation completed, fade out and reset
         animate(ballOpacity, 0, {
           duration: 0.125,
           ease: "easeOut",
         }).then(() => {
           // Reset position instantly while invisible
           progress.set(0);
-          settleOffset.set(0);
           forwardCompleted.current = false;
           // Fade back in
           animate(ballOpacity, 1, {
@@ -255,10 +251,10 @@ export function SpringPath() {
           });
         });
       } else {
-        // Forward animation not completed, reverse on same path
-        settleOffset.set(0);
+        // Forward animation not completed, return to start
+        const currentProgress = progress.get();
         animate(progress, 0, {
-          duration: (currentProgress / forwardPathData.length) * 0.5,
+          duration: currentProgress * 0.4,
           ease: "easeOut",
         });
       }
@@ -328,7 +324,6 @@ export function SpringPath() {
               variants={pathVariants}
               initial="initial"
               animate={controls}
-              custom={{ bounceEasing }}
               d="M288.5 223.5C288.5 223.5 286.5 211.5 278.5 211.5C270.5 211.5 272 236 271 236C270 236 267 201.5 253 201.5C236.611 201.5 242.5 239.5 241.5 239.5C240.892 239.5 240.5 227 233.5 210C230.132 201.821 225 198 225 198"
             />
           </g>

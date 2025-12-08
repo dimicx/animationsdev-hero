@@ -1,0 +1,129 @@
+/**
+ * Bounce easing with 2 main bounces matching the path's 3 ground touchpoints.
+ * First bounce: 70% height, Second bounce: 50% height, then settle.
+ */
+export function bounceEase(x: number): number {
+  // Bounce timing points - 3 ground hits matching the path
+  const b1 = 0.25; // First ground hit
+  const b2 = 0.55; // Second ground hit
+  const b3 = 0.82; // Third ground hit (final position)
+
+  // Bounce heights (how high the ball goes after each bounce, as fraction of original)
+  const h1 = 0.7; // First bounce: 70% height
+  const h2 = 0.5; // Second bounce: 50% height (higher than before)
+
+  if (x < b1) {
+    // Initial fall - ease in (accelerate due to gravity)
+    const t = x / b1;
+    return t * t; // Quadratic ease-in
+  } else if (x < b2) {
+    // First bounce up and down
+    const t = (x - b1) / (b2 - b1);
+    const parabola = 4 * t * (1 - t); // Parabola peaking at 0.5
+    return 1 - h1 * parabola;
+  } else if (x < b3) {
+    // Second bounce
+    const t = (x - b2) / (b3 - b2);
+    const parabola = 4 * t * (1 - t);
+    return 1 - h2 * parabola;
+  } else {
+    // Settle at final position (small vertical wobble handled separately)
+    return 1;
+  }
+}
+
+/**
+ * Approximate derivative of bounceEase to get velocity for squash/stretch.
+ * Returns a value where:
+ * - Positive = moving down (towards target)
+ * - Negative = moving up (bouncing back)
+ * - Near zero = at peak or settled
+ */
+export function bounceVelocity(x: number, delta: number = 0.01): number {
+  const v1 = bounceEase(Math.max(0, x - delta));
+  const v2 = bounceEase(Math.min(1, x + delta));
+  return (v2 - v1) / (2 * delta);
+}
+
+// Bounce timing points (must match bounceEase) - 3 ground hits
+const BOUNCE_POINTS = [0.25, 0.55, 0.82];
+
+/**
+ * Returns true if the ball is at or near a bounce point (ground contact).
+ */
+export function isAtBouncePoint(x: number, threshold: number = 0.03): boolean {
+  return BOUNCE_POINTS.some((bp) => Math.abs(x - bp) < threshold);
+}
+
+/**
+ * Custom X easing that accelerates on each bounce.
+ * The ball moves faster right after each ground impact.
+ * Matches 3 ground touchpoints in the path.
+ */
+export function bounceAcceleratedX(x: number): number {
+  const [b1, b2, b3] = BOUNCE_POINTS;
+
+  // Progress jumps at each bounce, then eases between
+  if (x < b1) {
+    // First fall: curves right then back left to match path curve
+    const t = x / b1;
+    const baseProgress = t * t * 0.38; // Reach 38% by first ground hit
+    // Rightward bulge mid-fall, returns to path at ground hit
+    const curveBulge = Math.sin(t * Math.PI) * 0.04;
+    return baseProgress + curveBulge;
+  } else if (x < b2) {
+    // First bounce to second ground hit
+    const t = (x - b1) / (b2 - b1);
+    // Custom curve: slow during rise (peak stays left), fast during fall
+    let eased;
+    if (t < 0.5) {
+      eased = 2 * t * t; // ease-in for rise
+    } else {
+      const t2 = (t - 0.5) * 2;
+      eased = 0.5 + (1 - Math.pow(1 - t2, 2)) * 0.5; // ease-out for fall
+    }
+    return 0.38 + eased * 0.37; // 38% to 75%
+  } else if (x < b3) {
+    // Second bounce to third ground hit (final position) - shortest jump
+    const t = (x - b2) / (b3 - b2);
+    const eased = 1 - Math.pow(1 - t, 2);
+    return 0.75 + eased * 0.25; // 75% to 100%
+  } else {
+    // At final position (settle phase - no more X movement)
+    return 1;
+  }
+}
+
+/**
+ * Get squash/stretch values based on bounce progress.
+ */
+export function getSquashStretchAtProgress(
+  progress: number,
+  intensity: number = 0.25
+): { scaleX: number; scaleY: number } {
+  const velocity = bounceVelocity(progress);
+  const atBounce = isAtBouncePoint(progress, 0.04);
+
+  if (atBounce && progress > 0.05 && progress < 0.97) {
+    // Impact squash - stronger for earlier bounces
+    let bounceDecay = 1;
+    if (progress > 0.85) bounceDecay = 0.2;
+    else if (progress > 0.65) bounceDecay = 0.4;
+    else if (progress > 0.4) bounceDecay = 0.7;
+
+    return {
+      scaleX: 1 + intensity * 1.5 * bounceDecay,
+      scaleY: 1 - intensity * 0.6 * bounceDecay,
+    };
+  }
+
+  // In motion - stretch based on velocity
+  const absVel = Math.abs(velocity);
+  const stretch = Math.min(absVel * intensity * 0.4, intensity * 0.8);
+
+  // Stretch vertically when moving fast (falling or rising)
+  return {
+    scaleX: 1 - stretch * 0.3,
+    scaleY: 1 + stretch * 0.6,
+  };
+}
