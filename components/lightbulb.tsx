@@ -133,7 +133,8 @@ const rayVariants: Variants = {
     pathLength: [1, 1, 0, 0, 1],
     strokeOpacity: [0.5, 0, 0, 0.5, 0.5],
     transition: {
-      delay: 0.2 + i * 0.05,
+      // delay: 0.2 + i * 0.05,
+      delay: 0.2,
       duration: 0.7,
       times: [0, 0, 0.2, 0.2, 0.5],
     },
@@ -142,7 +143,8 @@ const rayVariants: Variants = {
     pathLength: [1, 1, 0, 0, 1],
     strokeOpacity: [0.5, 0, 0, 0.5, 0.5],
     transition: {
-      delay: REPEAT_DELAY / 2 + 0.2 + i * 0.05,
+      // delay: REPEAT_DELAY / 2 + 0.2 + i * 0.05,
+      delay: REPEAT_DELAY / 2 + 0.2,
       duration: 0.7,
       times: [0, 0, 0.2, 0.2, 0.5],
       repeat: Infinity,
