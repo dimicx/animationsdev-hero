@@ -230,7 +230,7 @@ export function Hand() {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
-      className="origin-bottom! cursor-pointer"
+      className="origin-bottom!"
     >
       <motion.g
         initial={{

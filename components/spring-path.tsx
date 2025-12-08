@@ -92,10 +92,21 @@ const bubblesVariants: Variants = {
   animate: (i: number) => ({
     transform:
       i === 0
-        ? ["translateY(0%) translateX(0%)", "translateY(-25%) translateX(-20%)"]
-        : ["translateY(0%) translateX(0%)", "translateY(-60%) translateX(20%)"],
+        ? [
+            "translateY(0%) translateX(0%)",
+            "translateY(-30%) translateX(-25%)",
+            "translateY(-22%) translateX(-18%)",
+            "translateY(-25%) translateX(-20%)",
+          ]
+        : [
+            "translateY(0%) translateX(0%)",
+            "translateY(-80%) translateX(28%)",
+            "translateY(-55%) translateX(15%)",
+            "translateY(-60%) translateX(20%)",
+          ],
     transition: {
-      duration: 0.25,
+      duration: 0.7,
+      times: [0, 0.25, 0.6, 1],
       ease: "easeInOut",
     },
   }),
