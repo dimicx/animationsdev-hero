@@ -85,6 +85,32 @@ const idleVariants: Variants = {
   },
 };
 
+const bubblesVariants: Variants = {
+  initial: {
+    transform: "translateY(0%) translateX(0%)",
+  },
+  animate: (i: number) => ({
+    transform:
+      i === 0
+        ? ["translateY(0%) translateX(0%)", "translateY(-25%) translateX(-20%)"]
+        : ["translateY(0%) translateX(0%)", "translateY(-60%) translateX(20%)"],
+    transition: {
+      duration: 0.25,
+      ease: "easeInOut",
+    },
+  }),
+  idle: (i: number) => ({
+    transform: ["translateY(0px)", "translateY(-2px)", "translateY(3px)"],
+    transition: {
+      delay: 0.4 + i * 0.6,
+      duration: 3,
+      ease: "easeInOut",
+      repeat: Infinity,
+      repeatType: "reverse",
+    },
+  }),
+};
+
 const forwardPathString =
   "M212.5 190.5C212.5 190.5 227.9 196 233.5 210C239.1 224 241.5 240 241.5 240C241.5 240 235.542 204.103 251 201.5C266.86 198.83 271 237.5 271 237.5C271 237.5 268.08 209.741 278.5 211.5C286.136 212.789 289.5 228 289.5 228";
 
@@ -228,7 +254,7 @@ export function SpringPath() {
 
       backgroundControls.start("initial");
       await controls.start("initial", {
-        duration: 0.4,
+        duration: 0.35,
         ease: "easeOut",
       });
       idleControls.start("animate");
@@ -341,43 +367,34 @@ export function SpringPath() {
 
       <motion.g
         variants={{
-          initial: {},
-          animate: {
+          hidden: {},
+          visible: {
             transition: {
               staggerChildren: 0.1,
               delayChildren: 0.35,
             },
           },
         }}
-        initial="initial"
-        animate="animate"
+        initial="hidden"
+        animate="visible"
       >
         <motion.g
-          initial={{
-            transform: "translateY(0px)",
-          }}
-          animate={{
-            transform: ["translateY(-2px)", "translateY(3px)"],
-          }}
-          transition={{
-            delay: 0.4,
-            duration: 3,
-            ease: "easeInOut",
-            repeat: Infinity,
-            repeatType: "reverse",
+          variants={{
+            hidden: {
+              transform: "translateX(40px) translateY(-60px) scale(0)",
+              opacity: 0,
+            },
+            visible: {
+              transform: "translateX(0px) translateY(0px) scale(1)",
+              opacity: 1,
+            },
           }}
         >
           <motion.g
-            variants={{
-              initial: {
-                transform: "translateX(40px) translateY(-60px) scale(0)",
-                opacity: 0,
-              },
-              animate: {
-                transform: "translateX(0px) translateY(0px) scale(1)",
-                opacity: 1,
-              },
-            }}
+            variants={bubblesVariants}
+            initial="initial"
+            animate={controls}
+            custom={0}
             className="filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)]"
           >
             <circle
@@ -390,31 +407,22 @@ export function SpringPath() {
           </motion.g>
         </motion.g>
         <motion.g
-          initial={{
-            transform: "translateY(0px)",
-          }}
-          animate={{
-            transform: ["translateY(-2px)", "translateY(3px)"],
-          }}
-          transition={{
-            delay: 1,
-            duration: 3,
-            ease: "easeInOut",
-            repeat: Infinity,
-            repeatType: "reverse",
+          variants={{
+            hidden: {
+              transform: "translateX(40px) translateY(-60px) scale(0)",
+              opacity: 0,
+            },
+            visible: {
+              transform: "translateX(0px) translateY(0px) scale(1)",
+              opacity: 1,
+            },
           }}
         >
           <motion.g
-            variants={{
-              initial: {
-                transform: "translateX(40px) translateY(-60px) scale(0)",
-                opacity: 0,
-              },
-              animate: {
-                transform: "translateX(0px) translateY(0px) scale(1)",
-                opacity: 1,
-              },
-            }}
+            variants={bubblesVariants}
+            initial="initial"
+            animate={controls}
+            custom={1}
             className="filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)]"
           >
             <circle
