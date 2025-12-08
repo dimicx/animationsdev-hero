@@ -1,8 +1,7 @@
 import { motion, useAnimation, Variants } from "motion/react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
-import { useClickTimeout } from "@/lib/use-click-timeout";
 
 const REPEAT_DELAY = 8;
 
@@ -13,9 +12,9 @@ const wholeVariants: Variants = {
   animate: {
     transform: [
       "translateY(0px) rotate(0deg) scale(1)",
-      "translateY(5%) rotate(2deg) scale(0.99)",
-      "translateY(-10%) rotate(-3deg) scale(1.03)",
-      "translateY(-8%) rotate(-2deg) scale(1)",
+      "translateY(4%) rotate(1.5deg) scale(0.99)",
+      "translateY(-8%) rotate(-2.5deg) scale(1.02)",
+      "translateY(-6%) rotate(-1.5deg) scale(1)",
     ],
     transition: {
       duration: 0.7,
@@ -25,10 +24,10 @@ const wholeVariants: Variants = {
   },
   click: {
     transform: [
-      "translateY(-8%) rotate(-2deg) scale(1)",
-      "translateY(5%) rotate(2deg) scale(0.99)",
-      "translateY(-10%) rotate(-3deg) scale(1.03)",
-      "translateY(-8%) rotate(-2deg) scale(1)",
+      "translateY(-6%) rotate(-1.5deg) scale(1)",
+      "translateY(4%) rotate(1.5deg) scale(0.99)",
+      "translateY(-8%) rotate(-2.5deg) scale(1.02)",
+      "translateY(-6%) rotate(-1.5deg) scale(1)",
     ],
     transition: {
       duration: 0.7,
@@ -43,17 +42,17 @@ const backgroundVariants: Variants = {
     transform: "scale(1)",
   },
   animate: {
-    transform: ["scale(1)", "scale(0.99)", "scale(1.02)", "scale(1)"],
+    transform: ["scale(1)", "scale(0.985)", "scale(1.02)", "scale(1)"],
     transition: {
-      duration: 0.7,
+      duration: 0.5,
       times: [0, 0.25, 0.6, 1],
       ease: "easeInOut",
     },
   },
   click: {
-    transform: ["scale(1)", "scale(0.99)", "scale(1.02)", "scale(1)"],
+    transform: ["scale(1)", "scale(0.985)", "scale(1.02)", "scale(1)"],
     transition: {
-      duration: 0.7,
+      duration: 0.5,
       times: [0, 0.25, 0.6, 1],
       ease: "easeInOut",
     },
@@ -250,8 +249,6 @@ const raysOpacityVariants: Variants = {
 
 export function Lightbulb() {
   const controls = useAnimation();
-  const isAnimated = useRef(false);
-  const isHovering = useRef(false);
 
   useEffect(() => {
     controls.start("idle");
@@ -260,37 +257,25 @@ export function Lightbulb() {
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     onHoverStart: async () => {
-      isHovering.current = true;
-      controls.start("initial", { duration: 0 });
-      await controls.start("animate");
-      isAnimated.current = true;
+      await controls.start("initial", { duration: 0 });
+      controls.start("animate");
     },
     onHoverEnd: async () => {
-      isHovering.current = false;
       await controls.start("initial");
-      controls.start("idle");
-      isAnimated.current = false;
+      await controls.start("idle");
     },
   });
 
   const onClick = useCallback(async () => {
-    if (!isAnimated.current || !isHovering.current) {
-      return;
-    }
     controls.start("click");
   }, [controls]);
-
-  const { handleClick } = useClickTimeout({
-    delay: 1000,
-    onClick: onClick,
-  });
 
   return (
     <motion.g
       variants={fadeScaleVariants}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
+      onClick={onClick}
       className="origin-bottom!"
     >
       <motion.g
@@ -308,24 +293,24 @@ export function Lightbulb() {
         }}
       >
         <motion.g
-          initial={{
-            transform: "rotate(0deg)",
-          }}
-          animate={{
-            transform: ["rotate(-8deg)", "rotate(8deg)"],
-          }}
-          transition={{
-            duration: 5,
-            ease: "easeInOut",
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-          className="filter-[url(#filter5_i_359_1453)] dark:filter-[url(#filter5_i_368_1560)]"
+          variants={backgroundVariants}
+          initial="initial"
+          animate={controls}
         >
           <motion.g
-            variants={backgroundVariants}
-            initial="initial"
-            animate={controls}
+            initial={{
+              transform: "rotate(0deg)",
+            }}
+            animate={{
+              transform: ["rotate(-8deg)", "rotate(8deg)"],
+            }}
+            transition={{
+              duration: 5,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+            className="filter-[url(#filter5_i_359_1453)] dark:filter-[url(#filter5_i_368_1560)]"
           >
             <path
               d="M367.266 21.417c-2.316-9.36 10.658-14.171 15.564-5.87 2.973 5.03 10.083 5.68 13.821 1.188l4.123-4.955c8.221-9.88 24.263-3.102 22.91 9.68l-.678 6.41c-.615 5.811 4.807 10.455 10.487 9.08 9.371-2.268 14.965 10.389 6.64 15.252-5.132 2.998-5.591 10.24-.88 13.862l5.654 4.347c10.746 8.261 3.501 25.412-9.914 23.466l-7.058-1.023c-5.881-.853-10.753 4.524-9.325 10.293 2.316 9.359-10.658 14.171-15.564 5.871-2.974-5.031-10.083-5.681-13.822-1.189l-4.123 4.954c-8.221 9.88-24.263 3.102-22.91-9.679l.678-6.41c.615-5.812-4.807-10.456-10.487-9.08-9.371 2.267-14.965-10.39-6.639-15.253 5.131-2.998 5.59-10.239.879-13.861l-5.654-4.347c-10.746-8.262-3.5-25.412 9.915-23.467l7.057 1.024c5.882.853 10.753-4.524 9.326-10.293"
