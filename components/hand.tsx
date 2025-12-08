@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import { useFlubber } from "@/lib/flubber";
 import {
   animate,
@@ -10,7 +10,6 @@ import {
 } from "motion/react";
 import { fadeScaleVariants, UNIVERSAL_DELAY } from "@/lib/animation-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
-import { useClickTimeout } from "@/lib/use-click-timeout";
 
 const REPEAT_DELAY = 6;
 
@@ -169,8 +168,6 @@ export function Hand() {
   const controls = useAnimation();
   const handPathProgress = useMotionValue(0);
   const handPath = useFlubber(handPathProgress, handPaths);
-  const isAnimated = useRef(false);
-  const isHovering = useRef(false);
 
   const startAnimations = useCallback(() => {
     controls.start("idle");
@@ -184,7 +181,6 @@ export function Hand() {
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     onHoverStart: async () => {
-      isHovering.current = true;
       handPathProgress.set(0);
       controls.start("animate");
       await animate(handPathProgress, [0, 1, 2], {
@@ -192,24 +188,18 @@ export function Hand() {
         times: [0, 0.7, 1],
         ease: "easeInOut",
       });
-      isAnimated.current = true;
     },
     onHoverEnd: async () => {
-      isHovering.current = false;
       handPathProgress.set(0);
       await controls.start("initial");
       await Promise.all([
         controls.start("idle"),
         animate(handPathProgress, [0, 1, 2], handProgressTransition),
       ]);
-      isAnimated.current = false;
     },
   });
 
   const onClick = useCallback(async () => {
-    if (!isAnimated.current || !isHovering.current) {
-      return;
-    }
     handPathProgress.set(0);
     animate(handPathProgress, [0, 1, 2], {
       duration: 0.35,
@@ -219,17 +209,12 @@ export function Hand() {
     controls.start("click");
   }, [controls, handPathProgress]);
 
-  const { handleClick } = useClickTimeout({
-    delay: 500,
-    onClick: onClick,
-  });
-
   return (
     <motion.g
       variants={fadeScaleVariants}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
+      onClick={onClick}
       className="origin-bottom!"
     >
       <motion.g
