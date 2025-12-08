@@ -69,7 +69,7 @@ export function bounceAcceleratedX(x: number): number {
     const t = x / b1;
     const baseProgress = t * t * 0.38; // Reach 38% by first ground hit
     // Rightward bulge mid-fall, returns to path at ground hit
-    const curveBulge = Math.sin(t * Math.PI) * 0.04;
+    const curveBulge = Math.sin(t * Math.PI) * 0.07;
     return baseProgress + curveBulge;
   } else if (x < b2) {
     // First bounce to second ground hit

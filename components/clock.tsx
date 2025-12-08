@@ -29,7 +29,7 @@ const clockVariants: Variants = {
   },
   animate: {
     y: ["0%", "3%", "-6%"],
-    x: ["0%", "-3%", "3%", "-3%", "3%", "-3%", "0%"],
+    x: ["0%", "-4%", "4%", "-4%", "4%", "-4%", "0%"],
     transition: {
       y: {
         duration: 0.3,
@@ -55,7 +55,7 @@ const bellVariants: Variants = {
     x:
       i === 0
         ? ["0%", "-20%", "16%", "-16%", "20%", "-16%", "0%"]
-        : ["0%", "-30%", "24%", "-24%", "30%", "-24%", "0%"],
+        : ["0%", "-15%", "30%", "-30%", "35%", "-30%", "0%"],
     rotate: i === 0 ? "0deg" : ["0deg", "-5deg"],
     transition: {
       y: {
@@ -66,7 +66,7 @@ const bellVariants: Variants = {
       },
       x: {
         delay: i * 0.05,
-        duration: 0.3,
+        duration: 0.25,
         repeat: Infinity,
         ease: "linear",
       },
