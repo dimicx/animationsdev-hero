@@ -170,9 +170,12 @@ export function Hand({ isMobile }: { isMobile: boolean }) {
   const handPath = useFlubber(handPathProgress, handPaths);
   const hasAnimatedMobile = useRef(false);
 
-  const startAnimations = useCallback(() => {
-    controls.start("idle");
-    animate(handPathProgress, [0, 1, 2], handProgressTransition);
+  const startAnimations = useCallback(async () => {
+    await controls.start("initial", { duration: 0 });
+    await Promise.all([
+      controls.start("idle"),
+      animate(handPathProgress, [0, 1, 2], handProgressTransition),
+    ]);
   }, [controls, handPathProgress]);
 
   useEffect(() => {
@@ -183,12 +186,15 @@ export function Hand({ isMobile }: { isMobile: boolean }) {
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     onHoverStart: async () => {
       handPathProgress.set(0);
-      controls.start("animate");
-      await animate(handPathProgress, [0, 1, 2], {
-        duration: 0.5,
-        times: [0, 0.7, 1],
-        ease: "easeInOut",
-      });
+      await controls.start("initial", { duration: 0 });
+      await Promise.all([
+        controls.start("animate"),
+        animate(handPathProgress, [0, 1, 2], {
+          duration: 0.5,
+          times: [0, 0.7, 1],
+          ease: "easeInOut",
+        }),
+      ]);
       if (isMobile && !hasAnimatedMobile.current) {
         hasAnimatedMobile.current = true;
       }

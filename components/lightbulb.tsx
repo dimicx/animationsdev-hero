@@ -252,7 +252,11 @@ export function Lightbulb({ isMobile }: { isMobile: boolean }) {
   const hasAnimatedMobile = useRef(false);
 
   useEffect(() => {
-    controls.start("idle");
+    const startAnimations = async () => {
+      await controls.start("initial", { duration: 0 });
+      await controls.start("idle");
+    };
+    startAnimations();
   }, [controls]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
