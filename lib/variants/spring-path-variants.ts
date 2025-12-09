@@ -12,11 +12,11 @@ const pathVariants: Variants = {
     pathLength: [1, 0.01],
     strokeOpacity: [1, 1, 0],
     transition: {
-      delay: 0.03,
-      duration: BOUNCE_DURATION - 0.05,
+      delay: 0.045,
+      duration: BOUNCE_DURATION - 0.1,
       ease: bounceAcceleratedX, // Path shrinks in sync with X movement
       strokeOpacity: {
-        duration: BOUNCE_DURATION - 0.05,
+        duration: BOUNCE_DURATION - 0.1,
         ease: "easeOut",
         times: [0, 0.75, 0.76],
       },

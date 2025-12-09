@@ -32,9 +32,10 @@ import { useCallback, useEffect, useRef } from "react";
 // Ball positions - aligned with path touchpoints
 const START_X = 212;
 const START_Y = 188;
-const END_X = 289.5;
+const END_X = 290;
 const END_Y = 228;
-const GROUND_Y = 240;
+const GROUND_Y = 243;
+const SECOND_GROUND_Y = 237; // Second bounce hits slightly higher
 
 export function SpringPath({ isMobile }: { isMobile: boolean }) {
   const controls = useAnimation();
@@ -75,13 +76,21 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
     }
 
     // For second bounce (between 0.55 and 0.77), gradually raise the ground level
-    if (p > 0.55) {
+    if (p >= 0.55) {
       const liftT = (p - 0.55) / (0.77 - 0.55); // 0 to 1 during second bounce
-      const groundLevel = GROUND_Y + (THIRD_HIT_Y - GROUND_Y) * liftT;
+      const groundLevel =
+        SECOND_GROUND_Y + (THIRD_HIT_Y - SECOND_GROUND_Y) * liftT;
       return START_Y + easedY * (groundLevel - START_Y);
     }
 
-    // First two ground hits use full GROUND_Y
+    // First bounce (between 0.25 and 0.55), transition from first to second ground level
+    if (p >= 0.25) {
+      const t = (p - 0.25) / (0.55 - 0.25);
+      const groundLevel = GROUND_Y + (SECOND_GROUND_Y - GROUND_Y) * t;
+      return START_Y + easedY * (groundLevel - START_Y);
+    }
+
+    // First drop uses GROUND_Y
     return START_Y + easedY * (GROUND_Y - START_Y);
   });
 
