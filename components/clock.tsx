@@ -81,30 +81,30 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
           r="22.93"
           className="fill-[#989898] dark:fill-[#D6D6D6]"
         />
-        <g>
-          {/* hour hand */}
+        {/* hour hand */}
+        <motion.g style={{ transformOrigin: "543.876px 186.539px" }}>
           <line
-            x1="543.879"
-            y1="186.531"
-            x2="549.787"
-            y2="192.361"
+            x1="543.876"
+            y1="186.539"
+            x2="545.147"
+            y2="178.337"
             stroke="#252525"
-            strokeWidth="4.9"
-            strokeLinecap="round"
+            stroke-width="4.9"
+            stroke-linecap="round"
           />
-          {/* minute hand */}
+        </motion.g>
+        {/* minute hand */}
+        <motion.g style={{ transformOrigin: "543.876px 186.544px" }}>
           <line
-            x1="543.881"
-            y1="186.533"
-            x2="545.458"
-            y2="175.238"
+            x1="543.876"
+            y1="186.544"
+            x2="545.623"
+            y2="175.274"
             stroke="#252525"
-            strokeWidth="4.9"
-            strokeLinecap="round"
+            stroke-width="4.9"
+            stroke-linecap="round"
           />
-          {/* center dot */}
-          <circle cx="543.88" cy="186.54" r="2.45" fill="#252525" />
-        </g>
+        </motion.g>
       </motion.g>
 
       {/* bells */}
