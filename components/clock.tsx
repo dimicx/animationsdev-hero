@@ -28,6 +28,7 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
   const minuteHandControls = useAnimation();
   const backgroundControls = useAnimation();
   const hasClicked = useRef(false);
+  const hasClickedMobile = useRef(false);
 
   const startAnimations = useCallback(() => {
     controls.start("initial");
@@ -47,6 +48,7 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
     },
     onHoverEnd: async () => {
       hasClicked.current = false;
+      hasClickedMobile.current = false;
 
       hourHandControls.start({
         transform: `rotate(120deg)`,
@@ -65,6 +67,11 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
   });
 
   const handleClockClick = useCallback(() => {
+    // On mobile: first tap should only trigger hover, second tap triggers clock animation
+    if (isMobile && !hasClickedMobile.current) {
+      hasClickedMobile.current = true;
+      return;
+    }
     if (hasClicked.current) return;
     hasClicked.current = true;
 
@@ -106,7 +113,7 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
       transform: `rotate(${minuteWithSpins}deg)`,
       transition: CLOCK_HAND_TRANSITION,
     });
-  }, [controls, idleControls, hourHandControls, minuteHandControls]);
+  }, [controls, idleControls, hourHandControls, minuteHandControls, isMobile]);
 
   return (
     <motion.g
