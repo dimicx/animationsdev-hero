@@ -54,16 +54,20 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
   const progress = useMotionValue(0);
   const ballOpacity = useMotionValue(1);
 
-  // Shared drag position - small bubbles update this directly
+  // Drag position tracking
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
 
+  // Bubble position refs for calculating angles
+  const mediumBubbleRef = useRef<SVGGElement>(null);
+  const smallBubbleRef = useRef<SVGGElement>(null);
+
   // Scale factors - control how much each element moves relative to drag
   const mainBubbleScale = 0.1;
-  const mediumBubbleScaleX = 0.3;
-  const mediumBubbleScaleY = 0.12;
-  const smallBubbleScaleX = 0.4;
-  const smallBubbleScaleY = 0.13;
+  const mediumBubbleScaleX = 0.2;
+  const mediumBubbleScaleY = 0.15;
+  const smallBubbleScaleX = 0.3;
+  const smallBubbleScaleY = 0.2;
 
   const scaledDragX = useTransform(dragX, (x) => x * mainBubbleScale);
   const scaledDragY = useTransform(dragY, (y) => y * mainBubbleScale);
@@ -74,13 +78,13 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
   const scaledMediumDragX = useTransform(dragX, (x) => x * mediumBubbleScaleX);
   const scaledMediumDragY = useTransform(dragY, (y) => y * mediumBubbleScaleY);
 
-  // Main bubble follows the scaled values with a spring
+  // Spring configuration
   const springConfig = {
-    type: "spring",
     stiffness: 320,
     damping: 20,
     mass: 0.4,
   };
+
   const mainDx = useSpring(scaledDragX, springConfig);
   const mainDy = useSpring(scaledDragY, springConfig);
 
@@ -90,56 +94,8 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
   const mediumDx = useSpring(scaledMediumDragX, springConfig);
   const mediumDy = useSpring(scaledMediumDragY, springConfig);
 
-  // Small bubbles orbit around the main bubble center
-  const orbitRotation = useMotionValue(0);
-
-  // Calculate rotation based on drag position
-  const calculateRotation = (x: number, y: number) => {
-    if (x === 0 && y === 0) return 0;
-
-    // Get angle of drag position (in degrees, -180 to 180)
-    // 0° = right, 90° = below, ±180° = left, -90° = above
-    const dragAngle = Math.atan2(y, x) * (180 / Math.PI);
-
-    // Cardinal direction rotations:
-    // Right (0°) → -125°
-    // Below (90°) → -36°
-    // Left (180°) → 50°
-    // Above (-90°) → 143°
-
-    // Interpolate between cardinal points
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
-    if (dragAngle >= 0 && dragAngle < 90) {
-      // Right to Below (0° to 90°)
-      const t = dragAngle / 90;
-      return lerp(-125, -36, t);
-    } else if (dragAngle >= 90 && dragAngle <= 180) {
-      // Below to Left (90° to 180°)
-      const t = (dragAngle - 90) / 90;
-      return lerp(-36, 50, t);
-    } else if (dragAngle >= -180 && dragAngle < -90) {
-      // Left to Above (-180° to -90°)
-      const t = (dragAngle + 180) / 90;
-      return lerp(50, 143, t);
-    } else {
-      // Above to Right (-90° to 0°) - go the "long way" around
-      const t = (dragAngle + 90) / 90;
-      // Use 235 instead of -125 to invert direction (235 = -125 + 360)
-      const rotation = lerp(143, 235, t);
-      // Normalize back to -180 to 180 range
-      return rotation > 180 ? rotation - 360 : rotation;
-    }
-  };
-
-  // Animate rotation and position back to 0 on drag end
+  // Animate position back to 0 on drag end
   const handleDragEnd = () => {
-    animate(orbitRotation, 0, {
-      type: "spring",
-      stiffness: 320,
-      damping: 20,
-      mass: 0.4,
-    });
     animate(dragX, 0, {
       type: "spring",
       stiffness: 320,
@@ -314,90 +270,89 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
 
   return (
     <motion.g variants={fadeScaleVariants} className="origin-bottom-left!">
-      {/* small bubbles - container rotates around main bubble center */}
+      {/* small bubbles - point towards pointer */}
       <motion.g
-        style={{
-          rotate: orbitRotation,
-          transformOrigin: "255px 205px",
-        }}
-      >
-        <motion.g
-          variants={{
-            hidden: {},
-            visible: {
-              transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.35,
-              },
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.1,
+              delayChildren: 0.35,
             },
+          },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Medium bubble with scaled movement and rotation */}
+        <motion.g
+          ref={mediumBubbleRef}
+          style={{
+            x: mediumDx,
+            y: mediumDy,
+            transformOrigin: "201.927px 293.495px",
           }}
-          initial="hidden"
-          animate="visible"
         >
-          {/* Single drag wrapper for both small bubbles */}
-          <motion.g
-            drag
-            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-            dragElastic={1}
-            dragTransition={{ bounceStiffness: 500, bounceDamping: 20 }}
-            _dragX={dragX}
-            _dragY={dragY}
-            onDrag={(_, info) => {
-              // Clamp Y to only allow downward or neutral movement
-              // const clampedY = Math.max(0, info.offset.y);
-              dragX.set(info.offset.x);
-              // dragY.set(clampedY);
-              dragY.set(info.offset.y);
-              // orbitRotation.set(calculateRotation(info.offset.x, clampedY));
-              // orbitRotation.set(
-              //   calculateRotation(info.offset.x, info.offset.y)
-              // );
-            }}
-            onDragEnd={handleDragEnd}
-            className="cursor-grab active:cursor-grabbing"
-          >
-            {/* Visual group with scaled movement */}
-            <motion.g style={{ x: mediumDx, y: mediumDy }}>
-              <motion.g variants={bubblesAppearVariants}>
-                <motion.g
-                  variants={bubblesVariants}
-                  initial="initial"
-                  animate={controls}
-                  custom={0}
-                >
-                  {/* Transparent hit area */}
-                  <circle cx="201.927" cy="293.495" r="12" fill="transparent" />
-                  {/* Visible circle with filter */}
-                  <circle
-                    cx="201.927"
-                    cy="293.495"
-                    r="9.417"
-                    className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)]"
-                  />
-                </motion.g>
-              </motion.g>
-            </motion.g>
-            <motion.g style={{ x: smallDx, y: smallDy }}>
-              <motion.g variants={bubblesAppearVariants}>
-                <motion.g
-                  variants={bubblesVariants}
-                  initial="initial"
-                  animate={controls}
-                  custom={1}
-                >
-                  {/* Transparent hit area */}
-                  <circle cx="184.926" cy="314.008" r="8" fill="transparent" />
-                  {/* Visible circle with filter */}
-                  <circle
-                    cx="184.926"
-                    cy="314.008"
-                    r="4.913"
-                    className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)]"
-                  />
-                </motion.g>
-              </motion.g>
+          <motion.g variants={bubblesAppearVariants}>
+            <motion.g
+              variants={bubblesVariants}
+              initial="initial"
+              animate={controls}
+              custom={0}
+            >
+              {/* Visible circle with filter */}
+              <circle
+                cx="201.927"
+                cy="293.495"
+                r="9.417"
+                className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)]"
+              />
             </motion.g>
           </motion.g>
+        </motion.g>
+
+        {/* Small bubble with scaled movement and rotation */}
+        <motion.g
+          ref={smallBubbleRef}
+          style={{
+            x: smallDx,
+            y: smallDy,
+            transformOrigin: "184.926px 314.008px",
+          }}
+        >
+          <motion.g variants={bubblesAppearVariants}>
+            <motion.g
+              variants={bubblesVariants}
+              initial="initial"
+              animate={controls}
+              custom={1}
+            >
+              {/* Visible circle with filter */}
+              <circle
+                cx="184.926"
+                cy="314.008"
+                r="4.913"
+                className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)]"
+              />
+            </motion.g>
+          </motion.g>
+        </motion.g>
+
+        {/* Transparent drag group */}
+        <motion.g
+          drag
+          dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+          dragElastic={1}
+          dragTransition={{ bounceStiffness: 500, bounceDamping: 20 }}
+          onDrag={(_, info) => {
+            dragX.set(info.offset.x);
+            dragY.set(info.offset.y);
+          }}
+          onDragEnd={handleDragEnd}
+          className="cursor-grab active:cursor-grabbing"
+        >
+          {/* Transparent hit area for dragging */}
+          <circle cx="193" cy="303" r="30" fill="transparent" />
         </motion.g>
       </motion.g>
 
