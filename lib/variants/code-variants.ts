@@ -1,6 +1,6 @@
 import { Variants } from "motion";
 
-const rotateVariants: Variants = {
+const backgroundVariants: Variants = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
@@ -12,11 +12,13 @@ const rotateVariants: Variants = {
       "rotate(10deg) scale(1)",
     ],
     transition: {
-      delay: 0.1,
       duration: 0.5,
       times: [0, 0.4, 0.7, 1],
       ease: "easeInOut",
     },
+  },
+  click: {
+    transform: ["rotate(10deg) scale(0.985)", "rotate(10deg) scale(1)"],
   },
 };
 
@@ -108,7 +110,7 @@ const pulseVariants: Variants = {
   },
   click: {
     opacity: 1,
-    scale: [1.05, 1],
+    scale: [0.97, 1],
     transition: {
       ease: "easeInOut",
     },
@@ -116,7 +118,7 @@ const pulseVariants: Variants = {
 };
 
 export {
-  rotateVariants,
+  backgroundVariants,
   caretLeftVariants,
   caretRightVariants,
   slashVariants,

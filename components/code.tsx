@@ -10,7 +10,7 @@ import {
   caretRightVariants,
   codePathVariants,
   pulseVariants,
-  rotateVariants,
+  backgroundVariants,
   slashVariants,
 } from "@/lib/variants/code-variants";
 import {
@@ -69,6 +69,7 @@ export function Code({ isMobile }: { isMobile: boolean }) {
 
   const handleClick = () => {
     pulseControls.start("click");
+    controls.start("click");
 
     const prevIndex = colorIndexRef.current;
     const prevLightColor =
@@ -149,7 +150,7 @@ export function Code({ isMobile }: { isMobile: boolean }) {
         })}
       >
         <motion.g
-          variants={rotateVariants}
+          variants={backgroundVariants}
           initial="initial"
           animate={controls}
         >
