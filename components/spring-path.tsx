@@ -299,29 +299,29 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
           initial="hidden"
           animate="visible"
         >
-          <motion.g variants={bubblesAppearVariants}>
-            <motion.g
-              variants={bubblesVariants}
-              initial="initial"
-              animate={controls}
-              custom={0}
-            >
-              {/* Drag wrapper with transparent hit area */}
+          {/* Single drag wrapper for both small bubbles */}
+          <motion.g
+            drag
+            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            dragElastic={1}
+            dragTransition={{ bounceStiffness: 500, bounceDamping: 20 }}
+            onDrag={(_, info) => {
+              dragX.set(info.offset.x);
+              dragY.set(info.offset.y);
+              orbitRotation.set(
+                calculateRotation(info.offset.x, info.offset.y)
+              );
+            }}
+            onDragEnd={handleDragEnd}
+            style={{ x: dragX, y: dragY }}
+            className="cursor-grab active:cursor-grabbing"
+          >
+            <motion.g variants={bubblesAppearVariants}>
               <motion.g
-                drag
-                dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                dragElastic={1}
-                dragTransition={{ bounceStiffness: 500, bounceDamping: 20 }}
-                onDrag={(_, info) => {
-                  dragX.set(info.offset.x);
-                  dragY.set(info.offset.y);
-                  orbitRotation.set(
-                    calculateRotation(info.offset.x, info.offset.y)
-                  );
-                }}
-                onDragEnd={handleDragEnd}
-                style={{ x: dragX, y: dragY }}
-                className="cursor-grab active:cursor-grabbing"
+                variants={bubblesVariants}
+                initial="initial"
+                animate={controls}
+                custom={0}
               >
                 {/* Transparent hit area */}
                 <circle cx="201.927" cy="293.495" r="12" fill="transparent" />
@@ -334,30 +334,12 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
                 />
               </motion.g>
             </motion.g>
-          </motion.g>
-          <motion.g variants={bubblesAppearVariants}>
-            <motion.g
-              variants={bubblesVariants}
-              initial="initial"
-              animate={controls}
-              custom={1}
-            >
-              {/* Drag wrapper with transparent hit area */}
+            <motion.g variants={bubblesAppearVariants}>
               <motion.g
-                drag
-                dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                dragElastic={1}
-                dragTransition={{ bounceStiffness: 500, bounceDamping: 20 }}
-                onDrag={(_, info) => {
-                  dragX.set(info.offset.x);
-                  dragY.set(info.offset.y);
-                  orbitRotation.set(
-                    calculateRotation(info.offset.x, info.offset.y)
-                  );
-                }}
-                onDragEnd={handleDragEnd}
-                style={{ x: dragX, y: dragY }}
-                className="cursor-grab active:cursor-grabbing"
+                variants={bubblesVariants}
+                initial="initial"
+                animate={controls}
+                custom={1}
               >
                 {/* Transparent hit area */}
                 <circle cx="184.926" cy="314.008" r="8" fill="transparent" />
