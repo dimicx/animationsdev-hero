@@ -37,6 +37,8 @@ export function Timeline({ isMobile }: { isMobile: boolean }) {
 
   // Gap between masks and center line (half on each side)
   const MASK_GAP = 3.5;
+  // Offset to center cursor on line (half stroke width + gap)
+  const CURSOR_OFFSET = 2.457 / 2 + 3;
 
   // Motion value for the mask split position (where left mask ends and right mask begins)
   const rawMaskX = useMotionValue(MASK_CENTER_X);
@@ -75,11 +77,12 @@ export function Timeline({ isMobile }: { isMobile: boolean }) {
     (e: React.MouseEvent) => {
       if (!hasAnimationCompletedRef.current) return;
       const svgX = getMouseSVGPosition(e);
-      // Clamp to mask bounds
-      const clampedX = Math.max(MASK_MIN_X, Math.min(MASK_MAX_X, svgX));
+      // Offset to center cursor on line, then clamp to mask bounds
+      const offsetX = svgX + CURSOR_OFFSET;
+      const clampedX = Math.max(MASK_MIN_X, Math.min(MASK_MAX_X, offsetX));
       rawMaskX.set(clampedX);
     },
-    [getMouseSVGPosition, rawMaskX]
+    [getMouseSVGPosition, rawMaskX, CURSOR_OFFSET]
   );
 
   const handleMouseLeaveTimeline = useCallback(() => {
