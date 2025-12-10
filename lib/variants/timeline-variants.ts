@@ -40,6 +40,13 @@ const timelineOneVariants: Variants = {
       delay: 4,
     },
   },
+  click: {
+    pathLength: [1, 0.4, 1],
+    transition: {
+      duration: 1,
+      ease: "easeInOut",
+    },
+  },
 };
 
 const timelineTwoVariants: Variants = {
@@ -74,6 +81,14 @@ const timelineTwoVariants: Variants = {
       delay: 3.6,
     },
   },
+  click: {
+    pathLength: [1, 0.5, 1],
+    transition: {
+      duration: 1,
+      delay: 0.1,
+      ease: "easeInOut",
+    },
+  },
 };
 
 const timelineThreeVariants: Variants = {
@@ -106,6 +121,14 @@ const timelineThreeVariants: Variants = {
       repeatType: "loop",
       repeatDelay: 3.2,
       delay: 3.2,
+    },
+  },
+  click: {
+    pathLength: [1, 0.5, 1],
+    transition: {
+      duration: 1,
+      delay: 0.2,
+      ease: "easeInOut",
     },
   },
 };
