@@ -96,10 +96,30 @@ const codePathVariants: Variants = {
   },
 };
 
+const pulseVariants: Variants = {
+  idle: {
+    opacity: [0.4, 0.2, 0.4],
+    transition: {
+      duration: 1.5,
+      ease: "easeInOut",
+      repeat: Infinity,
+      repeatType: "loop",
+    },
+  },
+  click: {
+    opacity: 1,
+    scale: [1.05, 1],
+    transition: {
+      ease: "easeInOut",
+    },
+  },
+};
+
 export {
   rotateVariants,
   caretLeftVariants,
   caretRightVariants,
   slashVariants,
   codePathVariants,
+  pulseVariants,
 };
