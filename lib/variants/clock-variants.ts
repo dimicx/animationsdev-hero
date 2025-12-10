@@ -20,8 +20,8 @@ const backgroundVariants: Variants = {
   click: {
     transform: [
       "rotate(-3deg) scale(1)",
-      "rotate(-3deg) scale(0.99)",
-      "rotate(-3deg) scale(1.01)",
+      "rotate(-3deg) scale(0.98)",
+      "rotate(-3deg) scale(1.015)",
       "rotate(-3deg) scale(1)",
     ],
     transition: {
@@ -29,6 +29,33 @@ const backgroundVariants: Variants = {
       times: [0, 0.25, 0.6, 1],
       ease: "easeInOut",
     },
+  },
+};
+
+const clockAndBellsVariants: Variants = {
+  initial: {
+    transform: "rotate(0deg) scale(1)",
+    transformOrigin: "543.879px 186.54px",
+    transformBox: "view-box",
+  },
+  click: {
+    transform: [
+      "rotate(0deg) scale(1)",
+      "rotate(-10deg) scale(0.97)",
+      "rotate(-8deg) scale(1.02)",
+      "rotate(-8deg) scale(1)",
+    ],
+    transformOrigin: "543.879px 186.54px",
+    transformBox: "view-box",
+    transition: {
+      duration: 0.4,
+      ease: "easeOut",
+    },
+  },
+  idle: {
+    transform: ["rotate(0deg) scale(1)"],
+    transformOrigin: "543.879px 186.54px",
+    transformBox: "view-box",
   },
 };
 
@@ -110,4 +137,10 @@ const idleBellsVariants: Variants = {
   },
 };
 
-export { backgroundVariants, clockVariants, bellVariants, idleBellsVariants };
+export {
+  backgroundVariants,
+  clockVariants,
+  bellVariants,
+  idleBellsVariants,
+  clockAndBellsVariants,
+};
