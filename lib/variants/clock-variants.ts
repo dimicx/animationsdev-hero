@@ -41,15 +41,29 @@ const clockAndBellsVariants: Variants = {
   click: {
     transform: [
       "rotate(0deg) scale(1)",
-      "rotate(-10deg) scale(0.97)",
-      "rotate(-8deg) scale(1.02)",
+      "rotate(-10deg) scale(0.95)",
+      "rotate(-8deg) scale(1.03)",
       "rotate(-8deg) scale(1)",
     ],
     transformOrigin: "543.879px 186.54px",
     transformBox: "view-box",
     transition: {
       duration: 0.4,
-      ease: "easeOut",
+      times: [0, 0.25, 0.6, 1],
+    },
+  },
+  "scale-click": {
+    transform: [
+      "rotate(-8deg) scale(1)",
+      "rotate(-8deg) scale(0.95)",
+      "rotate(-8deg) scale(1.03)",
+      "rotate(-8deg) scale(1)",
+    ],
+    transformOrigin: "543.879px 186.54px",
+    transformBox: "view-box",
+    transition: {
+      duration: 0.4,
+      times: [0, 0.25, 0.6, 1],
     },
   },
   idle: {

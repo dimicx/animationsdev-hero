@@ -34,7 +34,9 @@ export function Clock({
   const hourHandControls = useAnimation();
   const minuteHandControls = useAnimation();
   const backgroundControls = useAnimation();
+  const scaleClickControls = useAnimation();
   const hasClicked = useRef(false);
+  const hasClickedOnce = useRef(false);
   const hasClickedMobile = useRef(false);
 
   const startAnimations = useCallback(() => {
@@ -67,6 +69,7 @@ export function Clock({
     onHoverEnd: async () => {
       hasClicked.current = false;
       hasClickedMobile.current = false;
+      hasClickedOnce.current = false;
 
       hourHandControls.start({
         transform: `rotate(120deg)`,
@@ -94,44 +97,51 @@ export function Clock({
       hasClickedMobile.current = true;
       return;
     }
-    if (hasClicked.current) return;
-    hasClicked.current = true;
+    // if (hasClicked.current) return;
+    if (!hasClickedOnce.current) {
+      hasClickedOnce.current = true;
+      hasClicked.current = true;
 
-    backgroundControls.start("click");
-    controls.start("initial").then(() => {
-      idleControls.start("animate");
-    });
+      backgroundControls.start("click");
+      scaleClickControls.start("click");
+      controls.start("initial").then(() => {
+        idleControls.start("animate");
+      });
 
-    const now = new Date();
-    const hours = now.getHours() % 12;
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
+      const now = new Date();
+      const hours = now.getHours() % 12;
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
 
-    // Calculate rotations (0 degrees is at 12 o'clock position)
-    // Hour hand: moves 30 degrees per hour (360/12) plus 0.5 degrees per minute
-    const newHourRotation = hours * 30 + minutes * 0.5;
+      // Calculate rotations (0 degrees is at 12 o'clock position)
+      // Hour hand: moves 30 degrees per hour (360/12) plus 0.5 degrees per minute
+      const newHourRotation = hours * 30 + minutes * 0.5;
 
-    // Minute hand: moves 6 degrees per minute (360/60)
-    const newMinuteRotation = minutes * 6 + seconds * 0.1;
+      // Minute hand: moves 6 degrees per minute (360/60)
+      const newMinuteRotation = minutes * 6 + seconds * 0.1;
 
-    const hourSpins = 1;
-    const minuteSpins = 2;
-    const hourWithSpins = 360 * hourSpins + newHourRotation;
-    const minuteWithSpins = 360 * minuteSpins + newMinuteRotation;
+      const hourSpins = 1;
+      const minuteSpins = 2;
+      const hourWithSpins = 360 * hourSpins + newHourRotation;
+      const minuteWithSpins = 360 * minuteSpins + newMinuteRotation;
 
-    hourHandControls.start({
-      transform: `rotate(${hourWithSpins}deg)`,
-      transformOrigin: "543.876px 186.539px",
-      transformBox: "view-box",
-      transition: CLOCK_HAND_TRANSITION,
-    });
+      hourHandControls.start({
+        transform: `rotate(${hourWithSpins}deg)`,
+        transformOrigin: "543.876px 186.539px",
+        transformBox: "view-box",
+        transition: CLOCK_HAND_TRANSITION,
+      });
 
-    minuteHandControls.start({
-      transform: `rotate(${minuteWithSpins}deg)`,
-      transformOrigin: "543.876px 186.544px",
-      transformBox: "view-box",
-      transition: CLOCK_HAND_TRANSITION,
-    });
+      minuteHandControls.start({
+        transform: `rotate(${minuteWithSpins}deg)`,
+        transformOrigin: "543.876px 186.544px",
+        transformBox: "view-box",
+        transition: CLOCK_HAND_TRANSITION,
+      });
+    } else {
+      backgroundControls.start("click");
+      scaleClickControls.start("scale-click");
+    }
   }, [
     controls,
     idleControls,
@@ -139,6 +149,7 @@ export function Clock({
     minuteHandControls,
     isMobile,
     backgroundControls,
+    scaleClickControls,
   ]);
 
   return (
@@ -180,7 +191,7 @@ export function Clock({
       <motion.g
         variants={clockAndBellsVariants}
         initial="initial"
-        animate={backgroundControls}
+        animate={scaleClickControls}
         style={{
           transformOrigin: "543.879px 186.54px",
           transformBox: "view-box",
