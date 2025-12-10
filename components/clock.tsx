@@ -11,12 +11,24 @@ import {
   clockVariants,
   idleBellsVariants,
 } from "@/lib/variants/clock-variants";
-import { motion, useAnimation } from "motion/react";
-import { useCallback, useEffect } from "react";
+import { motion, Transition, useAnimation } from "motion/react";
+import { useCallback, useEffect, useRef } from "react";
+
+const CLOCK_HAND_TRANSITION: Transition = {
+  type: "spring",
+  stiffness: 150,
+  damping: 19,
+  mass: 1.2,
+};
 
 export function Clock({ isMobile }: { isMobile: boolean }) {
   const controls = useAnimation();
   const idleControls = useAnimation();
+  const hourHandControls = useAnimation();
+  const minuteHandControls = useAnimation();
+  const backgroundControls = useAnimation();
+  const hasClicked = useRef(false);
+  const hasClickedMobile = useRef(false);
 
   const startAnimations = useCallback(() => {
     controls.start("initial");
@@ -31,13 +43,77 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     onHoverStart: async () => {
       await idleControls.start("initial", { duration: 0.05 });
+      backgroundControls.start("animate");
       controls.start("animate");
     },
     onHoverEnd: async () => {
+      hasClicked.current = false;
+      hasClickedMobile.current = false;
+
+      hourHandControls.start({
+        transform: `rotate(120deg)`,
+        transition: CLOCK_HAND_TRANSITION,
+      });
+      minuteHandControls.start({
+        transform: `rotate(0deg)`,
+        transition: CLOCK_HAND_TRANSITION,
+      });
+
+      if (hasClicked.current) return;
+      backgroundControls.start("initial");
       await controls.start("initial");
       idleControls.start("animate");
     },
   });
+
+  const handleClockClick = useCallback(() => {
+    // On mobile: first tap should only trigger hover, second tap triggers clock animation
+    if (isMobile && !hasClickedMobile.current) {
+      hasClickedMobile.current = true;
+      return;
+    }
+    if (hasClicked.current) return;
+    hasClicked.current = true;
+
+    controls.start("initial").then(() => {
+      idleControls.start("animate");
+    });
+
+    const now = new Date();
+    const hours = now.getHours() % 12;
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    // Calculate rotations (0 degrees is at 12 o'clock position)
+    // Hour hand: moves 30 degrees per hour (360/12) plus 0.5 degrees per minute
+    const newHourRotation = hours * 30 + minutes * 0.5;
+
+    // Minute hand: moves 6 degrees per minute (360/60)
+    const newMinuteRotation = minutes * 6 + seconds * 0.1;
+
+    const hourSpins = 1;
+    const minuteSpins = 2;
+    const hourWithSpins = 360 * hourSpins + newHourRotation;
+    const minuteWithSpins = 360 * minuteSpins + newMinuteRotation;
+
+    hourHandControls.set({
+      transformOrigin: "543.876px 186.539px",
+      transformBox: "view-box",
+    });
+    hourHandControls.start({
+      transform: `rotate(${hourWithSpins}deg)`,
+      transition: CLOCK_HAND_TRANSITION,
+    });
+
+    minuteHandControls.set({
+      transformOrigin: "543.876px 186.544px",
+      transformBox: "view-box",
+    });
+    minuteHandControls.start({
+      transform: `rotate(${minuteWithSpins}deg)`,
+      transition: CLOCK_HAND_TRANSITION,
+    });
+  }, [controls, idleControls, hourHandControls, minuteHandControls, isMobile]);
 
   return (
     <motion.g
@@ -45,6 +121,7 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
       className="origin-bottom-right!"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={handleClockClick}
     >
       <motion.g
         {...createRotationAnimation({
@@ -64,7 +141,7 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
           <motion.g
             variants={backgroundVariants}
             initial="initial"
-            animate={controls}
+            animate={backgroundControls}
           >
             <path
               d="M553.22 118.392c42.396 5.809 72.84 39.157 68 74.487-1.536 11.213-6.442 21.277-13.78 29.607-6.142 6.973-8.217 17.405-2.728 24.902l1.828 2.496a6.7 6.7 0 0 1 1.082 2.304c1.428 5.683-4.672 10.293-9.749 7.368l-20.818-11.989a16.37 16.37 0 0 0-9.304-2.147l-2.455.17c-9.352 1.811-19.359 2.145-29.605.741-42.395-5.809-72.839-39.158-67.998-74.487s43.132-59.26 85.527-53.452"
@@ -74,13 +151,51 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
         </motion.g>
       </motion.g>
       {/* clock */}
-      <motion.path
-        variants={clockVariants}
-        initial="initial"
-        animate={controls}
-        d="M546.994 163.826c12.546 1.719 21.324 13.284 19.605 25.83s-13.284 21.323-25.83 19.604-21.323-13.283-19.604-25.829 13.283-21.324 25.829-19.605m.984 30.222a2.456 2.456 0 0 0 3.454-3.494zm-2.207-21.297a2.457 2.457 0 0 0-2.768 2.1l-1.334 9.737a5.74 5.74 0 0 0 1.65 4.854l4.659 4.606 1.727-1.747 1.727-1.747-4.659-4.607a.82.82 0 0 1-.235-.692l1.334-9.736a2.457 2.457 0 0 0-2.101-2.768"
-        className="fill-[#989898] dark:fill-[#D6D6D6]"
-      ></motion.path>
+      <motion.g variants={clockVariants} initial="initial" animate={controls}>
+        <circle
+          cx="543.879"
+          cy="186.54"
+          r="22.93"
+          className="fill-[#989898] dark:fill-[#D6D6D6]"
+        />
+        {/* minute hand */}
+        <motion.g
+          style={{
+            transformBox: "view-box",
+            transformOrigin: "543.876px 186.544px",
+          }}
+          animate={minuteHandControls}
+        >
+          <line
+            x1="543.876"
+            y1="186.584"
+            x2="545.623"
+            y2="175.314"
+            strokeWidth="4.9"
+            strokeLinecap="round"
+            className="stroke-[#F8F8F8] dark:stroke-[#252525]"
+          />
+        </motion.g>
+        {/* hour hand */}
+        <motion.g
+          style={{
+            transformBox: "view-box",
+            transformOrigin: "543.876px 186.539px",
+            transform: `rotate(120deg)`,
+          }}
+          animate={hourHandControls}
+        >
+          <line
+            x1="543.876"
+            y1="186.578"
+            x2="545.147"
+            y2="178.376"
+            strokeWidth="4.9"
+            strokeLinecap="round"
+            className="stroke-[#F8F8F8] dark:stroke-[#252525]"
+          />
+        </motion.g>
+      </motion.g>
 
       {/* bells */}
       <motion.g
