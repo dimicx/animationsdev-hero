@@ -25,7 +25,6 @@ import {
   motion,
   useAnimation,
   useMotionValue,
-  useSpring,
   useTransform,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
@@ -64,60 +63,63 @@ export function SpringPath({
   const progress = useMotionValue(0);
   const ballOpacity = useMotionValue(1);
 
-  // Drag position tracking
-  const dragX = useMotionValue(0);
-  const dragY = useMotionValue(0);
-
   // Bubble position refs for calculating angles
   const mediumBubbleRef = useRef<SVGGElement>(null);
   const smallBubbleRef = useRef<SVGGElement>(null);
 
   // Scale factors - control how much each element moves relative to drag
-  const mainBubbleScale = 0.1;
+  const mainBubbleScale = 0.07;
   const mediumBubbleScaleX = 0.13;
   const mediumBubbleScaleY = 0.13;
   const smallBubbleScaleX = 0.16;
   const smallBubbleScaleY = 0.16;
 
-  const scaledDragX = useTransform(dragX, (x) => x * mainBubbleScale);
-  const scaledDragY = useTransform(dragY, (y) => y * mainBubbleScale);
-
-  const scaledSmallDragX = useTransform(dragX, (x) => x * smallBubbleScaleX);
-  const scaledSmallDragY = useTransform(dragY, (y) => y * smallBubbleScaleY);
-
-  const scaledMediumDragX = useTransform(dragX, (x) => x * mediumBubbleScaleX);
-  const scaledMediumDragY = useTransform(dragY, (y) => y * mediumBubbleScaleY);
-
-  // Spring configuration
   const springConfig = {
-    stiffness: 420,
+    stiffness: 600,
     damping: 20,
-    mass: 0.4,
+    mass: 1,
   };
 
-  const mainDx = useSpring(scaledDragX, springConfig);
-  const mainDy = useSpring(scaledDragY, springConfig);
+  // Create motion values for the spring-animated positions
+  const mainDx = useMotionValue(0);
+  const mainDy = useMotionValue(0);
 
-  const smallDx = useSpring(scaledSmallDragX, springConfig);
-  const smallDy = useSpring(scaledSmallDragY, springConfig);
+  const smallDx = useMotionValue(0);
+  const smallDy = useMotionValue(0);
 
-  const mediumDx = useSpring(scaledMediumDragX, springConfig);
-  const mediumDy = useSpring(scaledMediumDragY, springConfig);
+  const mediumDx = useMotionValue(0);
+  const mediumDy = useMotionValue(0);
 
   // Animate position back to 0 on drag end
   const handleDragEnd = () => {
-    animate(dragX, 0, {
+    // Animate the bubble positions with spring config
+    animate(mainDx, 0, {
       type: "spring",
-      stiffness: 320,
-      damping: 20,
-      mass: 0.4,
+      ...springConfig,
     });
-    animate(dragY, 0, {
+    animate(mainDy, 0, {
       type: "spring",
-      stiffness: 320,
-      damping: 20,
-      mass: 0.4,
+      ...springConfig,
     });
+
+    animate(smallDx, 0, {
+      type: "spring",
+      ...springConfig,
+    });
+    animate(smallDy, 0, {
+      type: "spring",
+      ...springConfig,
+    });
+
+    animate(mediumDx, 0, {
+      type: "spring",
+      ...springConfig,
+    });
+    animate(mediumDy, 0, {
+      type: "spring",
+      ...springConfig,
+    });
+
     onDragEndCallback?.();
   };
 
@@ -358,8 +360,12 @@ export function SpringPath({
           dragTransition={{ bounceStiffness: 500, bounceDamping: 20 }}
           onDragStart={onDragStart}
           onDrag={(_, info) => {
-            dragX.set(info.offset.x);
-            dragY.set(info.offset.y);
+            mainDx.set(info.offset.x * mainBubbleScale);
+            mainDy.set(info.offset.y * mainBubbleScale);
+            smallDx.set(info.offset.x * smallBubbleScaleX);
+            smallDy.set(info.offset.y * smallBubbleScaleY);
+            mediumDx.set(info.offset.x * mediumBubbleScaleX);
+            mediumDy.set(info.offset.y * mediumBubbleScaleY);
           }}
           onDragEnd={handleDragEnd}
         >
