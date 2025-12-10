@@ -33,7 +33,17 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
   const startAnimations = useCallback(() => {
     controls.start("initial");
     idleControls.start("animate");
-  }, [idleControls, controls]);
+    hourHandControls.set({
+      transform: `rotate(120deg)`,
+      transformOrigin: "543.876px 186.539px",
+      transformBox: "view-box",
+    });
+    minuteHandControls.set({
+      transform: `rotate(0deg)`,
+      transformOrigin: "543.876px 186.544px",
+      transformBox: "view-box",
+    });
+  }, [idleControls, controls, hourHandControls, minuteHandControls]);
 
   useEffect(() => {
     startAnimations();
@@ -52,10 +62,14 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
 
       hourHandControls.start({
         transform: `rotate(120deg)`,
+        transformOrigin: "543.876px 186.539px",
+        transformBox: "view-box",
         transition: CLOCK_HAND_TRANSITION,
       });
       minuteHandControls.start({
         transform: `rotate(0deg)`,
+        transformOrigin: "543.876px 186.544px",
+        transformBox: "view-box",
         transition: CLOCK_HAND_TRANSITION,
       });
 
@@ -97,21 +111,17 @@ export function Clock({ isMobile }: { isMobile: boolean }) {
     const hourWithSpins = 360 * hourSpins + newHourRotation;
     const minuteWithSpins = 360 * minuteSpins + newMinuteRotation;
 
-    hourHandControls.set({
-      transformOrigin: "543.876px 186.539px",
-      transformBox: "view-box",
-    });
     hourHandControls.start({
       transform: `rotate(${hourWithSpins}deg)`,
+      transformOrigin: "543.876px 186.539px",
+      transformBox: "view-box",
       transition: CLOCK_HAND_TRANSITION,
     });
 
-    minuteHandControls.set({
-      transformOrigin: "543.876px 186.544px",
-      transformBox: "view-box",
-    });
     minuteHandControls.start({
       transform: `rotate(${minuteWithSpins}deg)`,
+      transformOrigin: "543.876px 186.544px",
+      transformBox: "view-box",
       transition: CLOCK_HAND_TRANSITION,
     });
   }, [
