@@ -90,7 +90,7 @@ export function SpringPath({
 
   // Spring configuration
   const springConfig = {
-    stiffness: 320,
+    stiffness: 420,
     damping: 20,
     mass: 0.4,
   };
