@@ -58,15 +58,37 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
 
-  // Scale factor - main bubble moves less than small bubbles (anchored pull effect)
-  const mainBubbleScale = 0.3;
+  // Scale factors - control how much each element moves relative to drag
+  const mainBubbleScale = 0.1;
+  const mediumBubbleScaleX = 0.3;
+  const mediumBubbleScaleY = 0.12;
+  const smallBubbleScaleX = 0.4;
+  const smallBubbleScaleY = 0.13;
+
   const scaledDragX = useTransform(dragX, (x) => x * mainBubbleScale);
   const scaledDragY = useTransform(dragY, (y) => y * mainBubbleScale);
 
+  const scaledSmallDragX = useTransform(dragX, (x) => x * smallBubbleScaleX);
+  const scaledSmallDragY = useTransform(dragY, (y) => y * smallBubbleScaleY);
+
+  const scaledMediumDragX = useTransform(dragX, (x) => x * mediumBubbleScaleX);
+  const scaledMediumDragY = useTransform(dragY, (y) => y * mediumBubbleScaleY);
+
   // Main bubble follows the scaled values with a spring
-  const mainSpringConfig = { stiffness: 200, damping: 20, mass: 1.5 };
-  const mainDx = useSpring(scaledDragX, mainSpringConfig);
-  const mainDy = useSpring(scaledDragY, mainSpringConfig);
+  const springConfig = {
+    type: "spring",
+    stiffness: 320,
+    damping: 20,
+    mass: 0.4,
+  };
+  const mainDx = useSpring(scaledDragX, springConfig);
+  const mainDy = useSpring(scaledDragY, springConfig);
+
+  const smallDx = useSpring(scaledSmallDragX, springConfig);
+  const smallDy = useSpring(scaledSmallDragY, springConfig);
+
+  const mediumDx = useSpring(scaledMediumDragX, springConfig);
+  const mediumDy = useSpring(scaledMediumDragY, springConfig);
 
   // Small bubbles orbit around the main bubble center
   const orbitRotation = useMotionValue(0);
@@ -110,12 +132,25 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
     }
   };
 
-  // Animate rotation back to 0 on drag end
+  // Animate rotation and position back to 0 on drag end
   const handleDragEnd = () => {
     animate(orbitRotation, 0, {
       type: "spring",
-      stiffness: 300,
-      damping: 25,
+      stiffness: 320,
+      damping: 20,
+      mass: 0.4,
+    });
+    animate(dragX, 0, {
+      type: "spring",
+      stiffness: 320,
+      damping: 20,
+      mass: 0.4,
+    });
+    animate(dragY, 0, {
+      type: "spring",
+      stiffness: 320,
+      damping: 20,
+      mass: 0.4,
     });
   };
 
@@ -305,51 +340,61 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
             dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
             dragElastic={1}
             dragTransition={{ bounceStiffness: 500, bounceDamping: 20 }}
+            _dragX={dragX}
+            _dragY={dragY}
             onDrag={(_, info) => {
+              // Clamp Y to only allow downward or neutral movement
+              // const clampedY = Math.max(0, info.offset.y);
               dragX.set(info.offset.x);
+              // dragY.set(clampedY);
               dragY.set(info.offset.y);
-              orbitRotation.set(
-                calculateRotation(info.offset.x, info.offset.y)
-              );
+              // orbitRotation.set(calculateRotation(info.offset.x, clampedY));
+              // orbitRotation.set(
+              //   calculateRotation(info.offset.x, info.offset.y)
+              // );
             }}
             onDragEnd={handleDragEnd}
-            style={{ x: dragX, y: dragY }}
             className="cursor-grab active:cursor-grabbing"
           >
-            <motion.g variants={bubblesAppearVariants}>
-              <motion.g
-                variants={bubblesVariants}
-                initial="initial"
-                animate={controls}
-                custom={0}
-              >
-                {/* Transparent hit area */}
-                <circle cx="201.927" cy="293.495" r="12" fill="transparent" />
-                {/* Visible circle with filter */}
-                <circle
-                  cx="201.927"
-                  cy="293.495"
-                  r="9.417"
-                  className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)]"
-                />
+            {/* Visual group with scaled movement */}
+            <motion.g style={{ x: mediumDx, y: mediumDy }}>
+              <motion.g variants={bubblesAppearVariants}>
+                <motion.g
+                  variants={bubblesVariants}
+                  initial="initial"
+                  animate={controls}
+                  custom={0}
+                >
+                  {/* Transparent hit area */}
+                  <circle cx="201.927" cy="293.495" r="12" fill="transparent" />
+                  {/* Visible circle with filter */}
+                  <circle
+                    cx="201.927"
+                    cy="293.495"
+                    r="9.417"
+                    className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)]"
+                  />
+                </motion.g>
               </motion.g>
             </motion.g>
-            <motion.g variants={bubblesAppearVariants}>
-              <motion.g
-                variants={bubblesVariants}
-                initial="initial"
-                animate={controls}
-                custom={1}
-              >
-                {/* Transparent hit area */}
-                <circle cx="184.926" cy="314.008" r="8" fill="transparent" />
-                {/* Visible circle with filter */}
-                <circle
-                  cx="184.926"
-                  cy="314.008"
-                  r="4.913"
-                  className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)]"
-                />
+            <motion.g style={{ x: smallDx, y: smallDy }}>
+              <motion.g variants={bubblesAppearVariants}>
+                <motion.g
+                  variants={bubblesVariants}
+                  initial="initial"
+                  animate={controls}
+                  custom={1}
+                >
+                  {/* Transparent hit area */}
+                  <circle cx="184.926" cy="314.008" r="8" fill="transparent" />
+                  {/* Visible circle with filter */}
+                  <circle
+                    cx="184.926"
+                    cy="314.008"
+                    r="4.913"
+                    className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)]"
+                  />
+                </motion.g>
               </motion.g>
             </motion.g>
           </motion.g>
