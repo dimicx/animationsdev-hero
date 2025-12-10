@@ -12,23 +12,91 @@ import {
   timelineThreeVariants,
   timelineTwoVariants,
 } from "@/lib/variants/timeline-variants";
-import { motion, useAnimation } from "motion/react";
-import { useEffect, useRef } from "react";
+import {
+  motion,
+  useAnimation,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "motion/react";
+import { useCallback, useEffect, useRef } from "react";
+
+// SVG coordinate bounds for the mask area (accounting for rotation)
+const MASK_MIN_X = 196; // Left edge of mask area
+const MASK_MAX_X = 250; // Right edge of mask area
+// Center line position adjusted for symmetric gap
+const MASK_CENTER_X = 223.65;
 
 export function Timeline({ isMobile }: { isMobile: boolean }) {
   const controls = useAnimation();
   const containerControls = useAnimation();
   const bufferLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasEnteredMainAreaRef = useRef(false);
+  const svgRef = useRef<SVGGElement>(null);
+  const hasAnimationCompletedRef = useRef(false);
+
+  // Gap between masks and center line (half on each side)
+  const MASK_GAP = 3.5;
+
+  // Motion value for the mask split position (where left mask ends and right mask begins)
+  const rawMaskX = useMotionValue(MASK_CENTER_X);
+  const maskX = useSpring(rawMaskX, { stiffness: 500, damping: 40 });
+
+  // Left mask: width from left edge (185) to cursor position minus gap
+  const leftMaskWidth = useTransform(maskX, (x) =>
+    Math.max(0, x - 185 - MASK_GAP)
+  );
+  // Right mask: starts at cursor plus gap, extends to right edge (265)
+  const rightMaskX = useTransform(maskX, (x) => x + MASK_GAP);
+  const rightMaskWidth = useTransform(maskX, (x) =>
+    Math.max(0, 265 - x - MASK_GAP)
+  );
+  // Center line offset from default center position
+  const centerLineX = useTransform(maskX, (x) => x - MASK_CENTER_X);
+  const centerLineY = useTransform(maskX, (x) => (x - MASK_CENTER_X) * 0.02);
+
+  // Convert mouse position to SVG coordinates
+  const getMouseSVGPosition = useCallback((e: React.MouseEvent) => {
+    const svg = svgRef.current?.ownerSVGElement;
+    if (!svg) return MASK_CENTER_X;
+
+    const point = svg.createSVGPoint();
+    point.x = e.clientX;
+    point.y = e.clientY;
+
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return MASK_CENTER_X;
+
+    const svgPoint = point.matrixTransform(ctm.inverse());
+    return svgPoint.x;
+  }, []);
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!hasAnimationCompletedRef.current) return;
+      const svgX = getMouseSVGPosition(e);
+      // Clamp to mask bounds
+      const clampedX = Math.max(MASK_MIN_X, Math.min(MASK_MAX_X, svgX));
+      rawMaskX.set(clampedX);
+    },
+    [getMouseSVGPosition, rawMaskX]
+  );
+
+  const handleMouseLeaveTimeline = useCallback(() => {
+    // Reset to center when mouse leaves
+    rawMaskX.set(MASK_CENTER_X);
+  }, [rawMaskX]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     onHoverStart: async () => {
       hasEnteredMainAreaRef.current = true;
       containerControls.start("animate");
-      controls.start("animate");
+      await controls.start("animate");
+      hasAnimationCompletedRef.current = true;
     },
     onHoverEnd: async () => {
+      hasAnimationCompletedRef.current = false;
       containerControls.start("initial");
       await controls.start("initial");
       controls.start("idle");
@@ -58,6 +126,11 @@ export function Timeline({ isMobile }: { isMobile: boolean }) {
     }
   };
 
+  const handleClick = () => {
+    if (!hasAnimationCompletedRef.current) return;
+    controls.start("click");
+  };
+
   useEffect(() => {
     controls.start("idle");
     containerControls.start("initial");
@@ -82,7 +155,16 @@ export function Timeline({ isMobile }: { isMobile: boolean }) {
         onMouseLeave={handleBufferLeave}
       />
 
-      <motion.g onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <motion.g
+        ref={svgRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => {
+          handleMouseLeave();
+          handleMouseLeaveTimeline();
+        }}
+        onMouseMove={!isMobile ? handleMouseMove : undefined}
+        onClick={handleClick}
+      >
         <motion.g
           {...createFloatingAnimation({
             from: -1,
@@ -110,38 +192,57 @@ export function Timeline({ isMobile }: { isMobile: boolean }) {
             </motion.g>
           </motion.g>
 
+          {/* center line - isolated from container to prevent bounding box issues */}
           <motion.g
             variants={timelineContainerVariants}
             initial="initial"
             animate={containerControls}
-            className="transform-border origin-center"
           >
-            {/* center line */}
-            <path
+            <motion.path
               strokeLinecap="round"
               strokeWidth="2.457"
               d="m217.429 81.691 5.204-32.34"
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
-            ></path>
+              style={{ x: centerLineX, y: centerLineY }}
+            />
+          </motion.g>
 
+          <motion.g
+            variants={timelineContainerVariants}
+            initial="initial"
+            animate={containerControls}
+            className="transform-view origin-center"
+          >
             <g>
               <mask
                 id="mask2_197_321"
-                style={{ maskType: "alpha" }}
+                style={{
+                  maskType: "alpha",
+                }}
                 maskUnits="userSpaceOnUse"
-                x="190"
-                y="43"
-                width="30"
-                height="44"
+                x="185"
+                y="40"
+                width="80"
+                height="60"
               >
-                <rect
-                  x="196.709"
-                  y="43"
-                  width="23"
-                  height="40"
-                  transform="rotate(9.07478 196.709 43)"
-                  fill="#D9D9D9"
-                />
+                <g
+                  style={{
+                    transform: "rotate(9deg)",
+                    transformOrigin: "185px 40px",
+                    transformBox: "view-box",
+                  }}
+                >
+                  {/* Left mask - reveals full opacity lines from left to cursor position */}
+                  <motion.rect
+                    x={185}
+                    y={40}
+                    height={60}
+                    fill="#D9D9D9"
+                    style={{
+                      width: leftMaskWidth,
+                    }}
+                  />
+                </g>
               </mask>
               <g mask="url(#mask2_197_321)">
                 <motion.line
@@ -189,21 +290,34 @@ export function Timeline({ isMobile }: { isMobile: boolean }) {
             <g>
               <mask
                 id="mask1_197_321"
-                style={{ maskType: "alpha" }}
                 maskUnits="userSpaceOnUse"
-                x="220"
-                y="46"
-                width="30"
-                height="45"
+                x="185"
+                y="40"
+                width="80"
+                height="60"
+                style={{
+                  maskType: "alpha",
+                }}
               >
-                <rect
-                  x="226.76"
-                  y="46.957"
-                  width="23"
-                  height="40"
-                  transform="rotate(9.07478 226.76 46.957)"
-                  fill="#D9D9D9"
-                />
+                <g
+                  style={{
+                    transform: "rotate(9deg)",
+                    transformOrigin: "185px 40px",
+                    transformBox: "view-box",
+                  }}
+                >
+                  {/* Right mask - reveals dimmed lines from cursor position to right */}
+                  <motion.rect
+                    y={40}
+                    height={60}
+                    fill="#D9D9D9"
+                    // style={{ x: rightMaskX, width: rightMaskWidth }}
+                    style={{
+                      x: rightMaskX,
+                      width: rightMaskWidth,
+                    }}
+                  />
+                </g>
               </mask>
               <g mask="url(#mask1_197_321)">
                 <motion.line
