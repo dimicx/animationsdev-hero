@@ -1,3 +1,4 @@
+import { SPRING_CONFIGS } from "@/lib/animation-configs";
 import {
   createFloatingAnimation,
   createRotationAnimation,
@@ -5,6 +6,7 @@ import {
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
+import { useMobileTap } from "@/lib/use-mobile-tap";
 import {
   backgroundVariants,
   bellVariants,
@@ -12,15 +14,12 @@ import {
   clockVariants,
   idleBellsVariants,
 } from "@/lib/variants/clock-variants";
-import { motion, Transition, useAnimation } from "motion/react";
+import { motion, useAnimation } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
 
-const CLOCK_HAND_TRANSITION: Transition = {
-  type: "spring",
-  stiffness: 150,
-  damping: 19,
-  mass: 1.2,
-};
+const HOUR_HAND_ORIGIN = "543.876px 186.539px";
+const MINUTE_HAND_ORIGIN = "543.876px 186.544px";
+const INITIAL_HOUR_ROTATION = 120;
 
 export function Clock({
   isMobile,
@@ -37,19 +36,23 @@ export function Clock({
   const scaleClickControls = useAnimation();
   const hasClicked = useRef(false);
   const hasClickedOnce = useRef(false);
-  const hasClickedMobile = useRef(false);
+  const {
+    isReadyRef: isReadyForClickRef,
+    markTapped,
+    reset: resetMobileTap,
+  } = useMobileTap({ isMobile });
 
   const startAnimations = useCallback(() => {
     controls.start("initial");
     idleControls.start("animate");
     hourHandControls.set({
-      transform: `rotate(120deg)`,
-      transformOrigin: "543.876px 186.539px",
+      transform: `rotate(${INITIAL_HOUR_ROTATION}deg)`,
+      transformOrigin: HOUR_HAND_ORIGIN,
       transformBox: "view-box",
     });
     minuteHandControls.set({
       transform: `rotate(0deg)`,
-      transformOrigin: "543.876px 186.544px",
+      transformOrigin: MINUTE_HAND_ORIGIN,
       transformBox: "view-box",
     });
   }, [idleControls, controls, hourHandControls, minuteHandControls]);
@@ -68,20 +71,20 @@ export function Clock({
     },
     onHoverEnd: async () => {
       hasClicked.current = false;
-      hasClickedMobile.current = false;
+      resetMobileTap();
       hasClickedOnce.current = false;
 
       hourHandControls.start({
-        transform: `rotate(120deg)`,
-        transformOrigin: "543.876px 186.539px",
+        transform: `rotate(${INITIAL_HOUR_ROTATION}deg)`,
+        transformOrigin: HOUR_HAND_ORIGIN,
         transformBox: "view-box",
-        transition: CLOCK_HAND_TRANSITION,
+        transition: SPRING_CONFIGS.clockHand,
       });
       minuteHandControls.start({
         transform: `rotate(0deg)`,
-        transformOrigin: "543.876px 186.544px",
+        transformOrigin: MINUTE_HAND_ORIGIN,
         transformBox: "view-box",
-        transition: CLOCK_HAND_TRANSITION,
+        transition: SPRING_CONFIGS.clockHand,
       });
 
       if (hasClicked.current) return;
@@ -94,11 +97,10 @@ export function Clock({
 
   const handleClockClick = useCallback(() => {
     // On mobile: first tap should only trigger hover, second tap triggers clock animation
-    if (isMobile && !hasClickedMobile.current) {
-      hasClickedMobile.current = true;
+    if (!isReadyForClickRef.current) {
+      markTapped();
       return;
     }
-    // if (hasClicked.current) return;
     if (!hasClickedOnce.current) {
       hasClickedOnce.current = true;
       hasClicked.current = true;
@@ -128,16 +130,16 @@ export function Clock({
 
       hourHandControls.start({
         transform: `rotate(${hourWithSpins}deg)`,
-        transformOrigin: "543.876px 186.539px",
+        transformOrigin: HOUR_HAND_ORIGIN,
         transformBox: "view-box",
-        transition: CLOCK_HAND_TRANSITION,
+        transition: SPRING_CONFIGS.clockHand,
       });
 
       minuteHandControls.start({
         transform: `rotate(${minuteWithSpins}deg)`,
-        transformOrigin: "543.876px 186.544px",
+        transformOrigin: MINUTE_HAND_ORIGIN,
         transformBox: "view-box",
-        transition: CLOCK_HAND_TRANSITION,
+        transition: SPRING_CONFIGS.clockHand,
       });
     } else {
       backgroundControls.start("click");
@@ -148,7 +150,8 @@ export function Clock({
     idleControls,
     hourHandControls,
     minuteHandControls,
-    isMobile,
+    markTapped,
+    isReadyForClickRef,
     backgroundControls,
     scaleClickControls,
   ]);
@@ -210,7 +213,7 @@ export function Clock({
           <motion.g
             style={{
               transformBox: "view-box",
-              transformOrigin: "543.876px 186.544px",
+              transformOrigin: MINUTE_HAND_ORIGIN,
             }}
             animate={minuteHandControls}
           >
@@ -228,8 +231,8 @@ export function Clock({
           <motion.g
             style={{
               transformBox: "view-box",
-              transformOrigin: "543.876px 186.539px",
-              transform: `rotate(120deg)`,
+              transformOrigin: HOUR_HAND_ORIGIN,
+              transform: `rotate(${INITIAL_HOUR_ROTATION}deg)`,
             }}
             animate={hourHandControls}
           >
