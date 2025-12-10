@@ -41,6 +41,7 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
   const controls = useAnimation();
   const idleControls = useAnimation();
   const backgroundControls = useAnimation();
+  const pathControls = useAnimation();
 
   const forwardCompleted = useRef(false);
   const animationRef = useRef<AnimationPlaybackControls | null>(null);
@@ -107,9 +108,10 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
 
   const startAnimations = useCallback(() => {
     controls.start("initial");
+    pathControls.start("initial");
     idleControls.start("animate");
     controls.start("idle");
-  }, [controls, idleControls]);
+  }, [controls, idleControls, pathControls]);
 
   useEffect(() => {
     startAnimations();
@@ -134,6 +136,7 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
       idleControls.start("initial");
       backgroundControls.start("animate");
       controls.start("animate");
+      pathControls.start("animate");
       forwardCompleted.current = false;
 
       // Reset progress
@@ -158,11 +161,11 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
       if (forwardCompleteTimeoutRef.current) {
         clearTimeout(forwardCompleteTimeoutRef.current);
       }
-
+      const currentProgress = progress.get();
       if (forwardCompleted.current) {
         // Forward animation completed, fade out and reset
         animate(ballOpacity, 0, {
-          duration: 0.125,
+          duration: 0.1,
           ease: "easeOut",
         }).then(() => {
           // Reset position instantly while invisible
@@ -170,25 +173,39 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
           forwardCompleted.current = false;
           // Fade back in
           animate(ballOpacity, 1, {
-            delay: 0.2,
+            delay: currentProgress * BOUNCE_DURATION * 0.5,
             duration: 0.125,
             ease: "easeOut",
+          });
+          pathControls.start("initial", {
+            pathLength: {
+              duration: currentProgress * BOUNCE_DURATION * 0.6,
+              ease: bounceAcceleratedX,
+            },
+            strokeOpacity: {
+              duration: 0,
+            },
           });
         });
       } else {
         // Forward animation not completed, return to start
-        const currentProgress = progress.get();
         animate(progress, 0, {
-          duration: currentProgress * 0.4,
-          ease: "easeOut",
+          duration: currentProgress * BOUNCE_DURATION * 0.9,
+          ease: bounceAcceleratedX,
+        });
+        pathControls.start("initial", {
+          pathLength: {
+            duration: currentProgress * BOUNCE_DURATION * 0.9,
+            ease: bounceAcceleratedX,
+          },
+          strokeOpacity: {
+            duration: 0,
+          },
         });
       }
 
       backgroundControls.start("initial");
-      await controls.start("initial", {
-        duration: 0.35,
-        ease: "easeOut",
-      });
+      await controls.start("initial");
       idleControls.start("animate");
       controls.start("idle");
     },
@@ -234,7 +251,7 @@ export function SpringPath({ isMobile }: { isMobile: boolean }) {
             <motion.path
               variants={pathVariants}
               initial="initial"
-              animate={controls}
+              animate={pathControls}
               d="M288.5 224.5C288.5 224.5 285.5 210 277 212C268.5 214 272 236 271 236C270 236 267 201.5 253 201.5C236.611 201.5 242.5 239.5 241.5 239.5C240.892 239.5 240.5 227 233.5 210C230.132 201.821 225 198 225 198"
             />
           </g>
