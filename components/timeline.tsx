@@ -132,6 +132,7 @@ export function Timeline({ isMobile }: { isMobile: boolean }) {
   const handleClick = () => {
     if (!hasAnimationCompletedRef.current) return;
     controls.start("click");
+    containerControls.start("click");
   };
 
   useEffect(() => {
