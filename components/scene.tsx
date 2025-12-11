@@ -32,7 +32,7 @@ export function Scene() {
         mass: 4,
       }}
     >
-      <div className="-mb-4 mt-12 flex justify-center md:-mb-2 md:mt-8">
+      <div className="-mb-4 mt-12 flex justify-center md:-mb-2 md:mt-8 select-none">
         <motion.svg
           xmlns="http://www.w3.org/2000/svg"
           width="622"
