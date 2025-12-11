@@ -5,6 +5,7 @@ import {
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
 import { useFlubber } from "@/lib/flubber";
+import { useAnimationHelpers } from "@/lib/use-animation-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import { useMobileTap } from "@/lib/use-mobile-tap";
 import {
@@ -15,11 +16,11 @@ import {
   REPEAT_DELAY,
 } from "@/lib/variants/hand-variants";
 import {
-  animate,
   AnimationPlaybackControls,
   motion,
-  useAnimation,
+  useAnimate,
   useMotionValue,
+  Variant,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -35,7 +36,8 @@ export function Hand({
   isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
-  const controls = useAnimation();
+  const [scope, animate] = useAnimate();
+  const { extractVariant, scopedAnimate } = useAnimationHelpers(animate);
   const handPathProgress = useMotionValue(0);
   const handPath = useFlubber(handPathProgress, handPaths);
   const {
@@ -45,11 +47,49 @@ export function Hand({
   } = useMobileTap({ isMobile });
   const handPathAnimationRef = useRef<AnimationPlaybackControls | null>(null);
 
+  const animateVariant = useCallback(
+    (variant: "initial" | "animate" | "idle" | "click") => {
+      const animations: AnimationPlaybackControls[] = [];
+
+      [
+        { name: "background", variants: backgroundVariants },
+        { name: "hand", variants: handVariants },
+        { name: "rays-opacity", variants: raysOpacityVariants },
+      ].forEach((item) => {
+        const selector = `[data-animate='${item.name}']`;
+        const itemVariant = extractVariant(item.variants[variant]);
+        animations.push(
+          scopedAnimate(selector, itemVariant.values, itemVariant.transition)
+        );
+      });
+
+      // Ray variants are functions that take an index
+      for (let i = 0; i < 3; i++) {
+        const rayVariant = rayVariants[variant];
+        const rayData =
+          typeof rayVariant === "function"
+            ? (rayVariant as (i: number) => Variant)(i)
+            : rayVariant;
+        const ray = extractVariant(rayData);
+        animations.push(
+          scopedAnimate(
+            `[data-animate='ray'][data-index='${i}']`,
+            ray.values,
+            ray.transition
+          )
+        );
+      }
+
+      return Promise.all(animations);
+    },
+    [scopedAnimate, extractVariant]
+  );
+
   const startIdleAnimations = useCallback(async () => {
     handPathAnimationRef.current?.stop();
     await animate(handPathProgress, 0, { duration: 0 });
 
-    controls.start("idle");
+    animateVariant("idle");
     handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
       duration: 0.65,
       times: [0, 0.4, 0.65],
@@ -59,7 +99,7 @@ export function Hand({
       repeatDelay: REPEAT_DELAY,
       delay: REPEAT_DELAY / 2,
     });
-  }, [controls, handPathProgress]);
+  }, [animate, animateVariant, handPathProgress]);
 
   useEffect(() => {
     startIdleAnimations();
@@ -76,7 +116,7 @@ export function Hand({
       handPathAnimationRef.current?.stop();
       animate(handPathProgress, 0, { duration: 0 });
 
-      controls.start("animate");
+      animateVariant("animate");
       handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
         duration: 0.5,
         times: [0, 0.7, 1],
@@ -91,7 +131,7 @@ export function Hand({
       handPathAnimationRef.current?.stop();
 
       animate(handPathProgress, 0, { duration: 0 });
-      await controls.start("initial");
+      await animateVariant("initial");
 
       startIdleAnimations();
     },
@@ -106,11 +146,12 @@ export function Hand({
       times: [0, 0.7, 1],
       ease: "easeInOut",
     });
-    controls.start("click");
-  }, [controls, handPathProgress, isReadyForClickRef]);
+    animateVariant("click");
+  }, [animate, animateVariant, handPathProgress, isReadyForClickRef]);
 
   return (
     <motion.g
+      ref={scope}
       variants={fadeScaleVariants}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -133,11 +174,7 @@ export function Hand({
           })}
           className="filter-[url(#filter4_i_359_1453)] dark:filter-[url(#filter4_i_368_1560)]"
         >
-          <motion.g
-            variants={backgroundVariants}
-            initial="initial"
-            animate={controls}
-          >
+          <motion.g data-animate="background">
             <path
               d="M14.904 133.163c4.089 9.715 8.508 20.268 10.663 25.567.817 2.007.064 4.171-1.78 5.308l-11.056 6.815a4.914 4.914 0 0 0-1.142 7.392l7.762 8.998a4.914 4.914 0 0 1 .01 6.407L1.339 214.677c-3.036 3.542.11 8.924 4.686 8.017l25.492-5.055a4.914 4.914 0 0 1 5.704 3.56l3.912 14.74c.895 3.376 4.929 4.765 7.714 2.657l11.864-8.979a4.91 4.91 0 0 1 5.978.037l14.675 11.394c2.88 2.237 7.106.668 7.829-2.905l3.374-16.668a4.914 4.914 0 0 1 6.233-3.73l16.687 5.028c4.467 1.346 8.12-3.709 5.439-7.528l-14.585-20.776a4.914 4.914 0 0 1 .897-6.614l16.079-13.25c2.857-2.355 2.183-6.903-1.235-8.328l-12.919-5.383a4.915 4.915 0 0 1-2.879-5.719l5.329-21.472c1.13-4.551-4.15-7.947-7.823-5.032L84.2 144.218c-2.559 2.031-6.35 1.045-7.596-1.975l-6.553-15.882c-1.48-3.585-6.337-4.123-8.565-.947l-9.606 13.693a4.913 4.913 0 0 1-6.477 1.434l-23.506-13.552c-4.082-2.353-8.82 1.832-6.993 6.174"
               className="fill-[#F8F8F8] dark:fill-[#252525]"
@@ -145,28 +182,17 @@ export function Hand({
           </motion.g>
         </motion.g>
 
-        <motion.g
-          variants={handVariants}
-          initial="initial"
-          animate={controls}
-          className="transform-border"
-        >
+        <motion.g data-animate="hand" className="transform-border">
           <motion.path
             d={handPath}
             className="fill-[#989898] dark:fill-[#D6D6D6]"
           ></motion.path>
         </motion.g>
 
-        <motion.g
-          variants={raysOpacityVariants}
-          initial="initial"
-          animate={controls}
-        >
+        <motion.g data-animate="rays-opacity">
           <motion.line
-            variants={rayVariants}
-            initial="initial"
-            animate={controls}
-            custom={2}
+            data-animate="ray"
+            data-index="2"
             x1="62.8541"
             y1="162.459"
             x2="64.5595"
@@ -177,10 +203,8 @@ export function Hand({
             className="stroke-[#989898] dark:stroke-[#D6D6D6]"
           />
           <motion.line
-            variants={rayVariants}
-            initial="initial"
-            animate={controls}
-            custom={1}
+            data-animate="ray"
+            data-index="1"
             x1="53.0553"
             y1="161.328"
             x2="52.3227"
@@ -191,10 +215,8 @@ export function Hand({
             className="stroke-[#989898] dark:stroke-[#D6D6D6]"
           />
           <motion.line
-            variants={rayVariants}
-            initial="initial"
-            animate={controls}
-            custom={0}
+            data-animate="ray"
+            data-index="0"
             x1="44.047"
             y1="165.362"
             x2="41.0059"

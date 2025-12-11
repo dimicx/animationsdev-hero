@@ -35,8 +35,6 @@ const backgroundVariants: Variants = {
 const clockAndBellsVariants: Variants = {
   initial: {
     transform: "rotate(0deg) scale(1)",
-    transformOrigin: "543.879px 186.54px",
-    transformBox: "view-box",
   },
   click: {
     transform: [
@@ -45,8 +43,6 @@ const clockAndBellsVariants: Variants = {
       "rotate(-8deg) scale(1.03)",
       "rotate(-8deg) scale(1)",
     ],
-    transformOrigin: "543.879px 186.54px",
-    transformBox: "view-box",
     transition: {
       duration: 0.5,
       times: [0, 0.25, 0.6, 1],
@@ -60,8 +56,6 @@ const clockAndBellsVariants: Variants = {
       "rotate(-8deg) scale(1.03)",
       "rotate(-8deg) scale(1)",
     ],
-    transformOrigin: "543.879px 186.54px",
-    transformBox: "view-box",
     transition: {
       duration: 0.4,
       times: [0, 0.25, 0.6, 1],
@@ -70,8 +64,6 @@ const clockAndBellsVariants: Variants = {
   },
   idle: {
     transform: ["rotate(0deg) scale(1)"],
-    transformOrigin: "543.879px 186.54px",
-    transformBox: "view-box",
   },
 };
 

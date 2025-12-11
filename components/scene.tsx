@@ -7,6 +7,7 @@ import { Hand } from "@/components/hand";
 import { Lightbulb } from "@/components/lightbulb";
 import { SpringPath } from "@/components/spring-path";
 import { Timeline } from "@/components/timeline";
+import { SPRING_CONFIGS } from "@/lib/animation-configs";
 import useIsMobile from "@/lib/use-is-mobile";
 import { motion, MotionConfig } from "motion/react";
 import { useRef } from "react";
@@ -24,14 +25,7 @@ export function Scene() {
   };
 
   return (
-    <MotionConfig
-      transition={{
-        type: "spring",
-        stiffness: 800,
-        damping: 80,
-        mass: 4,
-      }}
-    >
+    <MotionConfig transition={SPRING_CONFIGS.default}>
       <div className="-mb-4 mt-12 flex justify-center md:-mb-2 md:mt-8 select-none">
         <motion.svg
           xmlns="http://www.w3.org/2000/svg"
@@ -42,7 +36,7 @@ export function Scene() {
           className="h-auto max-w-full overflow-visible!"
           variants={{
             animate: {
-              transition: { staggerChildren: 0.05, delayChildren: 0.125 },
+              transition: { staggerChildren: 0.05 },
             },
           }}
           initial={"initial"}

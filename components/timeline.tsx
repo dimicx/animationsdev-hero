@@ -4,6 +4,7 @@ import {
   fadeScaleVariants,
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
+import { useAnimationHelpers } from "@/lib/use-animation-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import {
   backgroundVariants,
@@ -13,8 +14,9 @@ import {
   timelineTwoVariants,
 } from "@/lib/variants/timeline-variants";
 import {
+  AnimationPlaybackControls,
   motion,
-  useAnimation,
+  useAnimate,
   useMotionValue,
   useSpring,
   useTransform,
@@ -34,12 +36,54 @@ export function Timeline({
   isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
-  const controls = useAnimation();
-  const containerControls = useAnimation();
+  const [scope, animate] = useAnimate();
+  const { extractVariant, scopedAnimate } = useAnimationHelpers(animate);
   const bufferLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasEnteredMainAreaRef = useRef(false);
   const svgRef = useRef<SVGGElement>(null);
   const hasAnimationCompletedRef = useRef(false);
+
+  const animateVariant = useCallback(
+    (variant: "initial" | "animate" | "idle" | "click") => {
+      const animations: AnimationPlaybackControls[] = [];
+      [
+        { name: "background", variants: backgroundVariants },
+        { name: "timeline-container", variants: timelineContainerVariants },
+        { name: "timeline-one", variants: timelineOneVariants },
+        { name: "timeline-two", variants: timelineTwoVariants },
+        { name: "timeline-three", variants: timelineThreeVariants },
+      ].forEach((item) => {
+        const selector = `[data-animate='${item.name}']`;
+        const itemVariant = extractVariant(item.variants[variant]);
+        animations.push(
+          scopedAnimate(selector, itemVariant.values, itemVariant.transition)
+        );
+      });
+      return Promise.all(animations);
+    },
+    [scopedAnimate, extractVariant]
+  );
+
+  const animateContainerVariant = useCallback(
+    (variant: "initial" | "animate" | "click") => {
+      const background = extractVariant(backgroundVariants[variant]);
+      const timelineContainer = extractVariant(
+        timelineContainerVariants[variant]
+      );
+
+      scopedAnimate(
+        "[data-animate='background']",
+        background.values,
+        background.transition
+      );
+      scopedAnimate(
+        "[data-animate='timeline-container']",
+        timelineContainer.values,
+        timelineContainer.transition
+      );
+    },
+    [scopedAnimate, extractVariant]
+  );
 
   // Gap between masks and center line (half on each side)
   const MASK_GAP = 3.5;
@@ -101,15 +145,15 @@ export function Timeline({
     disabledRef: isDraggingRef,
     onHoverStart: async () => {
       hasEnteredMainAreaRef.current = true;
-      containerControls.start("animate");
-      await controls.start("animate");
+      animateContainerVariant("animate");
+      await animateVariant("animate");
       hasAnimationCompletedRef.current = true;
     },
     onHoverEnd: async () => {
       hasAnimationCompletedRef.current = false;
-      containerControls.start("initial");
-      await controls.start("initial");
-      controls.start("idle");
+      animateContainerVariant("initial");
+      animateVariant("initial");
+      animateVariant("idle");
     },
   });
 
@@ -120,40 +164,41 @@ export function Timeline({
       bufferLeaveTimeoutRef.current = null;
     }
     // Reset to initial when cursor enters buffer zone
-    containerControls.start("initial");
-    await controls.start("initial", {
-      duration: 0.15,
-      ease: "easeOut",
-    });
+    animateContainerVariant("initial");
+    animateVariant("initial");
   };
 
   const handleBufferLeave = () => {
     // Only trigger timeout if user never entered the main hover area
     if (!hasEnteredMainAreaRef.current) {
       bufferLeaveTimeoutRef.current = setTimeout(() => {
-        controls.start("idle");
+        animateVariant("idle");
       }, 100);
     }
   };
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (!hasAnimationCompletedRef.current) return;
-    controls.start("click");
-    containerControls.start("click");
+    animateVariant("click");
+    animateContainerVariant("click");
   };
 
   useEffect(() => {
-    controls.start("idle");
-    containerControls.start("initial");
+    animateVariant("idle");
+    animateContainerVariant("initial");
     return () => {
       if (bufferLeaveTimeoutRef.current) {
         clearTimeout(bufferLeaveTimeoutRef.current);
       }
     };
-  }, [controls, containerControls]);
+  }, [animateVariant, animateContainerVariant]);
 
   return (
-    <motion.g variants={fadeScaleVariants} className="origin-bottom!">
+    <motion.g
+      ref={scope}
+      variants={fadeScaleVariants}
+      className="origin-bottom!"
+    >
       {/* Buffer zone to reset the timeline when cursor enters */}
       <rect
         x="150"
@@ -191,11 +236,7 @@ export function Timeline({
             })}
             className="filter-[url(#filter6_i_359_1453)] dark:filter-[url(#filter6_i_368_1560)]"
           >
-            <motion.g
-              variants={backgroundVariants}
-              initial="initial"
-              animate={containerControls}
-            >
+            <motion.g data-animate="background">
               <path
                 d="M216.15 23.607c6.663-4.711 15.869-3.23 20.717 3.333a15 15 0 0 0 9.525 5.869c8.042 1.38 13.504 8.937 12.292 17.006a15 15 0 0 0 2.585 10.885c4.711 6.662 3.23 15.868-3.333 20.717a15 15 0 0 0-5.869 9.524c-1.38 8.042-8.937 13.505-17.006 12.292a15 15 0 0 0-10.885 2.585c-6.662 4.711-15.869 3.23-20.717-3.333a15 15 0 0 0-9.524-5.869c-8.042-1.38-13.505-8.937-12.292-17.006a15 15 0 0 0-2.585-10.885c-4.711-6.662-3.23-15.868 3.333-20.716a15 15 0 0 0 5.869-9.525c1.379-8.042 8.937-13.505 17.006-12.292a15 15 0 0 0 10.884-2.585"
                 className="fill-[#F8F8F8] dark:fill-[#252525]"
@@ -203,17 +244,9 @@ export function Timeline({
             </motion.g>
           </motion.g>
 
-          <motion.g
-            variants={backgroundVariants}
-            initial="initial"
-            animate={containerControls}
-          >
+          <motion.g data-animate="background">
             {/* center line - isolated from container to prevent bounding box issues */}
-            <motion.g
-              variants={timelineContainerVariants}
-              initial="initial"
-              animate={containerControls}
-            >
+            <motion.g data-animate="timeline-container">
               <motion.path
                 strokeLinecap="round"
                 strokeWidth="2.457"
@@ -225,9 +258,7 @@ export function Timeline({
           </motion.g>
 
           <motion.g
-            variants={timelineContainerVariants}
-            initial="initial"
-            animate={containerControls}
+            data-animate="timeline-container"
             className="transform-view origin-center"
           >
             <g>
@@ -263,9 +294,7 @@ export function Timeline({
               </mask>
               <g mask="url(#mask2_197_321)">
                 <motion.line
-                  variants={timelineOneVariants}
-                  initial="initial"
-                  animate={controls}
+                  data-animate="timeline-one"
                   x1="202.907"
                   y1="52.7907"
                   x2="231.287"
@@ -276,9 +305,7 @@ export function Timeline({
                   className="stroke-[#989898] dark:stroke-[#D6D6D6]"
                 />
                 <motion.line
-                  variants={timelineTwoVariants}
-                  initial="initial"
-                  animate={controls}
+                  data-animate="timeline-two"
                   x1="238.626"
                   y1="68.4911"
                   x2="211.948"
@@ -289,9 +316,7 @@ export function Timeline({
                   className="stroke-[#989898] dark:stroke-[#D6D6D6]"
                 />
                 <motion.line
-                  variants={timelineThreeVariants}
-                  initial="initial"
-                  animate={controls}
+                  data-animate="timeline-three"
                   x1="205.527"
                   y1="73.1088"
                   x2="229.023"
@@ -337,9 +362,7 @@ export function Timeline({
               </mask>
               <g mask="url(#mask1_197_321)">
                 <motion.line
-                  variants={timelineOneVariants}
-                  initial="initial"
-                  animate={controls}
+                  data-animate="timeline-one"
                   x1="202.907"
                   y1="52.7907"
                   x2="231.287"
@@ -350,9 +373,7 @@ export function Timeline({
                   className="stroke-[#989898] dark:stroke-[#D6D6D6]"
                 />
                 <motion.line
-                  variants={timelineTwoVariants}
-                  initial="initial"
-                  animate={controls}
+                  data-animate="timeline-two"
                   x1="238.626"
                   y1="68.4911"
                   x2="211.948"
@@ -363,9 +384,7 @@ export function Timeline({
                   className="stroke-[#989898] dark:stroke-[#D6D6D6]"
                 />
                 <motion.line
-                  variants={timelineThreeVariants}
-                  initial="initial"
-                  animate={controls}
+                  data-animate="timeline-three"
                   x1="205.527"
                   y1="73.1088"
                   x2="229.023"

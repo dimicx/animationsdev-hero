@@ -4,21 +4,21 @@ import {
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
 import { useFlubber } from "@/lib/flubber";
+import { useAnimationHelpers } from "@/lib/use-animation-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import { useMobileTap } from "@/lib/use-mobile-tap";
 import {
+  backgroundVariants,
   caretLeftVariants,
   caretRightVariants,
   codePathVariants,
   pulseVariants,
-  backgroundVariants,
   slashVariants,
 } from "@/lib/variants/code-variants";
 import {
-  animate,
+  AnimationPlaybackControls,
   motion,
   useAnimate,
-  useAnimation,
   useMotionValue,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
@@ -57,11 +57,10 @@ export function Code({
   isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
-  const controls = useAnimation();
-  const pulseControls = useAnimation();
   const colorIndexRef = useRef<number | null>(null);
   const pathRef = useRef<SVGPathElement>(null);
-  const [scope, animateColor] = useAnimate();
+  const [scope, animate] = useAnimate();
+  const { extractVariant, scopedAnimate } = useAnimationHelpers(animate);
   const {
     isReadyRef: isReadyForClickRef,
     markTapped,
@@ -71,13 +70,31 @@ export function Code({
   const codePathProgress = useMotionValue(0);
   const codePath = useFlubber(codePathProgress, codePaths);
 
-  const startAnimations = useCallback(() => {
-    pulseControls.start("idle");
-  }, [pulseControls]);
+  const animateVariant = useCallback(
+    (variant: "initial" | "animate" | "idle" | "click") => {
+      const animations: AnimationPlaybackControls[] = [];
+      [
+        { name: "background", variants: backgroundVariants },
+        { name: "caret-left", variants: caretLeftVariants },
+        { name: "caret-right", variants: caretRightVariants },
+        { name: "slash", variants: slashVariants },
+        { name: "code-path", variants: codePathVariants },
+        { name: "pulse", variants: pulseVariants },
+      ].forEach((item) => {
+        const selector = `[data-animate='${item.name}']`;
+        const itemVariant = extractVariant(item.variants[variant]);
+        animations.push(
+          scopedAnimate(selector, itemVariant.values, itemVariant.transition)
+        );
+      });
+      return Promise.all(animations);
+    },
+    [scopedAnimate, extractVariant]
+  );
 
   useEffect(() => {
-    startAnimations();
-  }, [startAnimations]);
+    animateVariant("idle");
+  }, [animateVariant]);
 
   const handleClick = () => {
     // On mobile: first tap should only trigger hover, second tap triggers click animation
@@ -86,8 +103,7 @@ export function Code({
       return;
     }
 
-    pulseControls.start("click");
-    controls.start("click");
+    animateVariant("click");
 
     const prevIndex = colorIndexRef.current;
     const prevLightColor =
@@ -101,7 +117,7 @@ export function Code({
     const newLightColor = LIGHT_MODE_COLORS[colorIndexRef.current];
     const newDarkColor = DARK_MODE_COLORS[colorIndexRef.current];
 
-    animateColor(
+    scopedAnimate(
       pathRef.current as SVGPathElement,
       {
         "--light-fill": [prevLightColor, newLightColor],
@@ -118,7 +134,7 @@ export function Code({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
     onHoverStart: () => {
-      controls.start("animate");
+      animateVariant("animate");
       animate(codePathProgress, [0, 1, 2], {
         duration: 0.5,
         times: [0, 0.3, 0.8],
@@ -127,8 +143,8 @@ export function Code({
     },
     onHoverEnd: () => {
       resetMobileTap();
-      controls.start("initial");
-      pulseControls.start("idle");
+      animateVariant("initial");
+      animateVariant("idle");
       animate(codePathProgress, 0, {
         duration: 0.5,
         ease: "easeOut",
@@ -138,7 +154,7 @@ export function Code({
       colorIndexRef.current = null;
 
       if (prevIndex !== null) {
-        animateColor(
+        scopedAnimate(
           pathRef.current as SVGPathElement,
           {
             "--light-fill": [LIGHT_MODE_COLORS[prevIndex], DEFAULT_LIGHT_FILL],
@@ -169,22 +185,14 @@ export function Code({
           duration: 3,
         })}
       >
-        <motion.g
-          variants={backgroundVariants}
-          initial="initial"
-          animate={controls}
-        >
+        <motion.g data-animate="background">
           <g className="filter-[url(#filter8_i_359_1453)] dark:filter-[url(#filter8_i_368_1560)]">
             <path
               d="M425.217 236.652C443.467 233.369 460.923 245.503 464.206 263.753C467.489 282.003 455.355 299.459 437.105 302.742L408.026 307.972C401.42 309.172 394.605 308.353 388.471 305.622C388.141 306.321 387.71 306.967 387.192 307.54C384.266 310.776 380.349 312.95 376.055 313.722L374.302 314.037C372.384 314.382 370.829 312.493 371.537 310.677L372.153 309.096C373.031 306.846 373.268 304.396 372.841 302.018L369.037 280.871C365.754 262.621 377.888 245.165 396.138 241.883L425.217 236.652Z"
               className="fill-[#F8F8F8] dark:fill-[#252525]"
             />
           </g>
-          <motion.g
-            variants={caretLeftVariants}
-            initial="initial"
-            animate={controls}
-          >
+          <motion.g data-animate="caret-left">
             <path
               d="M400.254 282.746L392.234 277.171C392.045 277.04 391.951 276.975 391.905 276.888C391.863 276.812 391.847 276.725 391.86 276.639C391.873 276.542 391.939 276.448 392.07 276.259L397.645 268.239"
               strokeWidth="2.457"
@@ -193,11 +201,7 @@ export function Code({
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
             />
           </motion.g>
-          <motion.g
-            variants={slashVariants}
-            initial="initial"
-            animate={controls}
-          >
+          <motion.g data-animate="slash">
             <path
               d="M423.804 261.037L423.126 271.144L422.447 281.25"
               strokeWidth="2.457"
@@ -206,11 +210,7 @@ export function Code({
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
             />
           </motion.g>
-          <motion.g
-            variants={caretRightVariants}
-            initial="initial"
-            animate={controls}
-          >
+          <motion.g data-animate="caret-right">
             <path
               d="M429.881 262.438L437.901 268.013C438.09 268.144 438.184 268.209 438.23 268.296C438.271 268.372 438.287 268.46 438.275 268.545C438.262 268.642 438.196 268.736 438.065 268.925L432.49 276.945"
               strokeWidth="2.457"
@@ -219,16 +219,8 @@ export function Code({
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
             />
           </motion.g>
-          <motion.g
-            variants={codePathVariants}
-            initial="initial"
-            animate={controls}
-          >
-            <motion.g
-              variants={pulseVariants}
-              initial="idle"
-              animate={pulseControls}
-            >
+          <motion.g data-animate="code-path">
+            <motion.g data-animate="pulse">
               <motion.path
                 ref={pathRef}
                 d={codePath}

@@ -4,6 +4,7 @@ import {
   fadeScaleVariants,
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
+import { useAnimationHelpers } from "@/lib/use-animation-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import { useMobileTap } from "@/lib/use-mobile-tap";
 import {
@@ -15,7 +16,7 @@ import {
   stemVariants,
   wholeVariants,
 } from "@/lib/variants/lightbulb-variants";
-import { motion, useAnimation } from "motion/react";
+import { AnimationPlaybackControls, motion, useAnimate } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
 
 export function Lightbulb({
@@ -25,7 +26,8 @@ export function Lightbulb({
   isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
-  const controls = useAnimation();
+  const [scope, animate] = useAnimate();
+  const { extractVariant, scopedAnimate } = useAnimationHelpers(animate);
   const {
     isReadyRef: isReadyForClickRef,
     markReady,
@@ -33,16 +35,39 @@ export function Lightbulb({
   } = useMobileTap({ isMobile });
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const animateVariant = useCallback(
+    (variant: "initial" | "animate" | "idle" | "click") => {
+      const animations: AnimationPlaybackControls[] = [];
+      [
+        { name: "whole", variants: wholeVariants },
+        { name: "background", variants: backgroundVariants },
+        { name: "bulb", variants: bulbVariants },
+        { name: "stem", variants: stemVariants },
+        { name: "bulb-mask", variants: bulbMaskVariants },
+        { name: "ray", variants: rayVariants },
+        { name: "rays-opacity", variants: raysOpacityVariants },
+      ].forEach((item) => {
+        const selector = `[data-animate='${item.name}']`;
+        const itemVariant = extractVariant(item.variants[variant]);
+        animations.push(
+          scopedAnimate(selector, itemVariant.values, itemVariant.transition)
+        );
+      });
+      return Promise.all(animations);
+    },
+    [scopedAnimate, extractVariant]
+  );
+
   useEffect(() => {
-    controls.start("initial");
-    controls.start("idle");
-  }, [controls]);
+    animateVariant("initial");
+    animateVariant("idle");
+  }, [animateVariant]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
     onHoverStart: async () => {
-      controls.start("animate");
+      animateVariant("animate");
 
       if (isMobile) {
         animationTimeoutRef.current = setTimeout(() => {
@@ -55,21 +80,22 @@ export function Lightbulb({
       if (animationTimeoutRef.current) {
         clearTimeout(animationTimeoutRef.current);
       }
-      await controls.start("initial");
-      controls.start("idle");
+      animateVariant("initial");
+      animateVariant("idle");
     },
   });
 
   const onClick = useCallback(async () => {
     if (!isReadyForClickRef.current) return;
-    controls.start("click");
+    animateVariant("click");
     if (animationTimeoutRef.current) {
       clearTimeout(animationTimeoutRef.current);
     }
-  }, [controls, isReadyForClickRef]);
+  }, [animateVariant, isReadyForClickRef]);
 
   return (
     <motion.g
+      ref={scope}
       variants={fadeScaleVariants}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -83,11 +109,7 @@ export function Lightbulb({
           duration: 3,
         })}
       >
-        <motion.g
-          variants={backgroundVariants}
-          initial="initial"
-          animate={controls}
-        >
+        <motion.g data-animate="background">
           <motion.g
             {...createRotationAnimation({
               from: -5,
@@ -103,16 +125,12 @@ export function Lightbulb({
           </motion.g>
         </motion.g>
 
-        <motion.g variants={wholeVariants} initial="initial" animate={controls}>
+        <motion.g data-animate="whole">
           <g>
             <defs>
               <mask id="bulb-mask">
                 <rect width="100%" height="100%" fill="white" />
-                <motion.g
-                  variants={bulbMaskVariants}
-                  initial="initial"
-                  animate={controls}
-                >
+                <motion.g data-animate="bulb-mask">
                   <path
                     d="M398.773 55.476a1.843 1.843 0 0 0-2.181 2.97l.181.144a3.08 3.08 0 0 1 .974 3.108 1.842 1.842 0 1 0 3.565.932 6.76 6.76 0 0 0-2.539-7.154"
                     fill="black"
@@ -122,18 +140,14 @@ export function Lightbulb({
             </defs>
             {/* stem */}
             <motion.path
-              variants={stemVariants}
-              initial="initial"
-              animate={controls}
+              data-animate="stem"
               d="M379.934 77.108c.307-.725 1.318-.824 1.845-.24a12.15 12.15 0 0 0 4.303 3.05 12.14 12.14 0 0 0 5.185.959c.787-.03 1.42.764 1.114 1.49l-.784 1.854-.009.024c-.924 2.187-4.46 2.783-7.896 1.332-3.436-1.452-5.473-4.403-4.551-6.59z"
               className="fill-[#989898] dark:fill-[#D6D6D6]"
             ></motion.path>
             {/* bulb */}
             {/* shine applied as mask to the bulb path (#bulb-mask) */}
             <motion.path
-              variants={bulbVariants}
-              initial="initial"
-              animate={controls}
+              data-animate="bulb"
               d="M398.989 49.368c6.408 2.708 9.141 10.328 5.95 16.51a10 10 0 0 1-4.121 4.208l-.94.508a10.6 10.6 0 0 0-4.718 5.197l-.318.752a1.95 1.95 0 0 1-1.353 1.14 10.12 10.12 0 0 1-10.967-4.634 1.95 1.95 0 0 1-.126-1.765l.318-.752a10.6 10.6 0 0 0 .437-7.005l-.291-1.028a10 10 0 0 1 .144-5.888c2.208-6.597 9.576-9.95 15.985-7.242"
               mask="url(#bulb-mask)"
               className="fill-[#989898] dark:fill-[#D6D6D6]"
@@ -141,15 +155,9 @@ export function Lightbulb({
           </g>
 
           {/* light rays reworked as lines to animate pathLength */}
-          <motion.g
-            variants={raysOpacityVariants}
-            initial="initial"
-            animate={controls}
-          >
+          <motion.g data-animate="rays-opacity">
             <motion.line
-              variants={rayVariants}
-              initial="initial"
-              animate={controls}
+              data-animate="ray"
               x1="376.711"
               y1="53.2909"
               x2="376.62"
@@ -160,9 +168,7 @@ export function Lightbulb({
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
             />
             <motion.line
-              variants={rayVariants}
-              initial="initial"
-              animate={controls}
+              data-animate="ray"
               x1="382.703"
               y1="45.4685"
               x2="382.04"
@@ -173,9 +179,7 @@ export function Lightbulb({
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
             />
             <motion.line
-              variants={rayVariants}
-              initial="initial"
-              animate={controls}
+              data-animate="ray"
               x1="391.866"
               y1="41.752"
               x2="391.536"
@@ -186,9 +190,7 @@ export function Lightbulb({
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
             />
             <motion.line
-              variants={rayVariants}
-              initial="initial"
-              animate={controls}
+              data-animate="ray"
               x1="401.616"
               y1="43.146"
               x2="403.502"
