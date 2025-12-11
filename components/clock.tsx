@@ -13,7 +13,7 @@ import {
   bellVariants,
   clockAndBellsVariants,
   clockVariants,
-  idleBellsVariants,
+  bellsVariants,
 } from "@/lib/variants/clock-variants";
 import {
   AnimationPlaybackControls,
@@ -101,24 +101,20 @@ export function Clock({
     [scopedAnimate, extractVariant]
   );
 
-  const animateIdleVariant = useCallback(
-    (
-      variant: "initial" | "animate",
-      overrideTransition?: Record<string, unknown>
-    ) => {
-      const idleBells = extractVariant(idleBellsVariants[variant]);
+  const animateBellsVariant = useCallback(
+    (variant: "initial" | "idle") => {
+      const bells = extractVariant(bellsVariants[variant]);
       return scopedAnimate(
-        "[data-animate='idle-bells']",
-        idleBells.values,
-        overrideTransition ?? idleBells.transition
+        "[data-animate='bells']",
+        bells.values,
+        bells.transition
       );
     },
     [scopedAnimate, extractVariant]
   );
 
   const startAnimations = useCallback(() => {
-    animateVariant("initial");
-    animateIdleVariant("animate");
+    animateBellsVariant("idle");
     animate(
       "[data-animate='clock-and-bells']",
       {
@@ -146,7 +142,7 @@ export function Clock({
       },
       { duration: 0 }
     );
-  }, [animateVariant, animateIdleVariant, animate]);
+  }, [animateBellsVariant, animate]);
 
   useEffect(() => {
     startAnimations();
@@ -156,7 +152,7 @@ export function Clock({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
     onHoverStart: async () => {
-      animateIdleVariant("initial");
+      animateBellsVariant("initial");
       animateBackgroundVariant("animate");
       animateVariant("animate");
     },
@@ -188,7 +184,7 @@ export function Clock({
       animateBackgroundVariant("initial");
       animateScaleClickVariant("initial");
       await animateVariant("initial");
-      animateIdleVariant("animate");
+      animateBellsVariant("idle");
     },
   });
 
@@ -205,7 +201,7 @@ export function Clock({
       animateBackgroundVariant("click");
       animateScaleClickVariant("click");
       animateVariant("initial").then(() => {
-        animateIdleVariant("animate");
+        animateBellsVariant("idle");
       });
 
       const now = new Date();
@@ -250,7 +246,7 @@ export function Clock({
     }
   }, [
     animateVariant,
-    animateIdleVariant,
+    animateBellsVariant,
     animate,
     markTapped,
     isReadyForClickRef,
@@ -345,7 +341,7 @@ export function Clock({
           </motion.g>
 
           {/* bells */}
-          <motion.g data-animate="idle-bells">
+          <motion.g data-animate="bells">
             <motion.g data-animate="bell" data-index="0">
               <path
                 d="M553.071 151.434a3.848 3.848 0 0 1 2.478 6.222l-1.993 2.482a1.7 1.7 0 0 1-1.826.544 27 27 0 0 0-4.182-.912 27 27 0 0 0-4.275-.247 1.7 1.7 0 0 1-1.612-1.015l-1.252-2.926a3.847 3.847 0 0 1 4.059-5.326z"

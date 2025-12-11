@@ -123,11 +123,11 @@ const bellVariants: Variants = {
   }),
 };
 
-const idleBellsVariants: Variants = {
+const bellsVariants: Variants = {
   initial: {
     transform: "translateX(0%) translateY(0%) rotate(0deg)",
   },
-  animate: {
+  idle: {
     transform: [
       "translateX(0%) translateY(0%) rotate(0deg)",
       "translateX(-12%) translateY(-6%) rotate(-8deg)",
@@ -149,6 +149,6 @@ export {
   backgroundVariants,
   clockVariants,
   bellVariants,
-  idleBellsVariants,
+  bellsVariants,
   clockAndBellsVariants,
 };

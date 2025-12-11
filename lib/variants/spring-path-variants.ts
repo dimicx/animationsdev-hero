@@ -62,11 +62,11 @@ const backgroundVariants: Variants = {
   },
 };
 
-const idleVariants: Variants = {
+const ballVariants: Variants = {
   initial: {
     transform: "translateY(0%) translateX(0%)",
   },
-  animate: {
+  idle: {
     transform: [
       "translateY(0%) translateX(0%)",
       "translateY(-25%) translateX(-20%)",
@@ -122,7 +122,7 @@ export {
   pathVariants,
   secondaryCircleVariants,
   backgroundVariants,
-  idleVariants,
+  ballVariants,
   bubblesVariants,
   bubblesAppearVariants,
 };

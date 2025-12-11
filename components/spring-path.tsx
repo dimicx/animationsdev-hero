@@ -14,10 +14,10 @@ import { useAnimationHelpers } from "@/lib/use-animation-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import {
   backgroundVariants,
+  ballVariants,
   BOUNCE_DURATION,
   bubblesAppearVariants,
   bubblesVariants,
-  idleVariants,
   pathVariants,
   secondaryCircleVariants,
 } from "@/lib/variants/spring-path-variants";
@@ -80,6 +80,7 @@ export function SpringPath({
           : bubblesVariants[variant]
       );
       const secondaryCircle = extractVariant(secondaryCircleVariants[variant]);
+      const background = extractVariant(backgroundVariants[variant]);
 
       scopedAnimate(
         "[data-animate='bubbles'][data-index='0']",
@@ -96,26 +97,19 @@ export function SpringPath({
         secondaryCircle.values,
         overrideTransition ?? secondaryCircle.transition
       );
-    },
-    [scopedAnimate, extractVariant]
-  );
-
-  const animateIdleVariant = useCallback(
-    (variant: "initial" | "animate") => {
-      const idle = extractVariant(idleVariants[variant]);
-      scopedAnimate("[data-animate='idle']", idle.values, idle.transition);
-    },
-    [scopedAnimate, extractVariant]
-  );
-
-  const animateBackgroundVariant = useCallback(
-    (variant: "initial" | "animate") => {
-      const background = extractVariant(backgroundVariants[variant]);
       scopedAnimate(
         "[data-animate='background']",
         background.values,
         background.transition
       );
+    },
+    [scopedAnimate, extractVariant]
+  );
+
+  const animateBallVariant = useCallback(
+    (variant: "initial" | "idle") => {
+      const ball = extractVariant(ballVariants[variant]);
+      scopedAnimate("[data-animate='ball']", ball.values, ball.transition);
     },
     [scopedAnimate, extractVariant]
   );
@@ -224,8 +218,8 @@ export function SpringPath({
   const startAnimations = useCallback(() => {
     animateVariant("initial");
     animatePathVariant("initial");
-    animateIdleVariant("animate");
-  }, [animateVariant, animatePathVariant, animateIdleVariant]);
+    animateBallVariant("idle");
+  }, [animateVariant, animatePathVariant, animateBallVariant]);
 
   useEffect(() => {
     startAnimations();
@@ -248,8 +242,7 @@ export function SpringPath({
         clearTimeout(forwardCompleteTimeoutRef.current);
       }
 
-      animateIdleVariant("initial");
-      animateBackgroundVariant("animate");
+      animateBallVariant("initial");
       animateVariant("animate");
       animatePathVariant("animate");
       forwardCompleted.current = false;
@@ -319,9 +312,8 @@ export function SpringPath({
         });
       }
 
-      animateBackgroundVariant("initial");
       animateVariant("initial");
-      animateIdleVariant("animate");
+      animateBallVariant("idle");
     },
   });
 
@@ -471,7 +463,7 @@ export function SpringPath({
               ></motion.circle>
             </g>
 
-            <motion.g data-animate="idle">
+            <motion.g data-animate="ball">
               <motion.circle
                 cx={cx}
                 cy={cy}

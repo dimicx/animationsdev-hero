@@ -59,7 +59,6 @@ export function Lightbulb({
   );
 
   useEffect(() => {
-    animateVariant("initial");
     animateVariant("idle");
   }, [animateVariant]);
 

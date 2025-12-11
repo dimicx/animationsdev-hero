@@ -87,7 +87,7 @@ export function Hand({
 
   const startIdleAnimations = useCallback(async () => {
     handPathAnimationRef.current?.stop();
-    await animate(handPathProgress, 0, { duration: 0 });
+    await animate(handPathProgress, 0);
 
     animateVariant("idle");
     handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
@@ -114,7 +114,7 @@ export function Hand({
     disabledRef: isDraggingRef,
     onHoverStart: async () => {
       handPathAnimationRef.current?.stop();
-      animate(handPathProgress, 0, { duration: 0 });
+      handPathProgress.set(0);
 
       animateVariant("animate");
       handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
@@ -130,7 +130,7 @@ export function Hand({
       resetMobileTap();
       handPathAnimationRef.current?.stop();
 
-      animate(handPathProgress, 0, { duration: 0 });
+      handPathProgress.set(0);
       await animateVariant("initial");
 
       startIdleAnimations();
@@ -140,7 +140,7 @@ export function Hand({
   const onClick = useCallback(async () => {
     if (!isReadyForClickRef.current) return;
     handPathAnimationRef.current?.stop();
-    await animate(handPathProgress, 0, { duration: 0 });
+    handPathProgress.set(0);
     handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
       duration: 0.35,
       times: [0, 0.7, 1],
