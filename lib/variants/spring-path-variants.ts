@@ -81,7 +81,10 @@ const ballVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const bubblesVariants: Record<string, TargetAndTransition | Variant> = {
+const bubblesVariants: {
+  initial: TargetAndTransition;
+  animate: Variant;
+} = {
   initial: {
     transform: "translateY(0%) translateX(0%)",
   },

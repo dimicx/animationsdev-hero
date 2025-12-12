@@ -354,7 +354,7 @@ export function Clock({
             <motion.g
               data-animate="bell"
               data-index="0"
-              initial={bellVariants.initial as TargetAndTransition}
+              initial={bellVariants.initial}
             >
               <path
                 d="M553.071 151.434a3.848 3.848 0 0 1 2.478 6.222l-1.993 2.482a1.7 1.7 0 0 1-1.826.544 27 27 0 0 0-4.182-.912 27 27 0 0 0-4.275-.247 1.7 1.7 0 0 1-1.612-1.015l-1.252-2.926a3.847 3.847 0 0 1 4.059-5.326z"
@@ -365,7 +365,7 @@ export function Clock({
             <motion.g
               data-animate="bell"
               data-index="1"
-              initial={bellVariants.initial as TargetAndTransition}
+              initial={bellVariants.initial}
             >
               <path
                 d="M570.169 166.997a3.771 3.771 0 0 1-2.773 6.044.16.16 0 0 1-.149-.081 27.3 27.3 0 0 0-4-5.269.16.16 0 0 1-.036-.164 3.77 3.77 0 0 1 6.567-1.045z"

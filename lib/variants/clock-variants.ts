@@ -89,7 +89,10 @@ const clockVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const bellVariants: Record<string, TargetAndTransition | Variant> = {
+const bellVariants: {
+  initial: TargetAndTransition;
+  animate: Variant;
+} = {
   initial: {
     y: "0%",
     x: "0%",

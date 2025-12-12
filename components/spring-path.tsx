@@ -350,7 +350,7 @@ export function SpringPath({
             <motion.g
               data-animate="bubbles"
               data-index="0"
-              initial={bubblesVariants.initial as TargetAndTransition}
+              initial={bubblesVariants.initial}
             >
               {/* Visible circle with filter */}
               <circle
@@ -376,7 +376,7 @@ export function SpringPath({
             <motion.g
               data-animate="bubbles"
               data-index="1"
-              initial={bubblesVariants.initial as TargetAndTransition}
+              initial={bubblesVariants.initial}
             >
               {/* Visible circle with filter */}
               <circle
