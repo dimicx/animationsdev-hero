@@ -1,9 +1,9 @@
-import { TargetAndTransition } from "motion";
+import { TargetAndTransition } from "motion/react";
 
 const timelineTimes = [0, 0.2, 0.35, 0.65, 0.8, 1];
 const timelineDuration = 1.7;
 
-const scaleVariants: Record<string, TargetAndTransition> = {
+const scaleVariants: Record<"initial" | "animate" | "click", TargetAndTransition> = {
   initial: {
     transform: "scale(1)",
   },
@@ -25,7 +25,10 @@ const scaleVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const timelineOneVariants: Record<string, TargetAndTransition> = {
+const timelineOneVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  TargetAndTransition
+> = {
   initial: {
     pathLength: 1,
   },
@@ -57,7 +60,10 @@ const timelineOneVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const timelineTwoVariants: Record<string, TargetAndTransition> = {
+const timelineTwoVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  TargetAndTransition
+> = {
   initial: {
     pathLength: 1,
     transform: "translateY(0%) translateX(0%)",
@@ -99,7 +105,10 @@ const timelineTwoVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const timelineThreeVariants: Record<string, TargetAndTransition> = {
+const timelineThreeVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  TargetAndTransition
+> = {
   initial: {
     pathLength: 1,
     transform: "translateY(0%) translateX(0%)",
@@ -141,7 +150,10 @@ const timelineThreeVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const timelineContainerVariants: Record<string, TargetAndTransition> = {
+const timelineContainerVariants: Record<
+  "initial" | "animate" | "click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "rotate(0deg)",
   },

@@ -1,6 +1,10 @@
-import { TargetAndTransition, Variant } from "motion";
+import { TargetAndTransition } from "motion/react";
+import { IndexedVariant } from "@/lib/helpers";
 
-const backgroundVariants: Record<string, TargetAndTransition> = {
+const backgroundVariants: Record<
+  "initial" | "animate" | "click" | "scale-click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
@@ -45,7 +49,10 @@ const backgroundVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const clockAndBellsVariants: Record<string, TargetAndTransition> = {
+const clockAndBellsVariants: Record<
+  "initial" | "click" | "scale-click" | "idle",
+  TargetAndTransition
+> = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
@@ -80,7 +87,7 @@ const clockAndBellsVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const clockVariants: Record<string, TargetAndTransition> = {
+const clockVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     y: "0%",
     x: "0%",
@@ -102,15 +109,12 @@ const clockVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const bellVariants: {
-  initial: TargetAndTransition;
-  animate: Variant;
-} = {
-  initial: {
+const bellVariants: Record<"initial" | "animate", IndexedVariant> = {
+  initial: () => ({
     y: "0%",
     x: "0%",
     rotate: "0deg",
-  },
+  }),
   animate: (i: number) => ({
     y: i === 0 ? ["0%", "10%", "-25%", "-70%"] : ["0%", "20%", "-50%", "-100%"],
     x:
@@ -139,7 +143,7 @@ const bellVariants: {
   }),
 };
 
-const bellsVariants: Record<string, TargetAndTransition> = {
+const bellsVariants: Record<"initial" | "idle", TargetAndTransition> = {
   initial: {
     transform: "translateX(0%) translateY(0%) rotate(0deg)",
   },

@@ -1,6 +1,9 @@
-import { TargetAndTransition } from "motion";
+import { TargetAndTransition } from "motion/react";
 
-const backgroundVariants: Record<string, TargetAndTransition> = {
+const backgroundVariants: Record<
+  "initial" | "animate" | "click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
@@ -32,7 +35,7 @@ const backgroundVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const caretLeftVariants: Record<string, TargetAndTransition> = {
+const caretLeftVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     transform: "translateX(0%) translateY(0%)",
   },
@@ -51,7 +54,7 @@ const caretLeftVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const caretRightVariants: Record<string, TargetAndTransition> = {
+const caretRightVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     transform: "translateX(0%) translateY(0%)",
   },
@@ -70,7 +73,7 @@ const caretRightVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const slashVariants: Record<string, TargetAndTransition> = {
+const slashVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     transform: "translateX(0%) translateY(0%) rotate(0deg)",
   },
@@ -89,7 +92,7 @@ const slashVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const codePathVariants: Record<string, TargetAndTransition> = {
+const codePathVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     transform: "translateX(0%) translateY(0%)",
   },
@@ -108,7 +111,7 @@ const codePathVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const pulseVariants: Record<string, TargetAndTransition> = {
+const pulseVariants: Record<"idle" | "click", TargetAndTransition> = {
   idle: {
     opacity: [0.4, 0.2, 0.4],
     transition: {

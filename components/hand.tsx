@@ -5,6 +5,7 @@ import {
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
 import { useFlubber } from "@/lib/flubber";
+import { getIndexedVariantValue, getVariantValue } from "@/lib/helpers";
 import { useAnimateHelpers } from "@/lib/use-animate-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import { useMobileTap } from "@/lib/use-mobile-tap";
@@ -56,24 +57,23 @@ export function Hand({
         { name: "rays-opacity", variants: raysOpacityVariants },
       ].forEach((item) => {
         const selector = `[data-animate='${item.name}']`;
-        const variantValue = item.variants[variant];
+        const variantValue = getVariantValue(item.variants, variant);
         if (variantValue) {
           const result = animateVariant(selector, variantValue);
           if (result) animations.push(result);
         }
       });
 
-      // Ray variants are functions that take an index
-      const rayAnimations = animateIndexedVariants(
-        "[data-animate='ray']",
-        rayVariants[variant],
-        3
-      );
-      animations.push(
-        ...rayAnimations.filter(
-          (a): a is AnimationPlaybackControls => a !== undefined
-        )
-      );
+      const rayVariantValue = getIndexedVariantValue(rayVariants, variant);
+      if (rayVariantValue) {
+        // Ray variants are functions that take an index
+        const rayAnimations = animateIndexedVariants(
+          "[data-animate='ray']",
+          rayVariantValue,
+          3
+        );
+        animations.push(...rayAnimations.filter((a) => a !== undefined));
+      }
 
       return Promise.all(animations);
     },

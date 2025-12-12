@@ -1,8 +1,8 @@
-import { TargetAndTransition } from "motion";
+import { TargetAndTransition } from "motion/react";
 
 const REPEAT_DELAY = 10;
 
-const wholeVariants: Record<string, TargetAndTransition> = {
+const wholeVariants: Record<"initial" | "animate" | "idle" | "click", TargetAndTransition> = {
   initial: {
     transform: "translateY(0%) rotate(0deg) scale(1)",
   },
@@ -32,9 +32,13 @@ const wholeVariants: Record<string, TargetAndTransition> = {
       ease: "easeInOut",
     },
   },
+  idle: {},
 };
 
-const backgroundVariants: Record<string, TargetAndTransition> = {
+const backgroundVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "scale(1)",
   },
@@ -54,9 +58,10 @@ const backgroundVariants: Record<string, TargetAndTransition> = {
       ease: "easeInOut",
     },
   },
+  idle: {},
 };
 
-const bulbVariants: Record<string, TargetAndTransition> = {
+const bulbVariants: Record<"initial" | "animate" | "idle" | "click", TargetAndTransition> = {
   initial: {
     opacity: 1,
     transform: "translateY(0%) translateX(0%)",
@@ -102,7 +107,7 @@ const bulbVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const stemVariants: Record<string, TargetAndTransition> = {
+const stemVariants: Record<"initial" | "animate" | "idle" | "click", TargetAndTransition> = {
   initial: {
     opacity: 1,
   },
@@ -133,7 +138,7 @@ const stemVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const bulbMaskVariants: Record<string, TargetAndTransition> = {
+const bulbMaskVariants: Record<"initial" | "animate" | "idle" | "click", TargetAndTransition> = {
   initial: {
     transform: "translateY(0%) translateX(0%) rotate(0deg)",
     opacity: 1,
@@ -181,7 +186,7 @@ const bulbMaskVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const rayVariants: Record<string, TargetAndTransition> = {
+const rayVariants: Record<"initial" | "animate" | "idle" | "click", TargetAndTransition> = {
   initial: { pathLength: 1, strokeOpacity: 0.5 },
   animate: {
     pathLength: [1, 1, 0, 0, 1],
@@ -215,7 +220,7 @@ const rayVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const raysOpacityVariants: Record<string, TargetAndTransition> = {
+const raysOpacityVariants: Record<"initial" | "animate" | "idle" | "click", TargetAndTransition> = {
   initial: { opacity: 1 },
   animate: {
     opacity: [1, 0, 0, 1],

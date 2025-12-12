@@ -1,4 +1,5 @@
 import { SPRING_CONFIGS } from "@/lib/animation-configs";
+import { IndexedVariant } from "@/lib/helpers";
 import {
   AnimationPlaybackControls,
   ElementOrSelector,
@@ -37,13 +38,14 @@ export function useAnimateHelpers(
    * and applying variants. Handles both function and object variants.
    */
   const animateIndexedVariants = useCallback(
-    (selector: string, variant: Variant, count: number) => {
+    (
+      selector: string,
+      variant: TargetAndTransition | IndexedVariant,
+      count: number
+    ) => {
       const animations = [];
       for (let i = 0; i < count; i++) {
-        const data =
-          typeof variant === "function"
-            ? (variant as (i: number) => TargetAndTransition)(i)
-            : variant;
+        const data = typeof variant === "function" ? variant(i) : variant;
         animations.push(animateVariant(`${selector}[data-index='${i}']`, data));
       }
       return animations;

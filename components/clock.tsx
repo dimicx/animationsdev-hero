@@ -5,6 +5,7 @@ import {
   fadeScaleVariants,
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
+import { getIndexedVariantValue, getVariantValue } from "@/lib/helpers";
 import { useAnimateHelpers } from "@/lib/use-animate-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import { useMobileTap } from "@/lib/use-mobile-tap";
@@ -43,23 +44,25 @@ export function Clock({
     (variant: "initial" | "animate") => {
       const animations: AnimationPlaybackControls[] = [];
 
-      const result = animateVariant(
-        "[data-animate='clock']",
-        clockVariants[variant]
-      );
-      if (result) animations.push(result);
+      const clockVariantValue = getVariantValue(clockVariants, variant);
+      if (clockVariantValue) {
+        const result = animateVariant(
+          "[data-animate='clock']",
+          clockVariantValue
+        );
+        if (result) animations.push(result);
+      }
 
-      // Bell variants are functions that take an index
-      const bellAnimations = animateIndexedVariants(
-        "[data-animate='bell']",
-        bellVariants[variant],
-        2
-      );
-      animations.push(
-        ...bellAnimations.filter(
-          (a): a is AnimationPlaybackControls => a !== undefined
-        )
-      );
+      const bellVariantValue = getIndexedVariantValue(bellVariants, variant);
+      if (bellVariantValue) {
+        // Bell variants are functions that take an index
+        const bellAnimations = animateIndexedVariants(
+          "[data-animate='bell']",
+          bellVariants[variant],
+          2
+        );
+        animations.push(...bellAnimations.filter((a) => a !== undefined));
+      }
 
       return Promise.all(animations);
     },
@@ -67,7 +70,7 @@ export function Clock({
   );
 
   const animateBackgroundVariant = useCallback(
-    (variant: "initial" | "animate" | "click" | "scale-click") => {
+    (variant: keyof typeof backgroundVariants) => {
       return animateVariant(
         "[data-animate='background']",
         backgroundVariants[variant]
@@ -77,7 +80,7 @@ export function Clock({
   );
 
   const animateScaleClickVariant = useCallback(
-    (variant: "initial" | "click" | "scale-click" | "idle") => {
+    (variant: keyof typeof clockAndBellsVariants) => {
       return animateVariant(
         "[data-animate='clock-and-bells']",
         clockAndBellsVariants[variant]
@@ -87,7 +90,7 @@ export function Clock({
   );
 
   const animateBellsVariant = useCallback(
-    (variant: "initial" | "idle") => {
+    (variant: keyof typeof bellsVariants) => {
       return animateVariant("[data-animate='bells']", bellsVariants[variant]);
     },
     [animateVariant]
@@ -329,22 +332,14 @@ export function Clock({
 
           {/* bells */}
           <motion.g data-animate="bells" initial={bellsVariants.initial}>
-            <motion.g
-              data-animate="bell"
-              data-index="0"
-              initial={bellVariants.initial}
-            >
+            <motion.g data-animate="bell" data-index="0">
               <path
                 d="M553.071 151.434a3.848 3.848 0 0 1 2.478 6.222l-1.993 2.482a1.7 1.7 0 0 1-1.826.544 27 27 0 0 0-4.182-.912 27 27 0 0 0-4.275-.247 1.7 1.7 0 0 1-1.612-1.015l-1.252-2.926a3.847 3.847 0 0 1 4.059-5.326z"
                 opacity="0.4"
                 className="fill-[#989898] dark:fill-[#D6D6D6]"
               ></path>
             </motion.g>
-            <motion.g
-              data-animate="bell"
-              data-index="1"
-              initial={bellVariants.initial}
-            >
+            <motion.g data-animate="bell" data-index="1">
               <path
                 d="M570.169 166.997a3.771 3.771 0 0 1-2.773 6.044.16.16 0 0 1-.149-.081 27.3 27.3 0 0 0-4-5.269.16.16 0 0 1-.036-.164 3.77 3.77 0 0 1 6.567-1.045z"
                 opacity="0.45"

@@ -1,8 +1,12 @@
-import { TargetAndTransition, Variant } from "motion";
+import { TargetAndTransition } from "motion/react";
+import { IndexedVariant } from "@/lib/helpers";
 
 const REPEAT_DELAY = 6;
 
-const backgroundVariants: Record<string, TargetAndTransition> = {
+const backgroundVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "scale(1)",
   },
@@ -37,7 +41,10 @@ const backgroundVariants: Record<string, TargetAndTransition> = {
 
 const idleRayPathLengths = [1, 0.45, 0.1];
 
-const rayVariants: Record<string, Variant> = {
+const rayVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  IndexedVariant
+> = {
   initial: (i: number) => ({
     pathLength: idleRayPathLengths[i],
     strokeOpacity: 0.5,
@@ -89,7 +96,10 @@ const rayVariants: Record<string, Variant> = {
   },
 };
 
-const raysOpacityVariants: Record<string, TargetAndTransition> = {
+const raysOpacityVariants: Record<
+  "initial" | "animate" | "idle",
+  TargetAndTransition
+> = {
   initial: { opacity: 1 },
   animate: {
     opacity: [1, 0, 0, 1],
@@ -111,7 +121,10 @@ const raysOpacityVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const handVariants: Record<string, TargetAndTransition> = {
+const handVariants: Record<
+  "initial" | "animate" | "click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "translateX(0%) translateY(0%) rotate(0deg) scale(1)",
   },

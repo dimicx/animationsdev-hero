@@ -4,6 +4,7 @@ import {
   fadeScaleVariants,
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
+import { getVariantValue } from "@/lib/helpers";
 import { useAnimateHelpers } from "@/lib/use-animate-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import { useMobileTap } from "@/lib/use-mobile-tap";
@@ -48,7 +49,7 @@ export function Lightbulb({
         { name: "rays-opacity", variants: raysOpacityVariants },
       ].forEach((item) => {
         const selector = `[data-animate='${item.name}']`;
-        const variantValue = item.variants[variant];
+        const variantValue = getVariantValue(item.variants, variant);
         if (variantValue) {
           const result = animateVariant(selector, variantValue);
           if (result) animations.push(result);

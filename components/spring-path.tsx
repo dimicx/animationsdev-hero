@@ -10,6 +10,7 @@ import {
   bounceEase,
   getSquashStretchAtProgress,
 } from "@/lib/bounce-physics";
+import { getIndexedVariantValue } from "@/lib/helpers";
 import { useAnimateHelpers } from "@/lib/use-animate-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import {
@@ -24,7 +25,7 @@ import {
 import {
   AnimationPlaybackControls,
   motion,
-  TargetAndTransition,
+  Transition,
   useAnimate,
   useMotionValue,
   useTransform,
@@ -56,7 +57,7 @@ export function SpringPath({
   isDraggingRef?: React.RefObject<boolean>;
 }) {
   const [scope, animate] = useAnimate();
-  const { animateVariant } = useAnimateHelpers(animate);
+  const { animateVariant, animateIndexedVariants } = useAnimateHelpers(animate);
 
   const forwardCompleted = useRef(false);
   const animationRef = useRef<AnimationPlaybackControls | null>(null);
@@ -66,52 +67,50 @@ export function SpringPath({
 
   const animateBubblesVariant = useCallback(
     (variant: "initial" | "animate") => {
-      // Animate medium bubble (index 0)
-      const mediumBubbleData =
-        typeof bubblesVariants[variant] === "function"
-          ? (bubblesVariants[variant] as (i: number) => TargetAndTransition)(0)
-          : bubblesVariants[variant];
+      const animations: AnimationPlaybackControls[] = [];
 
-      animateVariant(
-        "[data-animate='bubbles'][data-index='0']",
-        mediumBubbleData
+      const bubblesVariantVaue = getIndexedVariantValue(
+        bubblesVariants,
+        variant
       );
+      if (bubblesVariantVaue) {
+        const bubblesAnimations = animateIndexedVariants(
+          "[data-animate='bubbles']",
+          bubblesVariantVaue,
+          2
+        );
+        animations.push(...bubblesAnimations.filter((a) => a !== undefined));
+      }
 
-      // Animate small bubble (index 1)
-      const smallBubbleData =
-        typeof bubblesVariants[variant] === "function"
-          ? (bubblesVariants[variant] as (i: number) => TargetAndTransition)(1)
-          : bubblesVariants[variant];
-
-      animateVariant(
-        "[data-animate='bubbles'][data-index='1']",
-        smallBubbleData
-      );
-
-      animateVariant(
+      const secondaryCircleAnimation = animateVariant(
         "[data-animate='secondary-circle']",
         secondaryCircleVariants[variant]
       );
-      animateVariant(
+      const backgroundAnimation = animateVariant(
         "[data-animate='background']",
         backgroundVariants[variant]
       );
+
+      animations.push(
+        ...[secondaryCircleAnimation, backgroundAnimation].filter(
+          (a) => a !== undefined
+        )
+      );
+
+      return Promise.all(animations);
     },
-    [animateVariant]
+    [animateVariant, animateIndexedVariants]
   );
 
   const animateBallVariant = useCallback(
-    (variant: "initial" | "idle") => {
+    (variant: keyof typeof ballVariants) => {
       animateVariant("[data-animate='ball']", ballVariants[variant]);
     },
     [animateVariant]
   );
 
   const animatePathVariant = useCallback(
-    (
-      variant: "initial" | "animate",
-      overrideTransition?: Record<string, unknown>
-    ) => {
+    (variant: keyof typeof pathVariants, overrideTransition?: Transition) => {
       if (overrideTransition) {
         const { ...values } = pathVariants[variant];
         animate("[data-animate='path']", values, overrideTransition);
@@ -340,11 +339,7 @@ export function SpringPath({
           }}
         >
           <motion.g variants={bubblesAppearVariants}>
-            <motion.g
-              data-animate="bubbles"
-              data-index="0"
-              initial={bubblesVariants.initial}
-            >
+            <motion.g data-animate="bubbles" data-index="0">
               {/* Visible circle with filter */}
               <circle
                 cx="201.927"
@@ -366,11 +361,7 @@ export function SpringPath({
           }}
         >
           <motion.g variants={bubblesAppearVariants}>
-            <motion.g
-              data-animate="bubbles"
-              data-index="1"
-              initial={bubblesVariants.initial}
-            >
+            <motion.g data-animate="bubbles" data-index="1">
               {/* Visible circle with filter */}
               <circle
                 cx="184.926"

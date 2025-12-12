@@ -1,9 +1,10 @@
-import { TargetAndTransition, Variant } from "motion";
-import { bounceAcceleratedX } from "../bounce-physics";
+import { TargetAndTransition } from "motion/react";
+import { IndexedVariant } from "@/lib/helpers";
+import { bounceAcceleratedX } from "@/lib/bounce-physics";
 
 const BOUNCE_DURATION = 1.1;
 
-const pathVariants: Record<string, TargetAndTransition> = {
+const pathVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     pathLength: 1,
     strokeOpacity: 1,
@@ -24,7 +25,10 @@ const pathVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const secondaryCircleVariants: Record<string, TargetAndTransition> = {
+const secondaryCircleVariants: Record<
+  "initial" | "animate",
+  TargetAndTransition
+> = {
   initial: {
     stroke: "var(--stroke-color)",
     opacity: 1,
@@ -44,7 +48,7 @@ const secondaryCircleVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const backgroundVariants: Record<string, TargetAndTransition> = {
+const backgroundVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
@@ -62,7 +66,7 @@ const backgroundVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const ballVariants: Record<string, TargetAndTransition> = {
+const ballVariants: Record<"initial" | "idle", TargetAndTransition> = {
   initial: {
     transform: "translateY(0%) translateX(0%)",
   },
@@ -81,13 +85,10 @@ const ballVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-const bubblesVariants: {
-  initial: TargetAndTransition;
-  animate: Variant;
-} = {
-  initial: {
+const bubblesVariants: Record<"initial" | "animate", IndexedVariant> = {
+  initial: () => ({
     transform: "translateY(0%) translateX(0%)",
-  },
+  }),
   animate: (i: number) => ({
     transform:
       i === 0
@@ -109,16 +110,17 @@ const bubblesVariants: {
   }),
 };
 
-const bubblesAppearVariants: Record<string, TargetAndTransition> = {
-  hidden: {
-    transform: "translateX(40px) translateY(-60px) scale(0)",
-    opacity: 0,
-  },
-  visible: {
-    transform: "translateX(0px) translateY(0px) scale(1)",
-    opacity: 1,
-  },
-};
+const bubblesAppearVariants: Record<"hidden" | "visible", TargetAndTransition> =
+  {
+    hidden: {
+      transform: "translateX(40px) translateY(-60px) scale(0)",
+      opacity: 0,
+    },
+    visible: {
+      transform: "translateX(0px) translateY(0px) scale(1)",
+      opacity: 1,
+    },
+  };
 
 export {
   BOUNCE_DURATION,
