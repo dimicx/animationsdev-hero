@@ -5,7 +5,7 @@ import {
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
 import { useFlubber } from "@/lib/flubber";
-import { useAnimationHelpers } from "@/lib/use-animation-helpers";
+import { useAnimateHelpers } from "@/lib/use-animate-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import { useMobileTap } from "@/lib/use-mobile-tap";
 import {
@@ -18,7 +18,6 @@ import {
 import {
   AnimationPlaybackControls,
   motion,
-  TargetAndTransition,
   useAnimate,
   useMotionValue,
 } from "motion/react";
@@ -37,7 +36,7 @@ export function Hand({
   isDraggingRef?: React.RefObject<boolean>;
 }) {
   const [scope, animate] = useAnimate();
-  const { extractVariant, scopedAnimate } = useAnimationHelpers(animate);
+  const { animateVariant, animateIndexedVariants } = useAnimateHelpers(animate);
   const handPathProgress = useMotionValue(0);
   const handPath = useFlubber(handPathProgress, handPaths);
   const {
@@ -47,7 +46,7 @@ export function Hand({
   } = useMobileTap({ isMobile });
   const handPathAnimationRef = useRef<AnimationPlaybackControls | null>(null);
 
-  const animateVariant = useCallback(
+  const animateHandVariant = useCallback(
     (variant: "initial" | "animate" | "idle" | "click") => {
       const animations: AnimationPlaybackControls[] = [];
 
@@ -59,40 +58,33 @@ export function Hand({
         const selector = `[data-animate='${item.name}']`;
         const variantValue = item.variants[variant];
         if (variantValue) {
-          const itemVariant = extractVariant(variantValue);
-          animations.push(
-            scopedAnimate(selector, itemVariant.values, itemVariant.transition)
-          );
+          const result = animateVariant(selector, variantValue);
+          if (result) animations.push(result);
         }
       });
 
       // Ray variants are functions that take an index
-      for (let i = 0; i < 3; i++) {
-        const rayVariant = rayVariants[variant];
-        const rayData =
-          typeof rayVariant === "function"
-            ? (rayVariant as (i: number) => TargetAndTransition)(i)
-            : rayVariant;
-        const ray = extractVariant(rayData);
-        animations.push(
-          scopedAnimate(
-            `[data-animate='ray'][data-index='${i}']`,
-            ray.values,
-            ray.transition
-          )
-        );
-      }
+      const rayAnimations = animateIndexedVariants(
+        "[data-animate='ray']",
+        rayVariants[variant],
+        3
+      );
+      animations.push(
+        ...rayAnimations.filter(
+          (a): a is AnimationPlaybackControls => a !== undefined
+        )
+      );
 
       return Promise.all(animations);
     },
-    [scopedAnimate, extractVariant]
+    [animateVariant, animateIndexedVariants]
   );
 
   const startIdleAnimations = useCallback(async () => {
     handPathAnimationRef.current?.stop();
     await animate(handPathProgress, 0);
 
-    animateVariant("idle");
+    animateHandVariant("idle");
     handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
       duration: 0.65,
       times: [0, 0.4, 0.65],
@@ -102,7 +94,7 @@ export function Hand({
       repeatDelay: REPEAT_DELAY,
       delay: REPEAT_DELAY / 2,
     });
-  }, [animate, animateVariant, handPathProgress]);
+  }, [animate, animateHandVariant, handPathProgress]);
 
   useEffect(() => {
     startIdleAnimations();
@@ -119,7 +111,7 @@ export function Hand({
       handPathAnimationRef.current?.stop();
       handPathProgress.set(0);
 
-      animateVariant("animate");
+      animateHandVariant("animate");
       handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
         duration: 0.5,
         times: [0, 0.7, 1],
@@ -134,7 +126,7 @@ export function Hand({
       handPathAnimationRef.current?.stop();
 
       handPathProgress.set(0);
-      await animateVariant("initial");
+      await animateHandVariant("initial");
 
       startIdleAnimations();
     },
@@ -149,8 +141,8 @@ export function Hand({
       times: [0, 0.7, 1],
       ease: "easeInOut",
     });
-    animateVariant("click");
-  }, [animate, animateVariant, handPathProgress, isReadyForClickRef]);
+    animateHandVariant("click");
+  }, [animate, animateHandVariant, handPathProgress, isReadyForClickRef]);
 
   return (
     <motion.g

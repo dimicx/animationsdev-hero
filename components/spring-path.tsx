@@ -10,7 +10,7 @@ import {
   bounceEase,
   getSquashStretchAtProgress,
 } from "@/lib/bounce-physics";
-import { useAnimationHelpers } from "@/lib/use-animation-helpers";
+import { useAnimateHelpers } from "@/lib/use-animate-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import {
   backgroundVariants,
@@ -56,7 +56,7 @@ export function SpringPath({
   isDraggingRef?: React.RefObject<boolean>;
 }) {
   const [scope, animate] = useAnimate();
-  const { extractVariant, scopedAnimate } = useAnimationHelpers(animate);
+  const { animateVariant } = useAnimateHelpers(animate);
 
   const forwardCompleted = useRef(false);
   const animationRef = useRef<AnimationPlaybackControls | null>(null);
@@ -64,54 +64,47 @@ export function SpringPath({
     typeof setTimeout
   > | null>(null);
 
-  const animateVariant = useCallback(
-    (
-      variant: "initial" | "animate",
-      overrideTransition?: Record<string, unknown>
-    ) => {
-      const mediumBubble = extractVariant(
+  const animateBubblesVariant = useCallback(
+    (variant: "initial" | "animate") => {
+      // Animate medium bubble (index 0)
+      const mediumBubbleData =
         typeof bubblesVariants[variant] === "function"
           ? (bubblesVariants[variant] as (i: number) => TargetAndTransition)(0)
-          : bubblesVariants[variant]
+          : bubblesVariants[variant];
+
+      animateVariant(
+        "[data-animate='bubbles'][data-index='0']",
+        mediumBubbleData
       );
-      const smallBubble = extractVariant(
+
+      // Animate small bubble (index 1)
+      const smallBubbleData =
         typeof bubblesVariants[variant] === "function"
           ? (bubblesVariants[variant] as (i: number) => TargetAndTransition)(1)
-          : bubblesVariants[variant]
-      );
-      const secondaryCircle = extractVariant(secondaryCircleVariants[variant]);
-      const background = extractVariant(backgroundVariants[variant]);
+          : bubblesVariants[variant];
 
-      scopedAnimate(
-        "[data-animate='bubbles'][data-index='0']",
-        mediumBubble.values,
-        overrideTransition ?? mediumBubble.transition
-      );
-      scopedAnimate(
+      animateVariant(
         "[data-animate='bubbles'][data-index='1']",
-        smallBubble.values,
-        overrideTransition ?? smallBubble.transition
+        smallBubbleData
       );
-      scopedAnimate(
+
+      animateVariant(
         "[data-animate='secondary-circle']",
-        secondaryCircle.values,
-        overrideTransition ?? secondaryCircle.transition
+        secondaryCircleVariants[variant]
       );
-      scopedAnimate(
+      animateVariant(
         "[data-animate='background']",
-        background.values,
-        background.transition
+        backgroundVariants[variant]
       );
     },
-    [scopedAnimate, extractVariant]
+    [animateVariant]
   );
 
   const animateBallVariant = useCallback(
     (variant: "initial" | "idle") => {
-      const ball = extractVariant(ballVariants[variant]);
-      scopedAnimate("[data-animate='ball']", ball.values, ball.transition);
+      animateVariant("[data-animate='ball']", ballVariants[variant]);
     },
-    [scopedAnimate, extractVariant]
+    [animateVariant]
   );
 
   const animatePathVariant = useCallback(
@@ -119,14 +112,14 @@ export function SpringPath({
       variant: "initial" | "animate",
       overrideTransition?: Record<string, unknown>
     ) => {
-      const path = extractVariant(pathVariants[variant]);
-      scopedAnimate(
-        "[data-animate='path']",
-        path.values,
-        overrideTransition ?? path.transition
-      );
+      if (overrideTransition) {
+        const { ...values } = pathVariants[variant];
+        animate("[data-animate='path']", values, overrideTransition);
+      } else {
+        animateVariant("[data-animate='path']", pathVariants[variant]);
+      }
     },
-    [scopedAnimate, extractVariant]
+    [animateVariant, animate]
   );
 
   // Animation progress (0 to 1)
@@ -216,10 +209,10 @@ export function SpringPath({
   });
 
   const startAnimations = useCallback(() => {
-    animateVariant("initial");
+    animateBubblesVariant("initial");
     animatePathVariant("initial");
     animateBallVariant("idle");
-  }, [animateVariant, animatePathVariant, animateBallVariant]);
+  }, [animateBubblesVariant, animatePathVariant, animateBallVariant]);
 
   useEffect(() => {
     startAnimations();
@@ -243,7 +236,7 @@ export function SpringPath({
       }
 
       animateBallVariant("initial");
-      animateVariant("animate");
+      animateBubblesVariant("animate");
       animatePathVariant("animate");
       forwardCompleted.current = false;
 
@@ -312,7 +305,7 @@ export function SpringPath({
         });
       }
 
-      animateVariant("initial");
+      animateBubblesVariant("initial");
       animateBallVariant("idle");
     },
   });

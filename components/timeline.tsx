@@ -4,10 +4,9 @@ import {
   fadeScaleVariants,
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
-import { useAnimationHelpers } from "@/lib/use-animation-helpers";
+import { useAnimateHelpers } from "@/lib/use-animate-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import {
-  type VariantKey,
   scaleVariants,
   timelineContainerVariants,
   timelineOneVariants,
@@ -38,14 +37,14 @@ export function Timeline({
   isDraggingRef?: React.RefObject<boolean>;
 }) {
   const [scope, animate] = useAnimate();
-  const { extractVariant, scopedAnimate } = useAnimationHelpers(animate);
+  const { animateVariant } = useAnimateHelpers(animate);
   const bufferLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasEnteredMainAreaRef = useRef(false);
   const svgRef = useRef<SVGGElement>(null);
   const hasAnimationCompletedRef = useRef(false);
 
-  const animateVariant = useCallback(
-    (variant: VariantKey) => {
+  const animateTimelineVariant = useCallback(
+    (variant: "initial" | "animate" | "click" | "idle") => {
       const animations: AnimationPlaybackControls[] = [];
       [
         { name: "scale", variants: scaleVariants },
@@ -57,32 +56,24 @@ export function Timeline({
         const selector = `[data-animate='${item.name}']`;
         const variantValue = item.variants[variant];
         if (variantValue) {
-          const itemVariant = extractVariant(variantValue);
-          animations.push(
-            scopedAnimate(selector, itemVariant.values, itemVariant.transition)
-          );
+          const result = animateVariant(selector, variantValue);
+          if (result) animations.push(result);
         }
       });
       return Promise.all(animations);
     },
-    [scopedAnimate, extractVariant]
+    [animateVariant]
   );
 
   const animateContainerVariant = useCallback(
     (variant: "initial" | "animate" | "click") => {
-      const scale = extractVariant(scaleVariants[variant]);
-      const timelineContainer = extractVariant(
+      animateVariant("[data-animate='scale']", scaleVariants[variant]);
+      animateVariant(
+        "[data-animate='timeline-container']",
         timelineContainerVariants[variant]
       );
-
-      scopedAnimate("[data-animate='scale']", scale.values, scale.transition);
-      scopedAnimate(
-        "[data-animate='timeline-container']",
-        timelineContainer.values,
-        timelineContainer.transition
-      );
     },
-    [scopedAnimate, extractVariant]
+    [animateVariant]
   );
 
   // Gap between masks and center line (half on each side)
@@ -146,14 +137,14 @@ export function Timeline({
     onHoverStart: async () => {
       hasEnteredMainAreaRef.current = true;
       animateContainerVariant("animate");
-      await animateVariant("animate");
+      await animateTimelineVariant("animate");
       hasAnimationCompletedRef.current = true;
     },
     onHoverEnd: async () => {
       hasAnimationCompletedRef.current = false;
       animateContainerVariant("initial");
-      animateVariant("initial");
-      animateVariant("idle");
+      animateTimelineVariant("initial");
+      animateTimelineVariant("idle");
     },
   });
 
@@ -165,33 +156,33 @@ export function Timeline({
     }
     // Reset to initial when cursor enters buffer zone
     animateContainerVariant("initial");
-    animateVariant("initial");
+    animateTimelineVariant("initial");
   };
 
   const handleBufferLeave = () => {
     // Only trigger timeout if user never entered the main hover area
     if (!hasEnteredMainAreaRef.current) {
       bufferLeaveTimeoutRef.current = setTimeout(() => {
-        animateVariant("idle");
+        animateTimelineVariant("idle");
       }, 100);
     }
   };
 
   const handleClick = async () => {
     if (!hasAnimationCompletedRef.current) return;
-    animateVariant("click");
+    animateTimelineVariant("click");
     animateContainerVariant("click");
   };
 
   useEffect(() => {
-    animateVariant("idle");
+    animateTimelineVariant("idle");
     // animateContainerVariant("initial");
     return () => {
       if (bufferLeaveTimeoutRef.current) {
         clearTimeout(bufferLeaveTimeoutRef.current);
       }
     };
-  }, [animateVariant, animateContainerVariant]);
+  }, [animateTimelineVariant, animateContainerVariant]);
 
   return (
     <motion.g

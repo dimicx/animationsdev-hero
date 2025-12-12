@@ -4,7 +4,7 @@ import {
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
 import { useFlubber } from "@/lib/flubber";
-import { useAnimationHelpers } from "@/lib/use-animation-helpers";
+import { useAnimateHelpers } from "@/lib/use-animate-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import { useMobileTap } from "@/lib/use-mobile-tap";
 import {
@@ -60,7 +60,7 @@ export function Code({
   const colorIndexRef = useRef<number | null>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const [scope, animate] = useAnimate();
-  const { extractVariant, scopedAnimate } = useAnimationHelpers(animate);
+  const { animateVariant } = useAnimateHelpers(animate);
   const {
     isReadyRef: isReadyForClickRef,
     markTapped,
@@ -70,7 +70,7 @@ export function Code({
   const codePathProgress = useMotionValue(0);
   const codePath = useFlubber(codePathProgress, codePaths);
 
-  const animateVariant = useCallback(
+  const animateCodeVariant = useCallback(
     (variant: "initial" | "animate" | "idle" | "click") => {
       const animations: AnimationPlaybackControls[] = [];
       [
@@ -84,20 +84,18 @@ export function Code({
         const selector = `[data-animate='${item.name}']`;
         const variantValue = item.variants[variant];
         if (variantValue) {
-          const itemVariant = extractVariant(variantValue);
-          animations.push(
-            scopedAnimate(selector, itemVariant.values, itemVariant.transition)
-          );
+          const result = animateVariant(selector, variantValue);
+          if (result) animations.push(result);
         }
       });
       return Promise.all(animations);
     },
-    [scopedAnimate, extractVariant]
+    [animateVariant]
   );
 
   useEffect(() => {
-    animateVariant("idle");
-  }, [animateVariant]);
+    animateCodeVariant("idle");
+  }, [animateCodeVariant]);
 
   const handleClick = () => {
     // On mobile: first tap should only trigger hover, second tap triggers click animation
@@ -106,7 +104,7 @@ export function Code({
       return;
     }
 
-    animateVariant("click");
+    animateCodeVariant("click");
 
     const prevIndex = colorIndexRef.current;
     const prevLightColor =
@@ -120,7 +118,7 @@ export function Code({
     const newLightColor = LIGHT_MODE_COLORS[colorIndexRef.current];
     const newDarkColor = DARK_MODE_COLORS[colorIndexRef.current];
 
-    scopedAnimate(
+    animate(
       pathRef.current as SVGPathElement,
       {
         "--light-fill": [prevLightColor, newLightColor],
@@ -137,7 +135,7 @@ export function Code({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
     onHoverStart: () => {
-      animateVariant("animate");
+      animateCodeVariant("animate");
       animate(codePathProgress, [0, 1, 2], {
         duration: 0.5,
         times: [0, 0.3, 0.8],
@@ -146,8 +144,8 @@ export function Code({
     },
     onHoverEnd: () => {
       resetMobileTap();
-      animateVariant("initial");
-      animateVariant("idle");
+      animateCodeVariant("initial");
+      animateCodeVariant("idle");
       animate(codePathProgress, 0, {
         duration: 0.5,
         ease: "easeOut",
@@ -157,7 +155,7 @@ export function Code({
       colorIndexRef.current = null;
 
       if (prevIndex !== null) {
-        scopedAnimate(
+        animate(
           pathRef.current as SVGPathElement,
           {
             "--light-fill": [LIGHT_MODE_COLORS[prevIndex], DEFAULT_LIGHT_FILL],

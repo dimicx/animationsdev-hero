@@ -171,13 +171,6 @@ const timelineContainerVariants: Record<string, TargetAndTransition> = {
   },
 };
 
-export type VariantKey =
-  | keyof typeof scaleVariants
-  | keyof typeof timelineContainerVariants
-  | keyof typeof timelineOneVariants
-  | keyof typeof timelineTwoVariants
-  | keyof typeof timelineThreeVariants;
-
 export {
   scaleVariants,
   timelineOneVariants,

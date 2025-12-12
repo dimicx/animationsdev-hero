@@ -4,7 +4,7 @@ import {
   fadeScaleVariants,
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
-import { useAnimationHelpers } from "@/lib/use-animation-helpers";
+import { useAnimateHelpers } from "@/lib/use-animate-helpers";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import { useMobileTap } from "@/lib/use-mobile-tap";
 import {
@@ -27,7 +27,7 @@ export function Lightbulb({
   isDraggingRef?: React.RefObject<boolean>;
 }) {
   const [scope, animate] = useAnimate();
-  const { extractVariant, scopedAnimate } = useAnimationHelpers(animate);
+  const { animateVariant } = useAnimateHelpers(animate);
   const {
     isReadyRef: isReadyForClickRef,
     markReady,
@@ -35,7 +35,7 @@ export function Lightbulb({
   } = useMobileTap({ isMobile });
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const animateVariant = useCallback(
+  const animateLightbulbVariant = useCallback(
     (variant: "initial" | "animate" | "idle" | "click") => {
       const animations: AnimationPlaybackControls[] = [];
       [
@@ -50,26 +50,24 @@ export function Lightbulb({
         const selector = `[data-animate='${item.name}']`;
         const variantValue = item.variants[variant];
         if (variantValue) {
-          const itemVariant = extractVariant(variantValue);
-          animations.push(
-            scopedAnimate(selector, itemVariant.values, itemVariant.transition)
-          );
+          const result = animateVariant(selector, variantValue);
+          if (result) animations.push(result);
         }
       });
       return Promise.all(animations);
     },
-    [scopedAnimate, extractVariant]
+    [animateVariant]
   );
 
   useEffect(() => {
-    animateVariant("idle");
-  }, [animateVariant]);
+    animateLightbulbVariant("idle");
+  }, [animateLightbulbVariant]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
     onHoverStart: async () => {
-      animateVariant("animate");
+      animateLightbulbVariant("animate");
 
       if (isMobile) {
         animationTimeoutRef.current = setTimeout(() => {
@@ -82,18 +80,18 @@ export function Lightbulb({
       if (animationTimeoutRef.current) {
         clearTimeout(animationTimeoutRef.current);
       }
-      animateVariant("initial");
-      animateVariant("idle");
+      animateLightbulbVariant("initial");
+      animateLightbulbVariant("idle");
     },
   });
 
   const onClick = useCallback(async () => {
     if (!isReadyForClickRef.current) return;
-    animateVariant("click");
+    animateLightbulbVariant("click");
     if (animationTimeoutRef.current) {
       clearTimeout(animationTimeoutRef.current);
     }
-  }, [animateVariant, isReadyForClickRef]);
+  }, [animateLightbulbVariant, isReadyForClickRef]);
 
   return (
     <motion.g
