@@ -37,8 +37,7 @@ export function Clock({
 }) {
   const [scope, animate] = useAnimate();
   const { extractVariant, scopedAnimate } = useAnimationHelpers(animate);
-  const hasClicked = useRef(false);
-  const hasClickedOnce = useRef(false);
+  const hasClickedRef = useRef(false);
   const {
     isReadyRef: isReadyForClickRef,
     markTapped,
@@ -157,9 +156,8 @@ export function Clock({
       animateVariant("animate");
     },
     onHoverEnd: async () => {
-      hasClicked.current = false;
+      hasClickedRef.current = false;
       resetMobileTap();
-      hasClickedOnce.current = false;
 
       animate(
         "[data-animate='hour-hand']",
@@ -180,7 +178,6 @@ export function Clock({
         SPRING_CONFIGS.clockHand
       );
 
-      if (hasClicked.current) return;
       animateBackgroundVariant("initial");
       animateScaleClickVariant("initial");
       await animateVariant("initial");
@@ -194,9 +191,9 @@ export function Clock({
       markTapped();
       return;
     }
-    if (!hasClickedOnce.current) {
-      hasClickedOnce.current = true;
-      hasClicked.current = true;
+
+    if (!hasClickedRef.current) {
+      hasClickedRef.current = true;
 
       animateBackgroundVariant("click");
       animateScaleClickVariant("click");
