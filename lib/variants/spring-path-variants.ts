@@ -71,10 +71,12 @@ const backgroundVariants: Record<
     transform: [
       "rotate(7deg) scale(1)",
       "rotate(7deg) scale(0.98)",
+      "rotate(7deg) scale(1.015)",
       "rotate(7deg) scale(1)",
     ],
     transition: {
       duration: 0.4,
+      times: [0, 0.25, 0.6, 1],
       ease: "easeOut",
     },
   },
@@ -128,16 +130,19 @@ const bubblesVariants: Record<"initial" | "animate" | "click", IndexedVariant> =
         i === 0
           ? [
               "translateY(-35%) translateX(-20%)",
-              "translateY(-50%) translateX(-25%)",
+              "translateY(-60%) translateX(-20%)",
+              "translateY(-30%) translateX(-20%)",
               "translateY(-35%) translateX(-20%)",
             ]
           : [
               "translateY(-60%) translateX(20%)",
-              "translateY(-120%) translateX(40%)",
+              "translateY(-150%) translateX(20%)",
+              "translateY(-50%) translateX(20%)",
               "translateY(-60%) translateX(20%)",
             ],
       transition: {
         duration: 0.4,
+        times: [0, 0.25, 0.6, 1],
         ease: "easeOut",
       },
     }),
