@@ -10,22 +10,24 @@ import {
   bounceEase,
   getSquashStretchAtProgress,
 } from "@/lib/bounce-physics";
+import { useAnimateVariants } from "@/lib/use-animate-variants";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import {
   backgroundVariants,
+  ballVariants,
   BOUNCE_DURATION,
   bubblesAppearVariants,
   bubblesVariants,
-  idleVariants,
   pathVariants,
   secondaryCircleVariants,
 } from "@/lib/variants/spring-path-variants";
 import {
-  animate,
   AnimationPlaybackControls,
   motion,
-  useAnimation,
+  Transition,
+  useAnimate,
   useMotionValue,
+  useReducedMotion,
   useTransform,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
@@ -54,16 +56,56 @@ export function SpringPath({
   onDragEnd?: () => void;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
-  const controls = useAnimation();
-  const idleControls = useAnimation();
-  const backgroundControls = useAnimation();
-  const pathControls = useAnimation();
+  const shouldReduceMotion = useReducedMotion();
+  const [scope, animate] = useAnimate();
+  const { animateVariants } = useAnimateVariants(animate);
 
   const forwardCompleted = useRef(false);
   const animationRef = useRef<AnimationPlaybackControls | null>(null);
   const forwardCompleteTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
+
+  const animateSpringPathVariant = useCallback(
+    (variant: "initial" | "animate" | "click") => {
+      const animationConfigs = [
+        { selector: "bubbles", variants: bubblesVariants, count: 2 },
+        { selector: "secondary-circle", variants: secondaryCircleVariants },
+        { selector: "background", variants: backgroundVariants },
+      ];
+
+      const animations = animationConfigs.flatMap((config) =>
+        animateVariants(
+          `[data-animate='${config.selector}']`,
+          config.variants,
+          variant,
+          config.count
+        )
+      );
+
+      return Promise.all(animations);
+    },
+    [animateVariants]
+  );
+
+  const animateBallVariant = useCallback(
+    (variant: keyof typeof ballVariants) => {
+      animateVariants("[data-animate='ball']", ballVariants, variant);
+    },
+    [animateVariants]
+  );
+
+  const animatePathVariant = useCallback(
+    (variant: keyof typeof pathVariants, overrideTransition?: Transition) => {
+      if (overrideTransition) {
+        const { ...values } = pathVariants[variant];
+        animate("[data-animate='path']", values, overrideTransition);
+      } else {
+        animateVariants("[data-animate='path']", pathVariants, variant);
+      }
+    },
+    [animateVariants, animate]
+  );
 
   // Animation progress (0 to 1)
   const progress = useMotionValue(0);
@@ -86,32 +128,14 @@ export function SpringPath({
   // Animate position back to 0 on drag end
   const handleDragEnd = () => {
     // Animate the bubble positions with spring config
-    animate(mainDx, 0, {
-      type: "spring",
-      ...SPRING_CONFIGS.dragBounce,
-    });
-    animate(mainDy, 0, {
-      type: "spring",
-      ...SPRING_CONFIGS.dragBounce,
-    });
+    animate(mainDx, 0, SPRING_CONFIGS.dragBounce);
+    animate(mainDy, 0, SPRING_CONFIGS.dragBounce);
 
-    animate(smallDx, 0, {
-      type: "spring",
-      ...SPRING_CONFIGS.dragBounce,
-    });
-    animate(smallDy, 0, {
-      type: "spring",
-      ...SPRING_CONFIGS.dragBounce,
-    });
+    animate(smallDx, 0, SPRING_CONFIGS.dragBounce);
+    animate(smallDy, 0, SPRING_CONFIGS.dragBounce);
 
-    animate(mediumDx, 0, {
-      type: "spring",
-      ...SPRING_CONFIGS.dragBounce,
-    });
-    animate(mediumDy, 0, {
-      type: "spring",
-      ...SPRING_CONFIGS.dragBounce,
-    });
+    animate(mediumDx, 0, SPRING_CONFIGS.dragBounce);
+    animate(mediumDy, 0, SPRING_CONFIGS.dragBounce);
 
     onDragEndCallback?.();
   };
@@ -170,11 +194,16 @@ export function SpringPath({
   });
 
   const startAnimations = useCallback(() => {
-    controls.start("initial");
-    pathControls.start("initial");
-    idleControls.start("animate");
-    controls.start("idle");
-  }, [controls, idleControls, pathControls]);
+    if (shouldReduceMotion) return;
+    animateSpringPathVariant("initial");
+    animatePathVariant("initial");
+    animateBallVariant("idle");
+  }, [
+    animateSpringPathVariant,
+    animatePathVariant,
+    animateBallVariant,
+    shouldReduceMotion,
+  ]);
 
   useEffect(() => {
     startAnimations();
@@ -190,6 +219,7 @@ export function SpringPath({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    shouldReduceMotion,
     onHoverStart: () => {
       // Stop any existing animation
       animationRef.current?.stop();
@@ -197,10 +227,9 @@ export function SpringPath({
         clearTimeout(forwardCompleteTimeoutRef.current);
       }
 
-      idleControls.start("initial");
-      backgroundControls.start("animate");
-      controls.start("animate");
-      pathControls.start("animate");
+      animateBallVariant("initial");
+      animateSpringPathVariant("animate");
+      animatePathVariant("animate");
       forwardCompleted.current = false;
 
       // Reset progress
@@ -219,7 +248,7 @@ export function SpringPath({
         forwardCompleted.current = true;
       }, (BOUNCE_DURATION - 0.2) * 1000);
     },
-    onHoverEnd: async () => {
+    onHoverEnd: () => {
       // Stop ongoing animation
       animationRef.current?.stop();
       if (forwardCompleteTimeoutRef.current) {
@@ -241,7 +270,7 @@ export function SpringPath({
             duration: 0.125,
             ease: "easeOut",
           });
-          pathControls.start("initial", {
+          animatePathVariant("initial", {
             pathLength: {
               duration: currentProgress * BOUNCE_DURATION * 0.5,
               ease: bounceAcceleratedX,
@@ -257,7 +286,7 @@ export function SpringPath({
           duration: currentProgress * BOUNCE_DURATION * 0.9,
           ease: bounceAcceleratedX,
         });
-        pathControls.start("initial", {
+        animatePathVariant("initial", {
           pathLength: {
             duration: currentProgress * BOUNCE_DURATION * 0.9,
             ease: bounceAcceleratedX,
@@ -268,15 +297,23 @@ export function SpringPath({
         });
       }
 
-      backgroundControls.start("initial");
-      await controls.start("initial");
-      idleControls.start("animate");
-      controls.start("idle");
+      animateSpringPathVariant("initial");
+      animateBallVariant("idle");
     },
   });
 
+  const handleClick = useCallback(() => {
+    if (shouldReduceMotion) return;
+    if (!forwardCompleted.current) return;
+    animateSpringPathVariant("click");
+  }, [animateSpringPathVariant, shouldReduceMotion]);
+
   return (
-    <motion.g variants={fadeScaleVariants} className="origin-bottom-left!">
+    <motion.g
+      ref={scope}
+      variants={fadeScaleVariants}
+      className="origin-bottom-left!"
+    >
       {/* small bubbles - point towards pointer */}
       <motion.g
         variants={{
@@ -284,7 +321,7 @@ export function SpringPath({
           visible: {
             transition: {
               staggerChildren: 0.1,
-              delayChildren: 0.35,
+              delayChildren: 0.225,
             },
           },
         }}
@@ -302,12 +339,10 @@ export function SpringPath({
         >
           <motion.g variants={bubblesAppearVariants}>
             <motion.g
-              variants={bubblesVariants}
-              initial="initial"
-              animate={controls}
-              custom={0}
+              data-animate="bubbles"
+              data-index="0"
+              initial={bubblesVariants.initial(0)}
             >
-              {/* Visible circle with filter */}
               <circle
                 cx="201.927"
                 cy="293.495"
@@ -329,12 +364,10 @@ export function SpringPath({
         >
           <motion.g variants={bubblesAppearVariants}>
             <motion.g
-              variants={bubblesVariants}
-              initial="initial"
-              animate={controls}
-              custom={1}
+              data-animate="bubbles"
+              data-index="1"
+              initial={bubblesVariants.initial(1)}
             >
-              {/* Visible circle with filter */}
               <circle
                 cx="184.926"
                 cy="314.008"
@@ -347,7 +380,7 @@ export function SpringPath({
 
         {/* Transparent drag group */}
         <motion.g
-          drag
+          drag={!shouldReduceMotion}
           dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
           dragElastic={1}
           dragTransition={{ bounceStiffness: 500, bounceDamping: 20 }}
@@ -370,18 +403,19 @@ export function SpringPath({
       <motion.g
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
         {...createFloatingAnimation({
           from: -1,
           to: 2,
           duration: 5,
+          shouldReduceMotion,
         })}
       >
         {/* main bubble */}
         <motion.g style={{ x: mainDx, y: mainDy }}>
           <motion.g
-            variants={backgroundVariants}
-            initial="initial"
-            animate={backgroundControls}
+            data-animate="background"
+            initial={backgroundVariants.initial}
           >
             <motion.g
               {...createRotationAnimation({
@@ -389,6 +423,7 @@ export function SpringPath({
                 to: 2,
                 duration: 6,
                 delay: 1,
+                shouldReduceMotion,
               })}
               className="filter-[url(#filter0_i_359_1453)] dark:filter-[url(#filter0_ii_368_1560)]"
             >
@@ -405,9 +440,8 @@ export function SpringPath({
               opacity="0.4"
             >
               <motion.path
-                variants={pathVariants}
-                initial="initial"
-                animate={pathControls}
+                data-animate="path"
+                initial={pathVariants.initial}
                 d="M288.5 224.5C288.5 224.5 285.5 210 277 212C268.5 214 272 236 271 236C270 236 267 201.5 253 201.5C236.611 201.5 242.5 239.5 241.5 239.5C240.892 239.5 240.5 227 233.5 210C230.132 201.821 225 198 225 198"
               />
             </g>
@@ -422,9 +456,8 @@ export function SpringPath({
                 ></circle>
               </g>
               <motion.circle
-                variants={secondaryCircleVariants}
-                initial="initial"
-                animate={controls}
+                data-animate="secondary-circle"
+                initial={secondaryCircleVariants.initial}
                 cx="289.63"
                 cy="228.535"
                 r="5.732"
@@ -435,11 +468,7 @@ export function SpringPath({
               ></motion.circle>
             </g>
 
-            <motion.g
-              variants={idleVariants}
-              initial="initial"
-              animate={idleControls}
-            >
+            <motion.g data-animate="ball" initial={ballVariants.initial}>
               <motion.circle
                 cx={cx}
                 cy={cy}

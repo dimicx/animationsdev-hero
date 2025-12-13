@@ -1,6 +1,9 @@
-import { Variants } from "motion";
+import { TargetAndTransition } from "motion/react";
 
-const backgroundVariants: Variants = {
+const backgroundVariants: Record<
+  "initial" | "animate" | "click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
@@ -32,7 +35,7 @@ const backgroundVariants: Variants = {
   },
 };
 
-const caretLeftVariants: Variants = {
+const caretLeftVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     transform: "translateX(0%) translateY(0%)",
   },
@@ -51,7 +54,7 @@ const caretLeftVariants: Variants = {
   },
 };
 
-const caretRightVariants: Variants = {
+const caretRightVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     transform: "translateX(0%) translateY(0%)",
   },
@@ -70,7 +73,7 @@ const caretRightVariants: Variants = {
   },
 };
 
-const slashVariants: Variants = {
+const slashVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     transform: "translateX(0%) translateY(0%) rotate(0deg)",
   },
@@ -89,7 +92,7 @@ const slashVariants: Variants = {
   },
 };
 
-const codePathVariants: Variants = {
+const codePathVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     transform: "translateX(0%) translateY(0%)",
   },
@@ -108,26 +111,30 @@ const codePathVariants: Variants = {
   },
 };
 
-const pulseVariants: Variants = {
-  idle: {
-    opacity: [0.4, 0.2, 0.4],
-    transition: {
-      duration: 1.5,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatType: "loop",
+const pulseVariants: Record<"initial" | "idle" | "click", TargetAndTransition> =
+  {
+    initial: {
+      opacity: 0.4,
     },
-  },
-  click: {
-    opacity: 1,
-    scale: [1, 0.97, 1.02, 1],
-    transition: {
-      duration: 0.35,
-      times: [0, 0.25, 0.6, 1],
-      ease: "easeOut",
+    idle: {
+      opacity: [0.4, 0.2, 0.4],
+      transition: {
+        duration: 1.5,
+        ease: "easeInOut",
+        repeat: Infinity,
+        repeatType: "loop",
+      },
     },
-  },
-};
+    click: {
+      opacity: 1,
+      scale: [1, 0.97, 1.02, 1],
+      transition: {
+        duration: 0.35,
+        times: [0, 0.25, 0.6, 1],
+        ease: "easeOut",
+      },
+    },
+  };
 
 export {
   backgroundVariants,

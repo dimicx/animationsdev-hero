@@ -1,17 +1,35 @@
 import { useCallback, useRef } from "react";
 
 interface UseHoverTimeoutProps {
+  /** Delay in milliseconds before hover animation starts */
   delay: number;
+  /** Callback fired when hover state starts (after delay) */
   onHoverStart: () => void;
+  /** Callback fired when hover state ends */
   onHoverEnd: () => void;
+  /** Optional ref to check if hover is disabled */
   disabledRef?: React.RefObject<boolean>;
+  /** Optional ref to check if reduce motion is enabled */
+  shouldReduceMotion?: boolean | null;
 }
 
+/**
+ * Hook for handling hover interactions with a delay threshold.
+ * Prevents quick mouse pass-throughs from triggering hover animations by requiring
+ * the mouse to stay hovered for a minimum duration before starting the animation.
+ *
+ * @param delay - Delay in milliseconds before hover animation starts
+ * @param onHoverStart - Callback fired when hover state starts (after delay)
+ * @param onHoverEnd - Callback fired when hover state ends
+ * @param disabledRef - Optional ref to check if hover is disabled
+ * @returns Object with handleMouseEnter and handleMouseLeave event handlers
+ */
 export function useHoverTimeout({
   delay,
   onHoverStart,
   onHoverEnd,
   disabledRef,
+  shouldReduceMotion = false,
 }: UseHoverTimeoutProps) {
   const mouseEnterTimeRef = useRef<number>(0);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -49,6 +67,10 @@ export function useHoverTimeout({
       onHoverEnd();
     }
   }, [delay, onHoverEnd, disabledRef]);
+
+  if (shouldReduceMotion) {
+    return { handleMouseEnter: () => {}, handleMouseLeave: () => {} };
+  }
 
   return { handleMouseEnter, handleMouseLeave };
 }

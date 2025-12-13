@@ -1,8 +1,12 @@
-import { Variants } from "motion";
+import { IndexedVariant } from "@/lib/use-animate-variants";
+import { TargetAndTransition } from "motion/react";
 
 const REPEAT_DELAY = 6;
 
-const backgroundVariants: Variants = {
+const backgroundVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "scale(1)",
   },
@@ -37,7 +41,10 @@ const backgroundVariants: Variants = {
 
 const idleRayPathLengths = [1, 0.45, 0.1];
 
-const rayVariants: Variants = {
+const rayVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  IndexedVariant
+> = {
   initial: (i: number) => ({
     pathLength: idleRayPathLengths[i],
     strokeOpacity: 0.5,
@@ -89,7 +96,10 @@ const rayVariants: Variants = {
   },
 };
 
-const raysOpacityVariants: Variants = {
+const raysOpacityVariants: Record<
+  "initial" | "animate" | "idle",
+  TargetAndTransition
+> = {
   initial: { opacity: 1 },
   animate: {
     opacity: [1, 0, 0, 1],
@@ -111,7 +121,10 @@ const raysOpacityVariants: Variants = {
   },
 };
 
-const handVariants: Variants = {
+const handVariants: Record<
+  "initial" | "animate" | "click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "translateX(0%) translateY(0%) rotate(0deg) scale(1)",
   },
@@ -144,9 +157,9 @@ const handVariants: Variants = {
 };
 
 export {
-  REPEAT_DELAY,
   backgroundVariants,
-  rayVariants,
-  raysOpacityVariants,
   handVariants,
+  raysOpacityVariants,
+  rayVariants,
+  REPEAT_DELAY,
 };

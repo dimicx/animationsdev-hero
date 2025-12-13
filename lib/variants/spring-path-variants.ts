@@ -1,9 +1,10 @@
-import { Variants } from "motion";
-import { bounceAcceleratedX } from "../bounce-physics";
+import { bounceAcceleratedX } from "@/lib/bounce-physics";
+import { IndexedVariant } from "@/lib/use-animate-variants";
+import { TargetAndTransition } from "motion/react";
 
 const BOUNCE_DURATION = 1.1;
 
-const pathVariants: Variants = {
+const pathVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     pathLength: 1,
     strokeOpacity: 1,
@@ -24,7 +25,10 @@ const pathVariants: Variants = {
   },
 };
 
-const secondaryCircleVariants: Variants = {
+const secondaryCircleVariants: Record<
+  "initial" | "animate",
+  TargetAndTransition
+> = {
   initial: {
     stroke: "var(--stroke-color)",
     opacity: 1,
@@ -44,7 +48,10 @@ const secondaryCircleVariants: Variants = {
   },
 };
 
-const backgroundVariants: Variants = {
+const backgroundVariants: Record<
+  "initial" | "animate" | "click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
@@ -60,13 +67,26 @@ const backgroundVariants: Variants = {
       ease: "easeInOut",
     },
   },
+  click: {
+    transform: [
+      "rotate(7deg) scale(1)",
+      "rotate(7deg) scale(0.98)",
+      "rotate(7deg) scale(1.015)",
+      "rotate(7deg) scale(1)",
+    ],
+    transition: {
+      duration: 0.4,
+      times: [0, 0.25, 0.6, 1],
+      ease: "easeOut",
+    },
+  },
 };
 
-const idleVariants: Variants = {
+const ballVariants: Record<"initial" | "idle", TargetAndTransition> = {
   initial: {
     transform: "translateY(0%) translateX(0%)",
   },
-  animate: {
+  idle: {
     transform: [
       "translateY(0%) translateX(0%)",
       "translateY(-25%) translateX(-20%)",
@@ -81,48 +101,75 @@ const idleVariants: Variants = {
   },
 };
 
-const bubblesVariants: Variants = {
-  initial: {
-    transform: "translateY(0%) translateX(0%)",
-  },
-  animate: (i: number) => ({
-    transform:
-      i === 0
-        ? [
-            "translateY(0%) translateX(0%)",
-            "translateY(-40%) translateX(-25%)",
-            "translateY(-35%) translateX(-20%)",
-          ]
-        : [
-            "translateY(0%) translateX(0%)",
-            "translateY(-80%) translateX(28%)",
-            "translateY(-60%) translateX(20%)",
-          ],
-    transition: {
-      duration: 0.7,
-      times: [0, 0.25, 0.6],
-      ease: "easeInOut",
-    },
-  }),
-};
+const bubblesVariants: Record<"initial" | "animate" | "click", IndexedVariant> =
+  {
+    initial: () => ({
+      transform: "translateY(0%) translateX(0%)",
+    }),
+    animate: (i: number) => ({
+      transform:
+        i === 0
+          ? [
+              "translateY(0%) translateX(0%)",
+              "translateY(-40%) translateX(-25%)",
+              "translateY(-35%) translateX(-20%)",
+            ]
+          : [
+              "translateY(0%) translateX(0%)",
+              "translateY(-80%) translateX(28%)",
+              "translateY(-60%) translateX(20%)",
+            ],
+      transition: {
+        duration: 0.7,
+        times: [0, 0.25, 0.6],
+        ease: "easeInOut",
+      },
+    }),
+    click: (i: number) => ({
+      transform:
+        i === 0
+          ? [
+              "translateY(-35%) translateX(-20%)",
+              "translateY(-60%) translateX(-20%)",
+              "translateY(-30%) translateX(-20%)",
+              "translateY(-35%) translateX(-20%)",
+            ]
+          : [
+              "translateY(-60%) translateX(20%)",
+              "translateY(-150%) translateX(20%)",
+              "translateY(-50%) translateX(20%)",
+              "translateY(-60%) translateX(20%)",
+            ],
+      transition: {
+        duration: 0.4,
+        times: [0, 0.25, 0.6, 1],
+        ease: "easeOut",
+      },
+    }),
+  };
 
-const bubblesAppearVariants: Variants = {
-  hidden: {
-    transform: "translateX(40px) translateY(-60px) scale(0)",
-    opacity: 0,
-  },
-  visible: {
-    transform: "translateX(0px) translateY(0px) scale(1)",
-    opacity: 1,
-  },
-};
+const bubblesAppearVariants: Record<"hidden" | "visible", TargetAndTransition> =
+  {
+    hidden: {
+      scale: 0,
+      x: 40,
+      y: -60,
+      opacity: 0,
+    },
+    visible: {
+      scale: 1,
+      x: 0,
+      y: 0,
+      opacity: 1,
+    },
+  };
 
 export {
+  backgroundVariants,
+  ballVariants,
   BOUNCE_DURATION,
+  bubblesAppearVariants,
+  bubblesVariants,
   pathVariants,
   secondaryCircleVariants,
-  backgroundVariants,
-  idleVariants,
-  bubblesVariants,
-  bubblesAppearVariants,
 };

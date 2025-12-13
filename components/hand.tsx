@@ -4,7 +4,8 @@ import {
   fadeScaleVariants,
   UNIVERSAL_DELAY,
 } from "@/lib/animation-variants";
-import { useFlubber } from "@/lib/flubber";
+import { useAnimateVariants } from "@/lib/use-animate-variants";
+import { useFlubber } from "@/lib/use-flubber";
 import { useHoverTimeout } from "@/lib/use-hover-timeout";
 import { useMobileTap } from "@/lib/use-mobile-tap";
 import {
@@ -15,11 +16,11 @@ import {
   REPEAT_DELAY,
 } from "@/lib/variants/hand-variants";
 import {
-  animate,
   AnimationPlaybackControls,
   motion,
-  useAnimation,
+  useAnimate,
   useMotionValue,
+  useReducedMotion,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -35,21 +36,47 @@ export function Hand({
   isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
-  const controls = useAnimation();
+  const shouldReduceMotion = useReducedMotion();
+  const [scope, animate] = useAnimate();
+  const { animateVariants } = useAnimateVariants(animate);
   const handPathProgress = useMotionValue(0);
   const handPath = useFlubber(handPathProgress, handPaths);
   const {
     isReadyRef: isReadyForClickRef,
-    markReady,
+    markTapped,
     reset: resetMobileTap,
   } = useMobileTap({ isMobile });
   const handPathAnimationRef = useRef<AnimationPlaybackControls | null>(null);
 
-  const startIdleAnimations = useCallback(async () => {
-    handPathAnimationRef.current?.stop();
-    await animate(handPathProgress, 0, { duration: 0 });
+  const animateHandVariant = useCallback(
+    (variant: "initial" | "animate" | "idle" | "click") => {
+      const animationConfigs = [
+        { selector: "background", variants: backgroundVariants },
+        { selector: "hand", variants: handVariants },
+        { selector: "rays-opacity", variants: raysOpacityVariants },
+        { selector: "ray", variants: rayVariants, count: 3 },
+      ];
 
-    controls.start("idle");
+      const animations = animationConfigs.flatMap((config) =>
+        animateVariants(
+          `[data-animate='${config.selector}']`,
+          config.variants,
+          variant,
+          config.count
+        )
+      );
+
+      return Promise.all(animations);
+    },
+    [animateVariants]
+  );
+
+  const startIdleAnimations = useCallback(async () => {
+    if (shouldReduceMotion) return;
+    handPathAnimationRef.current?.stop();
+    await animate(handPathProgress, 0);
+
+    animateHandVariant("idle");
     handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
       duration: 0.65,
       times: [0, 0.4, 0.65],
@@ -59,7 +86,7 @@ export function Hand({
       repeatDelay: REPEAT_DELAY,
       delay: REPEAT_DELAY / 2,
     });
-  }, [controls, handPathProgress]);
+  }, [animate, animateHandVariant, handPathProgress, shouldReduceMotion]);
 
   useEffect(() => {
     startIdleAnimations();
@@ -72,45 +99,55 @@ export function Hand({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    shouldReduceMotion,
     onHoverStart: async () => {
       handPathAnimationRef.current?.stop();
-      animate(handPathProgress, 0, { duration: 0 });
+      handPathProgress.set(0);
 
-      controls.start("animate");
+      animateHandVariant("animate");
       handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
         duration: 0.5,
         times: [0, 0.7, 1],
         ease: "easeInOut",
-        onComplete: () => {
-          markReady();
-        },
       });
     },
     onHoverEnd: async () => {
       resetMobileTap();
       handPathAnimationRef.current?.stop();
 
-      animate(handPathProgress, 0, { duration: 0 });
-      await controls.start("initial");
+      handPathProgress.set(0);
+      await animateHandVariant("initial");
 
       startIdleAnimations();
     },
   });
 
-  const onClick = useCallback(async () => {
-    if (!isReadyForClickRef.current) return;
+  const onClick = useCallback(() => {
+    if (shouldReduceMotion) return;
+    if (!isReadyForClickRef.current) {
+      markTapped();
+      return;
+    }
     handPathAnimationRef.current?.stop();
-    await animate(handPathProgress, 0, { duration: 0 });
+    handPathProgress.set(0);
     handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
       duration: 0.35,
       times: [0, 0.7, 1],
       ease: "easeInOut",
     });
-    controls.start("click");
-  }, [controls, handPathProgress, isReadyForClickRef]);
+    animateHandVariant("click");
+  }, [
+    animate,
+    animateHandVariant,
+    handPathProgress,
+    isReadyForClickRef,
+    markTapped,
+    shouldReduceMotion,
+  ]);
 
   return (
     <motion.g
+      ref={scope}
       variants={fadeScaleVariants}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -123,6 +160,7 @@ export function Hand({
           to: 1,
           duration: 3,
           delay: 0.5,
+          shouldReduceMotion,
         })}
       >
         <motion.g
@@ -130,13 +168,13 @@ export function Hand({
             from: -2,
             to: 2,
             duration: 5,
+            shouldReduceMotion,
           })}
           className="filter-[url(#filter4_i_359_1453)] dark:filter-[url(#filter4_i_368_1560)]"
         >
           <motion.g
-            variants={backgroundVariants}
-            initial="initial"
-            animate={controls}
+            data-animate="background"
+            initial={backgroundVariants.initial}
           >
             <path
               d="M14.904 133.163c4.089 9.715 8.508 20.268 10.663 25.567.817 2.007.064 4.171-1.78 5.308l-11.056 6.815a4.914 4.914 0 0 0-1.142 7.392l7.762 8.998a4.914 4.914 0 0 1 .01 6.407L1.339 214.677c-3.036 3.542.11 8.924 4.686 8.017l25.492-5.055a4.914 4.914 0 0 1 5.704 3.56l3.912 14.74c.895 3.376 4.929 4.765 7.714 2.657l11.864-8.979a4.91 4.91 0 0 1 5.978.037l14.675 11.394c2.88 2.237 7.106.668 7.829-2.905l3.374-16.668a4.914 4.914 0 0 1 6.233-3.73l16.687 5.028c4.467 1.346 8.12-3.709 5.439-7.528l-14.585-20.776a4.914 4.914 0 0 1 .897-6.614l16.079-13.25c2.857-2.355 2.183-6.903-1.235-8.328l-12.919-5.383a4.915 4.915 0 0 1-2.879-5.719l5.329-21.472c1.13-4.551-4.15-7.947-7.823-5.032L84.2 144.218c-2.559 2.031-6.35 1.045-7.596-1.975l-6.553-15.882c-1.48-3.585-6.337-4.123-8.565-.947l-9.606 13.693a4.913 4.913 0 0 1-6.477 1.434l-23.506-13.552c-4.082-2.353-8.82 1.832-6.993 6.174"
@@ -146,9 +184,8 @@ export function Hand({
         </motion.g>
 
         <motion.g
-          variants={handVariants}
-          initial="initial"
-          animate={controls}
+          data-animate="hand"
+          initial={handVariants.initial}
           className="transform-border"
         >
           <motion.path
@@ -158,15 +195,12 @@ export function Hand({
         </motion.g>
 
         <motion.g
-          variants={raysOpacityVariants}
-          initial="initial"
-          animate={controls}
+          data-animate="rays-opacity"
+          initial={raysOpacityVariants.initial}
         >
           <motion.line
-            variants={rayVariants}
-            initial="initial"
-            animate={controls}
-            custom={2}
+            data-animate="ray"
+            data-index="2"
             x1="62.8541"
             y1="162.459"
             x2="64.5595"
@@ -177,10 +211,8 @@ export function Hand({
             className="stroke-[#989898] dark:stroke-[#D6D6D6]"
           />
           <motion.line
-            variants={rayVariants}
-            initial="initial"
-            animate={controls}
-            custom={1}
+            data-animate="ray"
+            data-index="1"
             x1="53.0553"
             y1="161.328"
             x2="52.3227"
@@ -191,10 +223,8 @@ export function Hand({
             className="stroke-[#989898] dark:stroke-[#D6D6D6]"
           />
           <motion.line
-            variants={rayVariants}
-            initial="initial"
-            animate={controls}
-            custom={0}
+            data-animate="ray"
+            data-index="0"
             x1="44.047"
             y1="165.362"
             x2="41.0059"

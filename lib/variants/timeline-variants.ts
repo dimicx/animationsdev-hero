@@ -1,9 +1,9 @@
-import { Variants } from "motion";
+import { TargetAndTransition } from "motion/react";
 
 const timelineTimes = [0, 0.2, 0.35, 0.65, 0.8, 1];
 const timelineDuration = 1.7;
 
-const backgroundVariants: Variants = {
+const scaleVariants: Record<"initial" | "animate" | "click", TargetAndTransition> = {
   initial: {
     transform: "scale(1)",
   },
@@ -25,7 +25,10 @@ const backgroundVariants: Variants = {
   },
 };
 
-const timelineOneVariants: Variants = {
+const timelineOneVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  TargetAndTransition
+> = {
   initial: {
     pathLength: 1,
   },
@@ -57,7 +60,10 @@ const timelineOneVariants: Variants = {
   },
 };
 
-const timelineTwoVariants: Variants = {
+const timelineTwoVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  TargetAndTransition
+> = {
   initial: {
     pathLength: 1,
     transform: "translateY(0%) translateX(0%)",
@@ -99,7 +105,10 @@ const timelineTwoVariants: Variants = {
   },
 };
 
-const timelineThreeVariants: Variants = {
+const timelineThreeVariants: Record<
+  "initial" | "animate" | "idle" | "click",
+  TargetAndTransition
+> = {
   initial: {
     pathLength: 1,
     transform: "translateY(0%) translateX(0%)",
@@ -141,7 +150,10 @@ const timelineThreeVariants: Variants = {
   },
 };
 
-const timelineContainerVariants: Variants = {
+const timelineContainerVariants: Record<
+  "initial" | "animate" | "click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "rotate(0deg)",
   },
@@ -172,7 +184,7 @@ const timelineContainerVariants: Variants = {
 };
 
 export {
-  backgroundVariants,
+  scaleVariants,
   timelineOneVariants,
   timelineTwoVariants,
   timelineThreeVariants,

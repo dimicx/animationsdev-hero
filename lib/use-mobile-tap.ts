@@ -6,28 +6,36 @@ interface UseMobileTapOptions {
 }
 
 interface UseMobileTapReturn {
-  /** Whether the component is ready for click action (always true on desktop) */
+  /** Whether ready for click action (always true on desktop) */
   isReady: boolean;
-  /** Call this to mark the first tap as complete (for immediate mode) */
+  /** Mark first tap complete, enabling click action */
   markTapped: () => void;
-  /** Call this when hover/animation completes (for delayed mode) */
-  markReady: () => void;
-  /** Reset state (call on hover end) */
+  /** Reset ready state */
   reset: () => void;
   /** Ref for checking ready state in callbacks */
   isReadyRef: React.RefObject<boolean>;
 }
 
 /**
- * Hook for handling mobile "double-tap" pattern where:
- * - First tap triggers hover state
- * - Second tap triggers the actual click action
+ * Hook for handling mobile double-tap pattern.
+ * On mobile: first tap triggers hover, second tap triggers click action.
+ * On desktop: isReady is always true, allowing immediate clicks.
  *
- * On desktop, isReady is always true.
+ * @param isMobile - Whether the device is mobile
+ * @returns Object with isReady state, markTapped, reset functions, and isReadyRef
  *
- * Two modes:
- * 1. Immediate: Call markTapped() on first click, isReady becomes true immediately
- * 2. Delayed: Call markReady() after animation/timeout, isReady becomes true then
+ * @example
+ * ```tsx
+ * const { isReady, markTapped, reset, isReadyRef } = useMobileTap({ isMobile });
+ *
+ * const handleClick = () => {
+ *   if (!isReady) {
+ *     markTapped(); // First tap on mobile
+ *     return;
+ *   }
+ *   // Proceed with action
+ * };
+ * ```
  */
 export function useMobileTap({
   isMobile,
@@ -48,12 +56,6 @@ export function useMobileTap({
     }
   }, [isMobile]);
 
-  const markReady = useCallback(() => {
-    if (isMobile) {
-      isReadyRef.current = true;
-    }
-  }, [isMobile]);
-
   const reset = useCallback(() => {
     if (isMobile) {
       isReadyRef.current = false;
@@ -65,7 +67,6 @@ export function useMobileTap({
       return isReadyRef.current;
     },
     markTapped,
-    markReady,
     reset,
     isReadyRef,
   };

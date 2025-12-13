@@ -1,6 +1,10 @@
-import { Variants } from "motion";
+import { IndexedVariant } from "@/lib/use-animate-variants";
+import { TargetAndTransition } from "motion/react";
 
-const backgroundVariants: Variants = {
+const backgroundVariants: Record<
+  "initial" | "animate" | "click" | "scale-click",
+  TargetAndTransition
+> = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
@@ -20,9 +24,20 @@ const backgroundVariants: Variants = {
   click: {
     transform: [
       "rotate(-3deg) scale(1)",
-      "rotate(-3deg) scale(0.98)",
-      "rotate(-3deg) scale(1.015)",
-      "rotate(-3deg) scale(1)",
+      "rotate(-8deg) scale(0.98)",
+      "rotate(-6deg) scale(1)",
+    ],
+    transition: {
+      duration: 0.4,
+      ease: "easeOut",
+    },
+  },
+  "scale-click": {
+    transform: [
+      "rotate(-6deg) scale(1)",
+      "rotate(-6deg) scale(0.98)",
+      "rotate(-6deg) scale(1.015)",
+      "rotate(-6deg) scale(1)",
     ],
     transition: {
       duration: 0.4,
@@ -32,11 +47,12 @@ const backgroundVariants: Variants = {
   },
 };
 
-const clockAndBellsVariants: Variants = {
+const clockAndBellsVariants: Record<
+  "initial" | "click" | "scale-click" | "idle",
+  TargetAndTransition
+> = {
   initial: {
     transform: "rotate(0deg) scale(1)",
-    transformOrigin: "543.879px 186.54px",
-    transformBox: "view-box",
   },
   click: {
     transform: [
@@ -45,8 +61,6 @@ const clockAndBellsVariants: Variants = {
       "rotate(-8deg) scale(1.03)",
       "rotate(-8deg) scale(1)",
     ],
-    transformOrigin: "543.879px 186.54px",
-    transformBox: "view-box",
     transition: {
       duration: 0.5,
       times: [0, 0.25, 0.6, 1],
@@ -60,8 +74,6 @@ const clockAndBellsVariants: Variants = {
       "rotate(-8deg) scale(1.03)",
       "rotate(-8deg) scale(1)",
     ],
-    transformOrigin: "543.879px 186.54px",
-    transformBox: "view-box",
     transition: {
       duration: 0.4,
       times: [0, 0.25, 0.6, 1],
@@ -70,12 +82,10 @@ const clockAndBellsVariants: Variants = {
   },
   idle: {
     transform: ["rotate(0deg) scale(1)"],
-    transformOrigin: "543.879px 186.54px",
-    transformBox: "view-box",
   },
 };
 
-const clockVariants: Variants = {
+const clockVariants: Record<"initial" | "animate", TargetAndTransition> = {
   initial: {
     y: "0%",
     x: "0%",
@@ -97,12 +107,12 @@ const clockVariants: Variants = {
   },
 };
 
-const bellVariants: Variants = {
-  initial: {
+const bellVariants: Record<"initial" | "animate", IndexedVariant> = {
+  initial: () => ({
     y: "0%",
     x: "0%",
     rotate: "0deg",
-  },
+  }),
   animate: (i: number) => ({
     y: i === 0 ? ["0%", "10%", "-25%", "-70%"] : ["0%", "20%", "-50%", "-100%"],
     x:
@@ -131,11 +141,11 @@ const bellVariants: Variants = {
   }),
 };
 
-const idleBellsVariants: Variants = {
+const bellsVariants: Record<"initial" | "idle", TargetAndTransition> = {
   initial: {
     transform: "translateX(0%) translateY(0%) rotate(0deg)",
   },
-  animate: {
+  idle: {
     transform: [
       "translateX(0%) translateY(0%) rotate(0deg)",
       "translateX(-12%) translateY(-6%) rotate(-8deg)",
@@ -155,8 +165,8 @@ const idleBellsVariants: Variants = {
 
 export {
   backgroundVariants,
-  clockVariants,
+  bellsVariants,
   bellVariants,
-  idleBellsVariants,
   clockAndBellsVariants,
+  clockVariants,
 };
