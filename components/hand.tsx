@@ -117,9 +117,6 @@ export function Hand({
         duration: 0.5,
         times: [0, 0.7, 1],
         ease: "easeInOut",
-        onComplete: () => {
-          markTapped();
-        },
       });
     },
     onHoverEnd: async () => {
@@ -134,7 +131,10 @@ export function Hand({
   });
 
   const onClick = useCallback(async () => {
-    if (!isReadyForClickRef.current) return;
+    if (!isReadyForClickRef.current) {
+      markTapped();
+      return;
+    }
     handPathAnimationRef.current?.stop();
     handPathProgress.set(0);
     handPathAnimationRef.current = animate(handPathProgress, [0, 1, 0], {
@@ -143,7 +143,13 @@ export function Hand({
       ease: "easeInOut",
     });
     animateHandVariant("click");
-  }, [animate, animateHandVariant, handPathProgress, isReadyForClickRef]);
+  }, [
+    animate,
+    animateHandVariant,
+    handPathProgress,
+    isReadyForClickRef,
+    markTapped,
+  ]);
 
   return (
     <motion.g
