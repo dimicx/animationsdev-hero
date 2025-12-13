@@ -18,7 +18,7 @@ import {
   wholeVariants,
 } from "@/lib/variants/lightbulb-variants";
 import { AnimationPlaybackControls, motion, useAnimate } from "motion/react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 
 export function Lightbulb({
   isMobile,
@@ -31,10 +31,9 @@ export function Lightbulb({
   const { animateVariant } = useAnimateVariants(animate);
   const {
     isReadyRef: isReadyForClickRef,
-    markReady,
+    markTapped,
     reset: resetMobileTap,
   } = useMobileTap({ isMobile });
-  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const animateLightbulbVariant = useCallback(
     (variant: "initial" | "animate" | "idle" | "click") => {
@@ -69,30 +68,21 @@ export function Lightbulb({
     disabledRef: isDraggingRef,
     onHoverStart: async () => {
       animateLightbulbVariant("animate");
-
-      if (isMobile) {
-        animationTimeoutRef.current = setTimeout(() => {
-          markReady();
-        }, 200);
-      }
     },
     onHoverEnd: async () => {
       resetMobileTap();
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current);
-      }
       animateLightbulbVariant("initial");
       animateLightbulbVariant("idle");
     },
   });
 
   const onClick = useCallback(async () => {
-    if (!isReadyForClickRef.current) return;
-    animateLightbulbVariant("click");
-    if (animationTimeoutRef.current) {
-      clearTimeout(animationTimeoutRef.current);
+    if (!isReadyForClickRef.current) {
+      markTapped();
+      return;
     }
-  }, [animateLightbulbVariant, isReadyForClickRef]);
+    animateLightbulbVariant("click");
+  }, [animateLightbulbVariant, isReadyForClickRef, markTapped]);
 
   return (
     <motion.g
