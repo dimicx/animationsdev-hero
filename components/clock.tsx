@@ -21,6 +21,7 @@ import {
   motion,
   Transition,
   useAnimate,
+  useReducedMotion,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -36,6 +37,7 @@ export function Clock({
   isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
+  const shouldReduceMotion = useReducedMotion();
   const [scope, animate] = useAnimate();
   const { animateVariant, animateIndexedVariants } =
     useAnimateVariants(animate);
@@ -133,7 +135,6 @@ export function Clock({
   );
 
   const startAnimations = useCallback(() => {
-    animateBellsVariant("idle");
     animate(
       "[data-animate='clock-and-bells']",
       {
@@ -144,8 +145,16 @@ export function Clock({
       { duration: 0 }
     );
     animateHourHand(INITIAL_HOUR_ROTATION, { duration: 0 });
+    if (shouldReduceMotion) return;
+    animateBellsVariant("idle");
     animateMinuteHand(0, { duration: 0 });
-  }, [animateBellsVariant, animate, animateHourHand, animateMinuteHand]);
+  }, [
+    animateBellsVariant,
+    animate,
+    animateHourHand,
+    animateMinuteHand,
+    shouldReduceMotion,
+  ]);
 
   useEffect(() => {
     startAnimations();
@@ -154,6 +163,7 @@ export function Clock({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    shouldReduceMotion,
     onHoverStart: () => {
       animateBellsVariant("initial");
       animateBackgroundVariant("animate");
@@ -174,6 +184,7 @@ export function Clock({
   });
 
   const handleClockClick = useCallback(() => {
+    if (shouldReduceMotion) return;
     if (!isReadyForClickRef.current) {
       markTapped();
       return;
@@ -219,6 +230,7 @@ export function Clock({
     isReadyForClickRef,
     animateBackgroundVariant,
     animateScaleClickVariant,
+    shouldReduceMotion,
   ]);
 
   return (
@@ -235,6 +247,7 @@ export function Clock({
           from: -1.5,
           to: 1.5,
           duration: 3,
+          shouldReduceMotion,
         })}
       >
         <motion.g
@@ -246,6 +259,7 @@ export function Clock({
               from: -1,
               to: 1,
               duration: 4,
+              shouldReduceMotion,
             })}
             className="filter-[url(#filter7_i_359_1453)] dark:filter-[url(#filter7_i_368_1560)]"
           >

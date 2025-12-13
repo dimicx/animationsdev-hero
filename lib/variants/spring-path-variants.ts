@@ -113,11 +113,15 @@ const bubblesVariants: Record<"initial" | "animate", IndexedVariant> = {
 const bubblesAppearVariants: Record<"hidden" | "visible", TargetAndTransition> =
   {
     hidden: {
-      transform: "translateX(40px) translateY(-60px) scale(0)",
+      scale: 0,
+      x: 40,
+      y: -60,
       opacity: 0,
     },
     visible: {
-      transform: "translateX(0px) translateY(0px) scale(1)",
+      scale: 1,
+      x: 0,
+      y: 0,
       opacity: 1,
     },
   };

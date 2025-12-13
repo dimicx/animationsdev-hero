@@ -25,7 +25,7 @@ export function Scene() {
   };
 
   return (
-    <MotionConfig transition={SPRING_CONFIGS.default}>
+    <MotionConfig reducedMotion="user" transition={SPRING_CONFIGS.default}>
       <div className="-mb-4 mt-12 flex justify-center md:-mb-2 md:mt-8 select-none">
         <motion.svg
           xmlns="http://www.w3.org/2000/svg"
@@ -39,8 +39,8 @@ export function Scene() {
               transition: { staggerChildren: 0.05 },
             },
           }}
-          initial={"initial"}
-          animate={"animate"}
+          initial="initial"
+          animate="animate"
           role="img"
           aria-label="Interactive animation showcasing various microinteractions"
         >

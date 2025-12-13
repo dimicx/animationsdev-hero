@@ -28,6 +28,7 @@ import {
   Transition,
   useAnimate,
   useMotionValue,
+  useReducedMotion,
   useTransform,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
@@ -56,6 +57,7 @@ export function SpringPath({
   onDragEnd?: () => void;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
+  const shouldReduceMotion = useReducedMotion();
   const [scope, animate] = useAnimate();
   const { animateVariant, animateIndexedVariants } =
     useAnimateVariants(animate);
@@ -209,10 +211,16 @@ export function SpringPath({
   });
 
   const startAnimations = useCallback(() => {
+    if (shouldReduceMotion) return;
     animateBubblesVariant("initial");
     animatePathVariant("initial");
     animateBallVariant("idle");
-  }, [animateBubblesVariant, animatePathVariant, animateBallVariant]);
+  }, [
+    animateBubblesVariant,
+    animatePathVariant,
+    animateBallVariant,
+    shouldReduceMotion,
+  ]);
 
   useEffect(() => {
     startAnimations();
@@ -228,6 +236,7 @@ export function SpringPath({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    shouldReduceMotion,
     onHoverStart: () => {
       // Stop any existing animation
       animationRef.current?.stop();
@@ -340,8 +349,11 @@ export function SpringPath({
           }}
         >
           <motion.g variants={bubblesAppearVariants}>
-            <motion.g data-animate="bubbles" data-index="0">
-              {/* Visible circle with filter */}
+            <motion.g
+              data-animate="bubbles"
+              data-index="0"
+              initial={bubblesVariants.initial(0)}
+            >
               <circle
                 cx="201.927"
                 cy="293.495"
@@ -362,8 +374,11 @@ export function SpringPath({
           }}
         >
           <motion.g variants={bubblesAppearVariants}>
-            <motion.g data-animate="bubbles" data-index="1">
-              {/* Visible circle with filter */}
+            <motion.g
+              data-animate="bubbles"
+              data-index="1"
+              initial={bubblesVariants.initial(1)}
+            >
               <circle
                 cx="184.926"
                 cy="314.008"
@@ -403,6 +418,7 @@ export function SpringPath({
           from: -1,
           to: 2,
           duration: 5,
+          shouldReduceMotion,
         })}
       >
         {/* main bubble */}
@@ -417,6 +433,7 @@ export function SpringPath({
                 to: 2,
                 duration: 6,
                 delay: 1,
+                shouldReduceMotion,
               })}
               className="filter-[url(#filter0_i_359_1453)] dark:filter-[url(#filter0_ii_368_1560)]"
             >

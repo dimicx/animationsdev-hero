@@ -21,6 +21,7 @@ import {
   motion,
   useAnimate,
   useMotionValue,
+  useReducedMotion,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -36,6 +37,7 @@ export function Hand({
   isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
+  const shouldReduceMotion = useReducedMotion();
   const [scope, animate] = useAnimate();
   const { animateVariant, animateIndexedVariants } =
     useAnimateVariants(animate);
@@ -82,6 +84,7 @@ export function Hand({
   );
 
   const startIdleAnimations = useCallback(async () => {
+    if (shouldReduceMotion) return;
     handPathAnimationRef.current?.stop();
     await animate(handPathProgress, 0);
 
@@ -95,7 +98,7 @@ export function Hand({
       repeatDelay: REPEAT_DELAY,
       delay: REPEAT_DELAY / 2,
     });
-  }, [animate, animateHandVariant, handPathProgress]);
+  }, [animate, animateHandVariant, handPathProgress, shouldReduceMotion]);
 
   useEffect(() => {
     startIdleAnimations();
@@ -108,6 +111,7 @@ export function Hand({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    shouldReduceMotion,
     onHoverStart: async () => {
       handPathAnimationRef.current?.stop();
       handPathProgress.set(0);
@@ -130,7 +134,8 @@ export function Hand({
     },
   });
 
-  const onClick = useCallback(async () => {
+  const onClick = useCallback(() => {
+    if (shouldReduceMotion) return;
     if (!isReadyForClickRef.current) {
       markTapped();
       return;
@@ -149,6 +154,7 @@ export function Hand({
     handPathProgress,
     isReadyForClickRef,
     markTapped,
+    shouldReduceMotion,
   ]);
 
   return (
@@ -166,6 +172,7 @@ export function Hand({
           to: 1,
           duration: 3,
           delay: 0.5,
+          shouldReduceMotion,
         })}
       >
         <motion.g
@@ -173,6 +180,7 @@ export function Hand({
             from: -2,
             to: 2,
             duration: 5,
+            shouldReduceMotion,
           })}
           className="filter-[url(#filter4_i_359_1453)] dark:filter-[url(#filter4_i_368_1560)]"
         >

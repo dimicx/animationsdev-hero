@@ -19,6 +19,7 @@ import {
   motion,
   useAnimate,
   useMotionValue,
+  useReducedMotion,
   useSpring,
   useTransform,
 } from "motion/react";
@@ -37,6 +38,7 @@ export function Timeline({
   isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
+  const shouldReduceMotion = useReducedMotion();
   const [scope, animate] = useAnimate();
   const { animateVariant } = useAnimateVariants(animate);
   const bufferLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -135,6 +137,7 @@ export function Timeline({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    shouldReduceMotion,
     onHoverStart: async () => {
       hasEnteredMainAreaRef.current = true;
       animateContainerVariant("animate");
@@ -150,6 +153,7 @@ export function Timeline({
   });
 
   const handleBufferEnter = async () => {
+    if (shouldReduceMotion) return;
     hasEnteredMainAreaRef.current = false;
     if (bufferLeaveTimeoutRef.current) {
       clearTimeout(bufferLeaveTimeoutRef.current);
@@ -161,6 +165,7 @@ export function Timeline({
   };
 
   const handleBufferLeave = () => {
+    if (shouldReduceMotion) return;
     // Only trigger timeout if user never entered the main hover area
     if (!hasEnteredMainAreaRef.current) {
       bufferLeaveTimeoutRef.current = setTimeout(() => {
@@ -170,12 +175,14 @@ export function Timeline({
   };
 
   const handleClick = async () => {
+    if (shouldReduceMotion) return;
     if (!hasAnimationCompletedRef.current) return;
     animateTimelineVariant("click");
     animateContainerVariant("click");
   };
 
   useEffect(() => {
+    if (shouldReduceMotion) return;
     animateTimelineVariant("idle");
     // animateContainerVariant("initial");
     return () => {
@@ -183,7 +190,7 @@ export function Timeline({
         clearTimeout(bufferLeaveTimeoutRef.current);
       }
     };
-  }, [animateTimelineVariant, animateContainerVariant]);
+  }, [animateTimelineVariant, animateContainerVariant, shouldReduceMotion]);
 
   return (
     <motion.g
@@ -218,6 +225,7 @@ export function Timeline({
             from: -1,
             to: 2.5,
             duration: 2.5,
+            shouldReduceMotion,
           })}
         >
           <motion.g
@@ -225,6 +233,7 @@ export function Timeline({
               from: 0,
               to: 360,
               duration: 90,
+              shouldReduceMotion,
             })}
             className="filter-[url(#filter6_i_359_1453)] dark:filter-[url(#filter6_i_368_1560)]"
           >

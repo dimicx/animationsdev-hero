@@ -25,13 +25,11 @@ const backgroundVariants: Record<
     transform: [
       "rotate(-3deg) scale(1)",
       "rotate(-8deg) scale(0.98)",
-      "rotate(-4deg) scale(1.015)",
       "rotate(-6deg) scale(1)",
     ],
     transition: {
       duration: 0.4,
-      times: [0, 0.25, 0.6, 1],
-      ease: "easeInOut",
+      ease: "easeOut",
     },
   },
   "scale-click": {

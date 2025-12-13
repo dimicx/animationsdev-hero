@@ -9,6 +9,8 @@ interface UseHoverTimeoutProps {
   onHoverEnd: () => void;
   /** Optional ref to check if hover is disabled */
   disabledRef?: React.RefObject<boolean>;
+  /** Optional ref to check if reduce motion is enabled */
+  shouldReduceMotion?: boolean | null;
 }
 
 /**
@@ -27,6 +29,7 @@ export function useHoverTimeout({
   onHoverStart,
   onHoverEnd,
   disabledRef,
+  shouldReduceMotion = false,
 }: UseHoverTimeoutProps) {
   const mouseEnterTimeRef = useRef<number>(0);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -64,6 +67,10 @@ export function useHoverTimeout({
       onHoverEnd();
     }
   }, [delay, onHoverEnd, disabledRef]);
+
+  if (shouldReduceMotion) {
+    return { handleMouseEnter: () => {}, handleMouseLeave: () => {} };
+  }
 
   return { handleMouseEnter, handleMouseLeave };
 }

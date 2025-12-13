@@ -17,7 +17,12 @@ import {
   stemVariants,
   wholeVariants,
 } from "@/lib/variants/lightbulb-variants";
-import { AnimationPlaybackControls, motion, useAnimate } from "motion/react";
+import {
+  AnimationPlaybackControls,
+  motion,
+  useAnimate,
+  useReducedMotion,
+} from "motion/react";
 import { useCallback, useEffect } from "react";
 
 export function Lightbulb({
@@ -27,6 +32,7 @@ export function Lightbulb({
   isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
+  const shouldReduceMotion = useReducedMotion();
   const [scope, animate] = useAnimate();
   const { animateVariant } = useAnimateVariants(animate);
   const {
@@ -60,12 +66,14 @@ export function Lightbulb({
   );
 
   useEffect(() => {
+    if (shouldReduceMotion) return;
     animateLightbulbVariant("idle");
-  }, [animateLightbulbVariant]);
+  }, [animateLightbulbVariant, shouldReduceMotion]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    shouldReduceMotion,
     onHoverStart: () => {
       animateLightbulbVariant("animate");
     },
@@ -77,12 +85,18 @@ export function Lightbulb({
   });
 
   const onClick = useCallback(() => {
+    if (shouldReduceMotion) return;
     if (!isReadyForClickRef.current) {
       markTapped();
       return;
     }
     animateLightbulbVariant("click");
-  }, [animateLightbulbVariant, isReadyForClickRef, markTapped]);
+  }, [
+    animateLightbulbVariant,
+    isReadyForClickRef,
+    markTapped,
+    shouldReduceMotion,
+  ]);
 
   return (
     <motion.g
@@ -98,6 +112,7 @@ export function Lightbulb({
           from: -1.5,
           to: 1,
           duration: 3,
+          shouldReduceMotion,
         })}
       >
         <motion.g
@@ -109,6 +124,7 @@ export function Lightbulb({
               from: -5,
               to: 5,
               duration: 10,
+              shouldReduceMotion,
             })}
             className="filter-[url(#filter5_i_359_1453)] dark:filter-[url(#filter5_i_368_1560)]"
           >

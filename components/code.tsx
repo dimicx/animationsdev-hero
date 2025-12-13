@@ -21,6 +21,7 @@ import {
   motion,
   useAnimate,
   useMotionValue,
+  useReducedMotion,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -58,6 +59,7 @@ export function Code({
   isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
+  const shouldReduceMotion = useReducedMotion();
   const colorIndexRef = useRef<number | null>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const [scope, animate] = useAnimate();
@@ -95,10 +97,12 @@ export function Code({
   );
 
   useEffect(() => {
+    if (shouldReduceMotion) return;
     animateCodeVariant("idle");
-  }, [animateCodeVariant]);
+  }, [animateCodeVariant, shouldReduceMotion]);
 
   const handleClick = () => {
+    if (shouldReduceMotion) return;
     // On mobile: first tap should only trigger hover, second tap triggers click animation
     if (!isReadyForClickRef.current) {
       markTapped();
@@ -135,6 +139,7 @@ export function Code({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: isMobile ? 0 : UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    shouldReduceMotion: shouldReduceMotion,
     onHoverStart: () => {
       animateCodeVariant("animate");
       animate(codePathProgress, [0, 1, 2], {
@@ -185,6 +190,7 @@ export function Code({
           from: -1,
           to: 1,
           duration: 3,
+          shouldReduceMotion,
         })}
       >
         <motion.g data-animate="background">
@@ -222,7 +228,7 @@ export function Code({
             />
           </motion.g>
           <motion.g data-animate="code-path">
-            <motion.g data-animate="pulse">
+            <motion.g data-animate="pulse" initial={pulseVariants.initial}>
               <motion.path
                 ref={pathRef}
                 d={codePath}

@@ -3,11 +3,11 @@ import { Transition, Variants } from "motion/react";
 export const fadeScaleVariants: Variants = {
   initial: {
     opacity: 0,
-    transform: "scale(0)",
+    scale: 0,
   },
   animate: {
     opacity: 1,
-    transform: "scale(1)",
+    scale: 1,
   },
 };
 
@@ -16,8 +16,8 @@ export const UNIVERSAL_DELAY = 100; // 0.1s
 // Reusable floating animation props
 export interface FloatingAnimationProps {
   initial: { transform: string };
-  animate: { transform: string[] };
-  transition: Transition;
+  animate?: { transform: string[] | string };
+  transition?: Transition;
 }
 
 export const createFloatingAnimation = ({
@@ -25,12 +25,20 @@ export const createFloatingAnimation = ({
   to = 2,
   duration = 2.5,
   delay = 0,
+  shouldReduceMotion,
 }: {
   from?: number;
   to?: number;
   duration?: number;
   delay?: number;
-} = {}): FloatingAnimationProps => {
+  shouldReduceMotion?: boolean | null;
+} = {}): FloatingAnimationProps | undefined => {
+  if (shouldReduceMotion) {
+    return {
+      initial: { transform: "translateY(0px)" },
+      animate: { transform: "translateY(0px)" },
+    };
+  }
   return {
     initial: { transform: "translateY(0px)" },
     animate: { transform: [`translateY(${from}px)`, `translateY(${to}px)`] },
@@ -47,8 +55,8 @@ export const createFloatingAnimation = ({
 // Reusable rotation animation props
 export interface RotationAnimationProps {
   initial: { transform: string };
-  animate: { transform: string[] };
-  transition: Transition;
+  animate: { transform: string[] | string };
+  transition?: Transition;
 }
 
 export const createRotationAnimation = ({
@@ -56,12 +64,20 @@ export const createRotationAnimation = ({
   to = 2,
   duration = 5,
   delay = 0,
+  shouldReduceMotion,
 }: {
   from?: number;
   to?: number;
   duration?: number;
   delay?: number;
-} = {}): RotationAnimationProps => {
+  shouldReduceMotion?: boolean | null;
+} = {}): RotationAnimationProps | undefined => {
+  if (shouldReduceMotion) {
+    return {
+      initial: { transform: "rotate(0deg)" },
+      animate: { transform: "rotate(0deg)" },
+    };
+  }
   return {
     initial: { transform: "rotate(0deg)" },
     animate: { transform: [`rotate(${from}deg)`, `rotate(${to}deg)`] },
