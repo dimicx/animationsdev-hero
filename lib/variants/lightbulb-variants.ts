@@ -76,7 +76,7 @@ const bulbVariants = defineVariants({
       times: [0.2, 0.45, 0.6],
     },
   },
-  idle: (initialDelay) => ({
+  idle: (initialDelay: boolean) => ({
     opacity: [1, 0.3, 1, 0.3, 0.3, 1],
     transition: {
       duration: DURATION,
@@ -112,7 +112,7 @@ const stemVariants = defineVariants({
       times: [0.2, 0.45, 0.6],
     },
   },
-  idle: (initialDelay) => ({
+  idle: (initialDelay: boolean) => ({
     opacity: [1, 0.3, 1, 0.3, 0.3, 1],
     transition: {
       duration: DURATION,
@@ -149,7 +149,7 @@ const bulbMaskVariants = defineVariants({
       times: [0.45, 0.75, 1],
     },
   },
-  idle: (initialDelay) => ({
+  idle: (initialDelay: boolean) => ({
     opacity: [1, 0, 0, 1],
     transition: {
       duration: DURATION,
@@ -174,7 +174,7 @@ const bulbMaskVariants = defineVariants({
   },
 });
 
-const getIdleRayTransition = (initialDelay = false): Transition => ({
+const getIdleRayTransition = (initialDelay: boolean): Transition => ({
   duration: DURATION,
   delay: initialDelay ? INITIAL_DELAY : REPEAT_DELAY,
   repeat: Infinity,
@@ -198,7 +198,7 @@ const rayVariants = defineVariants({
       },
     },
   },
-  idle: (initialDelay) => {
+  idle: (initialDelay: boolean) => {
     const idleRayTransition = getIdleRayTransition(initialDelay);
     return {
       pathLength: [1, 0, 0, 1],

@@ -136,7 +136,7 @@ const bellsVariants = defineVariants({
   initial: {
     transform: "translateX(0%) translateY(0%) rotate(0deg)",
   },
-  idle: (initialDelay = false) => ({
+  idle: (initialDelay: boolean) => ({
     transform: [
       "translateX(0%) translateY(0%) rotate(0deg)",
       "translateX(-12%) translateY(-6%) rotate(-8deg)",

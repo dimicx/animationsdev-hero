@@ -18,7 +18,7 @@ const backgroundVariants = defineVariants({
       delay: 0.2,
     },
   },
-  idle: (initialDelay = false) => ({
+  idle: (initialDelay: boolean) => ({
     transform: ["scale(1)", "scale(0.97)", "scale(1.01)", "scale(1)"],
     transition: {
       duration: DURATION,
