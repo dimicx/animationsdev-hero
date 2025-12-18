@@ -3,6 +3,7 @@ import { defineVariants } from "@/lib/use-animate-variants";
 const TIMELINE_TIMES = [0, 0.2, 0.35, 0.65, 0.8, 1];
 const TIMELINE_DURATION = 1.7;
 const CLICK_DURATION = 1;
+const REPEAT_DELAY = 5;
 
 const scaleVariants = defineVariants({
   initial: {
@@ -45,8 +46,8 @@ const timelineOneVariants = defineVariants({
       ease: "easeInOut",
       repeat: Infinity,
       repeatType: "loop",
-      repeatDelay: 4,
-      delay: 4,
+      repeatDelay: REPEAT_DELAY,
+      delay: REPEAT_DELAY,
     },
   },
   click: {
@@ -86,8 +87,8 @@ const timelineTwoVariants = defineVariants({
       ease: "easeInOut",
       repeat: Infinity,
       repeatType: "loop",
-      repeatDelay: 3.6,
-      delay: 3.6,
+      repeatDelay: REPEAT_DELAY - 0.4,
+      delay: REPEAT_DELAY - 0.4,
     },
   },
   click: {
@@ -128,8 +129,8 @@ const timelineThreeVariants = defineVariants({
       ease: "easeInOut",
       repeat: Infinity,
       repeatType: "loop",
-      repeatDelay: 3.2,
-      delay: 3.2,
+      repeatDelay: REPEAT_DELAY - 0.8,
+      delay: REPEAT_DELAY - 0.8,
     },
   },
   click: {

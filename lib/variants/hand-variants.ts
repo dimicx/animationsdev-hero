@@ -1,7 +1,7 @@
 import { defineVariants } from "@/lib/use-animate-variants";
 import { Transition } from "motion/react";
 
-const REPEAT_DELAY = 5;
+const REPEAT_DELAY = 6;
 const INITIAL_DELAY = 2;
 const DURATION = 0.53;
 
@@ -10,18 +10,19 @@ const backgroundVariants = defineVariants({
     transform: "scale(1)",
   },
   animate: {
-    transform: ["scale(1)", "scale(0.97)", "scale(1)"],
+    transform: ["scale(1)", "scale(0.97)", "scale(1.01)", "scale(1)"],
     transition: {
       duration: DURATION,
-      times: [0.5, 0.8, 1],
+      times: [0.1, 0.33, 0.7, 1],
       ease: "easeOut",
+      delay: 0.2,
     },
   },
   idle: (initialDelay = false) => ({
-    transform: ["scale(1)", "scale(0.97)", "scale(1.015)", "scale(1)"],
+    transform: ["scale(1)", "scale(0.97)", "scale(1.01)", "scale(1)"],
     transition: {
       duration: DURATION,
-      times: [0.15, 0.3, 0.5, 1],
+      times: [0.1, 0.33, 0.7, 1],
       ease: "easeOut",
       repeat: Infinity,
       repeatType: "loop",
@@ -30,7 +31,7 @@ const backgroundVariants = defineVariants({
     },
   }),
   click: {
-    transform: ["scale(1)", "scale(0.97)", "scale(1.015)", "scale(1)"],
+    transform: ["scale(1)", "scale(0.97)", "scale(1.01)", "scale(1)"],
     transition: {
       duration: DURATION,
       times: [0.1, 0.33, 0.7, 1],

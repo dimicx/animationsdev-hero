@@ -1,5 +1,7 @@
 import { defineVariants } from "@/lib/use-animate-variants";
 
+const REPEAT_DELAY = 6;
+
 const backgroundVariants = defineVariants({
   initial: {
     transform: "rotate(0deg) scale(1)",
@@ -147,7 +149,7 @@ const bellsVariants = defineVariants({
       repeat: Infinity,
       repeatType: "loop",
       repeatDelay: 4,
-      delay: initialDelay ? 3 : 5,
+      delay: initialDelay ? REPEAT_DELAY / 2 : REPEAT_DELAY,
     },
   }),
 });
