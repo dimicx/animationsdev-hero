@@ -150,7 +150,7 @@ export function Code({
       resetMobileTap();
       animateCodeVariant("initial");
       animateCodeVariant("idle");
-      animate(codePathProgress, [2, 1, 0], {
+      animate(codePathProgress, [codePathProgress.get(), 1, 0], {
         duration: 0.4,
         times: [0, 0.3, 0.8],
         ease: "easeOut",

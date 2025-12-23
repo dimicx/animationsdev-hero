@@ -96,7 +96,7 @@ const codePathVariants = defineVariants({
   animate: {
     transform: [
       "translateX(0%) translateY(0%) rotate(0deg) scale(1)",
-      "translateX(-10%) translateY(0%) rotate(0deg) scale(1)",
+      "translateX(10%) translateY(0%) rotate(0deg) scale(1)",
       "translateX(43%) translateY(-9%) rotate(-1deg) scale(1)",
       "translateX(38%) translateY(-9%) rotate(-1deg) scale(1)",
     ],
