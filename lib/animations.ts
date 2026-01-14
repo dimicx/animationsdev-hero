@@ -72,14 +72,17 @@ export const createRotationAnimation = ({
 } = {}): RotationAnimationProps | undefined => {
   if (shouldReduceMotion) {
     return {
-      initial: { transform: "rotate(0deg)" },
-      animate: { transform: "rotate(0deg)" },
+      initial: { transform: "rotate(0deg) translateZ(0)" },
+      animate: { transform: "rotate(0deg) translateZ(0)" },
     };
   }
   return {
-    initial: { transform: "rotate(0deg)" },
+    initial: { transform: "rotate(0deg) translateZ(0)" },
     animate: {
-      transform: ["rotate(0deg)", `rotate(${to}deg)`],
+      transform: [
+        "rotate(0deg) translateZ(0)",
+        `rotate(${to}deg) translateZ(0)`,
+      ],
     },
     transition: {
       delay,

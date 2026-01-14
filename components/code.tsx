@@ -160,7 +160,6 @@ export function Code({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
-      className="origin-bottom-left! group"
     >
       <motion.g
         style={{ willChange: "transform" }}

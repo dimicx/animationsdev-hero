@@ -104,7 +104,6 @@ export function Lightbulb({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
-      className="origin-bottom!"
     >
       <motion.g
         style={{ willChange: "transform" }}

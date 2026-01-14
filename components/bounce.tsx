@@ -372,7 +372,7 @@ export function Bounce({
   }, [animateSpringPathVariant, shouldReduceMotion, animate, animateVariant]);
 
   return (
-    <motion.g ref={scope} className="origin-bottom-left!">
+    <motion.g ref={scope}>
       {/* small bubbles - point towards pointer */}
       <g>
         {/* medium bubble */}

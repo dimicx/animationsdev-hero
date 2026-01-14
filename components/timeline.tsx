@@ -172,7 +172,7 @@ export function Timeline({
   }, [animateTimelineVariant, animateContainerVariant, shouldReduceMotion]);
 
   return (
-    <motion.g ref={scope} className="origin-bottom!">
+    <motion.g ref={scope}>
       {/* buffer zone to reset timelines early */}
       <rect
         x="150"
