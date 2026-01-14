@@ -2,7 +2,7 @@ import {
   createFloatingAnimation,
   createRotationAnimation,
   UNIVERSAL_DELAY,
-} from "@/lib/animation-variants";
+} from "@/lib/animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import {
@@ -20,6 +20,7 @@ import {
   useTransform,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
+import { useMediaQuery } from "usehooks-ts";
 
 // SVG coordinate bounds for the mask area (accounting for rotation)
 const MASK_MIN_X = 196; // Left edge of mask area
@@ -28,12 +29,11 @@ const MASK_MAX_X = 250; // Right edge of mask area
 const MASK_CENTER_X = 223.65;
 
 export function Timeline({
-  isMobile,
   isDraggingRef,
 }: {
-  isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
+  const isMobile = useMediaQuery("(pointer: coarse)");
   const shouldReduceMotion = useReducedMotion();
   const [scope, animateVariant] = useAnimateVariant();
   const hasEnteredMainAreaRef = useRef(false);
@@ -41,7 +41,7 @@ export function Timeline({
   const hasAnimationCompletedRef = useRef(false);
 
   const animateTimelineVariant = useCallback(
-    (variant: "initial" | "animate" | "click" | "idle") => {
+    (variant: "initial" | "hover" | "click" | "idle") => {
       const variantMap = {
         scale: scaleVariants,
         "timeline-container": timelineContainerVariants,
@@ -65,7 +65,7 @@ export function Timeline({
   );
 
   const animateContainerVariant = useCallback(
-    (variant: "initial" | "animate" | "click") => {
+    (variant: "initial" | "hover" | "click") => {
       animateVariant("[data-animate='scale']", scaleVariants[variant]);
       animateVariant(
         "[data-animate='timeline-container']",
@@ -131,14 +131,13 @@ export function Timeline({
   }, [rawMaskX]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
-    delay: isMobile ? 0 : UNIVERSAL_DELAY,
+    delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    shouldReduceMotion,
     onHoverStart: async () => {
       hasEnteredMainAreaRef.current = true;
-      animateContainerVariant("animate");
+      animateContainerVariant("hover");
       animateTimelineVariant("initial");
-      await animateTimelineVariant("animate");
+      await animateTimelineVariant("hover");
       hasAnimationCompletedRef.current = true;
     },
     onHoverEnd: async () => {

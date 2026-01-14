@@ -4,10 +4,7 @@ import {
   DEFAULT_LIGHT_FILL,
   LIGHT_MODE_COLORS,
 } from "@/lib/animation-configs";
-import {
-  createFloatingAnimation,
-  UNIVERSAL_DELAY,
-} from "@/lib/animation-variants";
+import { createFloatingAnimation, UNIVERSAL_DELAY } from "@/lib/animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import { useMobileTap } from "@/lib/hooks/use-mobile-tap";
@@ -35,21 +32,15 @@ const codePaths = [
 ];
 
 export function Code({
-  isMobile,
   isDraggingRef,
 }: {
-  isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
   const shouldReduceMotion = useReducedMotion();
   const colorIndexRef = useRef<number | null>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const [scope, animateVariant, animate] = useAnimateVariant();
-  const {
-    isReadyRef: isReadyForClickRef,
-    markTapped,
-    reset: resetMobileTap,
-  } = useMobileTap({ isMobile });
+  const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const hasClickedRef = useRef(false);
 
   const codePathProgress = useSpring(0, {
@@ -59,7 +50,7 @@ export function Code({
   const codePath = useTransform(codePathProgress, [0, 1, 2], codePaths);
 
   const animateCodeVariant = useCallback(
-    (variant: "initial" | "animate" | "idle" | "click") => {
+    (variant: "initial" | "hover" | "idle" | "click") => {
       const variantMap = {
         whole: wholeVariants,
         "caret-left": caretLeftVariants,
@@ -86,7 +77,7 @@ export function Code({
   useEffect(() => {
     if (shouldReduceMotion) return;
     animateCodeVariant("idle");
-    animateVariant("[data-animate='pulse']", pulseVariants.animate);
+    animateVariant("[data-animate='pulse']", pulseVariants.hover);
   }, [animateCodeVariant, animateVariant, shouldReduceMotion]);
 
   const handleClick = () => {
@@ -128,20 +119,19 @@ export function Code({
   };
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
-    delay: isMobile ? 0 : UNIVERSAL_DELAY,
+    delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    shouldReduceMotion: shouldReduceMotion,
     onHoverStart: () => {
-      animateCodeVariant("animate");
+      animateCodeVariant("hover");
       codePathProgress.set(2);
     },
     onHoverEnd: () => {
-      resetMobileTap();
+      resetTap();
       animateCodeVariant("initial");
       animateCodeVariant("idle");
       codePathProgress.set(0);
       if (hasClickedRef.current) {
-        animateVariant("[data-animate='pulse']", pulseVariants.animate);
+        animateVariant("[data-animate='pulse']", pulseVariants.hover);
       }
       hasClickedRef.current = false;
 

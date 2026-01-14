@@ -6,7 +6,7 @@ const pathVariants = {
   initial: {
     strokeDashoffset: 0,
   },
-  animate: {
+  hover: {
     strokeDashoffset: [0, 1.05],
     transition: {
       delay: 0.1,
@@ -21,7 +21,7 @@ const secondaryCircleVariants = {
     stroke: "var(--stroke-color)",
     opacity: 1,
   },
-  animate: {
+  hover: {
     stroke: [
       "var(--stroke-color)",
       "var(--stroke-highlight)",
@@ -40,7 +40,7 @@ const backgroundVariants = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
-  animate: {
+  hover: {
     transform: [
       "rotate(0deg) scale(1)",
       "rotate(8deg) scale(0.99)",
@@ -98,7 +98,7 @@ const bubblesVariants = {
   initial: {
     transform: "translateY(0%) translateX(0%)",
   },
-  animate: (i: number) => ({
+  hover: (i: number) => ({
     transform:
       i === 0
         ? [

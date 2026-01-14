@@ -8,12 +8,10 @@ import { Defs } from "@/components/defs";
 import { Lightbulb } from "@/components/lightbulb";
 import { Timeline } from "@/components/timeline";
 import { SPRING_CONFIGS } from "@/lib/animation-configs";
-import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import { motion, MotionConfig } from "motion/react";
 import { useRef } from "react";
 
 export function Scene() {
-  const isMobile = useIsMobile();
   const isDraggingRef = useRef(false);
 
   const handleDragStart = () => {
@@ -37,17 +35,16 @@ export function Scene() {
           role="img"
           aria-label="Interactive animation showcasing various microinteractions"
         >
-          <Code isMobile={isMobile} isDraggingRef={isDraggingRef} />
+          <Code isDraggingRef={isDraggingRef} />
           <Bounce
-            isMobile={isMobile}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             isDraggingRef={isDraggingRef}
           />
-          <Click isMobile={isMobile} isDraggingRef={isDraggingRef} />
-          <Clock isMobile={isMobile} isDraggingRef={isDraggingRef} />
-          <Timeline isMobile={isMobile} isDraggingRef={isDraggingRef} />
-          <Lightbulb isMobile={isMobile} isDraggingRef={isDraggingRef} />
+          <Click isDraggingRef={isDraggingRef} />
+          <Clock isDraggingRef={isDraggingRef} />
+          <Timeline isDraggingRef={isDraggingRef} />
+          <Lightbulb isDraggingRef={isDraggingRef} />
           <Defs />
         </motion.svg>
       </div>
