@@ -85,11 +85,11 @@ export function Lightbulb({
 
   const onClick = useCallback(() => {
     if (shouldReduceMotion) return;
-    if (!hasAnimationCompletedRef.current) return;
     if (!isReadyForClickRef.current) {
       markTapped();
       return;
     }
+    if (!hasAnimationCompletedRef.current) return;
     animateLightbulbVariant("click");
   }, [
     animateLightbulbVariant,

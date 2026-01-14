@@ -165,11 +165,11 @@ export function Click({
 
   const onClick = useCallback(() => {
     if (shouldReduceMotion) return;
-    if (!hasAnimationCompletedRef.current) return;
     if (!isReadyForClickRef.current) {
       markTapped();
       return;
     }
+    if (!hasAnimationCompletedRef.current) return;
     playAnimationState("click", {
       keyframes: [0, 1, 0],
       times: [0.1, 0.33, 0.53],
