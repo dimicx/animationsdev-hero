@@ -5,7 +5,7 @@ const backgroundVariants = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
-  animate: {
+  hover: {
     transform: [
       "rotate(0deg) scale(1)",
       "rotate(-4deg) scale(0.99)",
@@ -44,27 +44,24 @@ const backgroundVariants = {
 
 const clockAndBellsVariants = {
   initial: {
-    transform: "rotate(0deg) scale(1)",
+    transform: "translateY(0px) rotate(0deg) scale(1)",
   },
-  click: {
+  hover: {
     transform: [
-      "rotate(0deg) scale(1)",
-      "rotate(-10deg) scale(0.95)",
-      "rotate(-8deg) scale(1.03)",
-      "rotate(-8deg) scale(1)",
+      "translateY(0px) rotate(0deg) scale(1)",
+      "translateY(-3px) rotate(0deg) scale(1)",
     ],
     transition: {
-      duration: 0.5,
-      times: [0, 0.25, 0.6, 1],
+      duration: 0.3,
       ease: "easeOut",
     },
   },
-  "scale-click": {
+  click: {
     transform: [
-      "rotate(-8deg) scale(1)",
-      "rotate(-8deg) scale(0.95)",
-      "rotate(-8deg) scale(1.03)",
-      "rotate(-8deg) scale(1)",
+      "translateY(0px) rotate(0deg) scale(1)",
+      "translateY(0px) rotate(-10deg) scale(0.95)",
+      "translateY(0px) rotate(-8deg) scale(1.03)",
+      "translateY(0px) rotate(-8deg) scale(1)",
     ],
     transition: {
       duration: 0.4,
@@ -72,24 +69,26 @@ const clockAndBellsVariants = {
       ease: "easeOut",
     },
   },
-  idle: {
-    transform: ["rotate(0deg) scale(1)"],
+  "scale-click": {
+    transform: [
+      "translateY(0px) rotate(-8deg) scale(1)",
+      "translateY(0px) rotate(-8deg) scale(0.95)",
+      "translateY(0px) rotate(-8deg) scale(1.03)",
+      "translateY(0px) rotate(-8deg) scale(1)",
+    ],
+    transition: {
+      duration: 0.4,
+      times: [0, 0.25, 0.6, 1],
+      ease: "easeOut",
+    },
   },
 };
 
 const clockVariants = {
-  initial: {
-    y: "0%",
-    x: "0%",
-  },
-  animate: {
-    y: ["0%", "-6%"],
-    x: ["0%", "-3%", "3.5%", "-3.5%", "3.5%", "-3%", "0%"],
+  initial: { x: "0px" },
+  hover: {
+    x: ["0px", "-1.5px", "1.75px", "-1.75px", "1.75px", "-1.5px", "0px"],
     transition: {
-      y: {
-        duration: 0.25,
-        ease: "easeOut",
-      },
       x: {
         duration: 0.25,
         repeat: Infinity,
@@ -100,31 +99,25 @@ const clockVariants = {
 };
 
 const bellVariants = {
-  initial: () => ({
-    y: "0%",
-    x: "0%",
+  initial: {
+    x: "0px",
     rotate: "0deg",
-  }),
-  animate: (i: number) => ({
-    y: i === 0 ? ["0%", "-25%", "-80%"] : ["0%", "-50%", "-120%"],
+  },
+  hover: (i: number) => ({
     x:
       i === 0
-        ? ["0%", "-20%", "16%", "-16%", "20%", "-16%", "0%"]
-        : ["0%", "-15%", "30%", "-30%", "35%", "-30%", "0%"],
-    rotate: i === 0 ? "0deg" : ["0deg", "-5deg"],
+        ? ["0px", "-2px", "2px", "-2px", "2px", "-2px", "0px"]
+        : ["0px", "-1.5px", "1.5px", "-1.5px", "1.5px", "-1.5px", "0px"],
+    rotate: i === 0 ? "0deg" : ["0deg", "-8deg"],
     transition: {
-      y: {
-        duration: 3,
-        times: [0, 0.1, 1],
-        ease: "easeOut",
-      },
       x: {
+        delay: i === 0 ? 0.015 : 0.03,
         duration: 0.25,
         repeat: Infinity,
         ease: "linear",
       },
       rotate: {
-        duration: 0.2,
+        duration: 3,
         ease: "easeOut",
       },
     },
@@ -133,21 +126,32 @@ const bellVariants = {
 
 const bellsVariants = {
   initial: {
-    transform: "translateX(0%) translateY(0%) rotate(0deg)",
+    y: "0px",
+    rotate: "0deg",
+  },
+  hover: {
+    y: ["0px", "-8px"],
+    rotate: "0deg",
+    transition: {
+      y: {
+        duration: 3,
+        ease: "easeOut",
+      },
+      rotate: {
+        duration: 0.3,
+        ease: "easeOut",
+      },
+    },
   },
   idle: (initialDelay: boolean) => ({
-    transform: [
-      "translateX(0%) translateY(0%) rotate(0deg)",
-      "translateX(-12%) translateY(-6%) rotate(-8deg)",
-      "translateX(12%) translateY(8%) rotate(8deg)",
-      "translateX(0%) translateY(0%) rotate(0deg)",
-    ],
+    y: "0px",
+    rotate: ["0deg", "-8deg", "8deg", "0deg"],
     transition: {
       duration: 1,
-      ease: "easeOut",
+      ease: "easeInOut",
       repeat: Infinity,
       repeatType: "loop",
-      repeatDelay: 4,
+      repeatDelay: REPEAT_DELAY,
       delay: initialDelay ? INITIAL_DELAY : REPEAT_DELAY,
     },
   }),

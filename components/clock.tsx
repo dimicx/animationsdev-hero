@@ -3,7 +3,7 @@ import {
   createFloatingAnimation,
   createRotationAnimation,
   UNIVERSAL_DELAY,
-} from "@/lib/animation-variants";
+} from "@/lib/animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import { useMobileTap } from "@/lib/hooks/use-mobile-tap";
@@ -14,62 +14,78 @@ import {
   clockAndBellsVariants,
   clockVariants,
 } from "@/lib/variants/clock-variants";
-import { motion, Transition, useReducedMotion } from "motion/react";
+import {
+  AnimationPlaybackControlsWithThen,
+  motion,
+  Transition,
+  useReducedMotion,
+} from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
 
 const CLOCK_CENTER = "543.427px 186.901px";
 const INITIAL_HOUR_ROTATION = 120;
 
 export function Clock({
-  isMobile,
   isDraggingRef,
 }: {
-  isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
   const shouldReduceMotion = useReducedMotion();
   const [scope, animateVariant, animate] = useAnimateVariant();
   const hasClickedRef = useRef(false);
-  const {
-    isReadyRef: isReadyForClickRef,
-    markTapped,
-    reset: resetMobileTap,
-  } = useMobileTap({ isMobile });
+  const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const isFirstIdleRef = useRef(true);
 
   const animateClockVariant = useCallback(
-    (variant: "initial" | "animate") => {
-      const animations = [
-        animateVariant("[data-animate='clock']", clockVariants[variant]),
-        ...Array.from({ length: 2 }, (_, i) =>
+    (variant: "initial" | "hover" | "click" | "scale-click") => {
+      const animations: (AnimationPlaybackControlsWithThen | undefined)[] = [];
+      const cVariant = clockVariants[variant as keyof typeof clockVariants];
+      animations.push(
+        animateVariant(
+          "[data-animate='clock']",
+          cVariant ?? clockVariants.initial
+        )
+      );
+
+      const cbVariant =
+        clockAndBellsVariants[variant as keyof typeof clockAndBellsVariants];
+      animations.push(
+        animateVariant(
+          "[data-animate='clock-and-bells']",
+          cbVariant ?? clockAndBellsVariants.initial
+        )
+      );
+
+      const bVariant = bellsVariants[variant as keyof typeof bellsVariants];
+      animations.push(
+        animateVariant(
+          '[data-animate="bells"]',
+          bVariant ?? bellsVariants.initial
+        )
+      );
+
+      Array.from({ length: 2 }, (_, i) => {
+        const bVariant = bellVariants[variant as keyof typeof bellVariants];
+        const resolved =
+          typeof bVariant === "function"
+            ? bVariant(i)
+            : bVariant ?? bellVariants.initial;
+        animations.push(
+          animateVariant(`[data-animate="bell"][data-index='${i}']`, resolved)
+        );
+      });
+      const bgVariant =
+        backgroundVariants[variant as keyof typeof backgroundVariants];
+      if (bgVariant) {
+        animations.push(
           animateVariant(
-            `[data-animate="bell"][data-index='${i}']`,
-            typeof bellVariants[variant] === "function"
-              ? bellVariants[variant](i)
-              : bellVariants[variant]
+            '[data-animate="background"]',
+            bgVariant ?? backgroundVariants.initial
           )
-        ),
-      ].filter(Boolean);
+        );
+      }
 
       return Promise.all(animations);
-    },
-    [animateVariant]
-  );
-
-  const animateBellsVariant = useCallback(
-    (variant: keyof typeof bellsVariants) => {
-      const initialDelay = variant === "idle" && isFirstIdleRef.current;
-
-      const bellsVariant = bellsVariants[variant];
-      const resolved =
-        typeof bellsVariant === "function"
-          ? bellsVariant(initialDelay)
-          : bellsVariant;
-
-      if (variant === "idle") {
-        isFirstIdleRef.current = false;
-      }
-      return animateVariant("[data-animate='bells']", resolved);
     },
     [animateVariant]
   );
@@ -100,52 +116,43 @@ export function Clock({
     [animate]
   );
 
-  const startAnimations = useCallback(() => {
-    animate(
-      "[data-animate='clock-and-bells']",
-      {
-        transform: "rotate(0deg) scale(1)",
-      },
-      { duration: 0 }
-    );
-    animateHourHand(INITIAL_HOUR_ROTATION, { duration: 0 });
-    if (shouldReduceMotion) return;
-    animateBellsVariant("idle");
-    animateMinuteHand(0, { duration: 0 });
-  }, [
-    animateBellsVariant,
-    animate,
-    animateHourHand,
-    animateMinuteHand,
-    shouldReduceMotion,
-  ]);
+  const animateBellsVariant = useCallback(
+    (variant: keyof typeof bellsVariants) => {
+      const initialDelay = variant === "idle" && isFirstIdleRef.current;
+
+      const bellsVariant = bellsVariants[variant];
+      const resolved =
+        typeof bellsVariant === "function"
+          ? bellsVariant(initialDelay)
+          : bellsVariant;
+
+      if (variant === "idle") {
+        isFirstIdleRef.current = false;
+      }
+      return animateVariant("[data-animate='bells']", resolved);
+    },
+    [animateVariant]
+  );
 
   useEffect(() => {
-    startAnimations();
-  }, [startAnimations]);
+    if (shouldReduceMotion) return;
+    animateBellsVariant("idle");
+  }, [animateBellsVariant, shouldReduceMotion]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
-    delay: isMobile ? 0 : UNIVERSAL_DELAY,
+    delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    shouldReduceMotion,
     onHoverStart: () => {
-      animateBellsVariant("initial");
-      animateVariant("[data-animate='background']", backgroundVariants.animate);
-      animateClockVariant("animate");
+      animateClockVariant("hover");
     },
-    onHoverEnd: () => {
+    onHoverEnd: async () => {
       hasClickedRef.current = false;
-      resetMobileTap();
+      resetTap();
 
       animateHourHand(INITIAL_HOUR_ROTATION);
       animateMinuteHand(0);
 
-      animateVariant("[data-animate='background']", backgroundVariants.initial);
-      animateVariant(
-        "[data-animate='clock-and-bells']",
-        clockAndBellsVariants.initial
-      );
-      animateClockVariant("initial");
+      await animateClockVariant("initial");
       animateBellsVariant("idle");
     },
   });
@@ -160,13 +167,7 @@ export function Clock({
     if (!hasClickedRef.current) {
       hasClickedRef.current = true;
 
-      animateVariant("[data-animate='background']", backgroundVariants.click);
-      animateVariant(
-        "[data-animate='clock-and-bells']",
-        clockAndBellsVariants.click
-      );
-      animateClockVariant("initial");
-      animateBellsVariant("idle");
+      animateClockVariant("click");
 
       const now = new Date();
       const hours = now.getHours() % 12;
@@ -188,36 +189,25 @@ export function Clock({
       animateHourHand(hourWithSpins);
       animateMinuteHand(minuteWithSpins);
     } else {
-      animateVariant(
-        "[data-animate='background']",
-        backgroundVariants["scale-click"]
-      );
-      animateVariant(
-        "[data-animate='clock-and-bells']",
-        clockAndBellsVariants["scale-click"]
-      );
+      animateClockVariant("scale-click");
     }
   }, [
     animateClockVariant,
-    animateBellsVariant,
     animateHourHand,
     animateMinuteHand,
     markTapped,
     isReadyForClickRef,
-    animateVariant,
     shouldReduceMotion,
   ]);
 
   return (
     <motion.g
       ref={scope}
-      className="origin-bottom-right!"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClockClick}
     >
       <motion.g
-        style={{ willChange: "transform" }}
         {...createFloatingAnimation({
           to: 1.5,
           duration: 3,
@@ -227,10 +217,8 @@ export function Clock({
         <motion.g
           data-animate="background"
           initial={backgroundVariants.initial}
-          style={{ willChange: "transform" }}
         >
           <motion.g
-            style={{ willChange: "transform" }}
             {...createRotationAnimation({
               to: 1,
               duration: 4,
@@ -248,14 +236,9 @@ export function Clock({
         <motion.g
           data-animate="clock-and-bells"
           initial={clockAndBellsVariants.initial}
-          style={{ willChange: "transform" }}
         >
           {/* clock */}
-          <motion.g
-            data-animate="clock"
-            initial={clockVariants.initial}
-            style={{ willChange: "transform" }}
-          >
+          <motion.g data-animate="clock" initial={clockVariants.initial}>
             <circle
               cx="543.879"
               cy="186.54"
@@ -270,7 +253,6 @@ export function Clock({
                 transformOrigin: "0% 100%",
                 transformBox: "fill-box",
               }}
-              style={{ willChange: "transform" }}
             >
               <line
                 x1="543.876"
@@ -290,7 +272,6 @@ export function Clock({
                 transformOrigin: "0% 100%",
                 transformBox: "fill-box",
               }}
-              style={{ willChange: "transform" }}
             >
               <line
                 x1="543.876"
@@ -307,29 +288,22 @@ export function Clock({
           {/* bells */}
           <motion.g
             data-animate="bells"
-            initial={bellsVariants.initial}
-            style={{
+            initial={{
+              ...bellsVariants.initial,
               transformOrigin: CLOCK_CENTER,
-              transformBox: "fill-box",
-              willChange: "transform",
+            }}
+            style={{
+              transformBox: "view-box",
             }}
           >
-            <motion.g
-              data-animate="bell"
-              data-index="0"
-              style={{ willChange: "transform" }}
-            >
+            <motion.g data-animate="bell" data-index="0">
               <path
                 d="M553.071 151.434a3.848 3.848 0 0 1 2.478 6.222l-1.993 2.482a1.7 1.7 0 0 1-1.826.544 27 27 0 0 0-4.182-.912 27 27 0 0 0-4.275-.247 1.7 1.7 0 0 1-1.612-1.015l-1.252-2.926a3.847 3.847 0 0 1 4.059-5.326z"
                 opacity="0.4"
                 className="fill-[#989898] dark:fill-[#D6D6D6]"
               ></path>
             </motion.g>
-            <motion.g
-              data-animate="bell"
-              data-index="1"
-              style={{ willChange: "transform" }}
-            >
+            <motion.g data-animate="bell" data-index="1">
               <path
                 d="M570.169 166.997a3.771 3.771 0 0 1-2.773 6.044.16.16 0 0 1-.149-.081 27.3 27.3 0 0 0-4-5.269.16.16 0 0 1-.036-.164 3.77 3.77 0 0 1 6.567-1.045z"
                 opacity="0.45"

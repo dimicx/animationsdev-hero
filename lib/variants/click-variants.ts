@@ -1,9 +1,9 @@
 import { Transition } from "motion/react";
 
 const REPEAT_DELAY = 6;
-const INITIAL_DELAY = 2.5;
-const DURATION = 0.53;
-const IDLE_DURATION = DURATION + 0.1;
+const INITIAL_DELAY = 2;
+const DURATION = 0.55;
+const IDLE_DURATION = 0.75;
 
 const backgroundVariants = {
   initial: {
@@ -13,16 +13,16 @@ const backgroundVariants = {
     transform: ["scale(1)", "scale(0.97)", "scale(1.01)", "scale(1)"],
     transition: {
       duration: DURATION,
-      times: [0.1, 0.33, 0.7, 1],
       ease: "easeOut",
+      times: [0, 0.2, 0.6, 1],
       delay: 0.2,
     },
   },
   idle: (initialDelay: boolean) => ({
-    transform: ["scale(1)", "scale(0.97)", "scale(1.01)", "scale(1)"],
+    transform: ["scale(1)", "scale(0.97)", "scale(1.005)", "scale(1)"],
     transition: {
       duration: IDLE_DURATION,
-      times: [0.2, 0.55, 0.92, 1],
+      times: [0.2, 0.4, 0.85, 1],
       ease: "easeOut",
       repeat: Infinity,
       repeatType: "loop",
@@ -34,7 +34,7 @@ const backgroundVariants = {
     transform: ["scale(1)", "scale(0.97)", "scale(1.01)", "scale(1)"],
     transition: {
       duration: DURATION,
-      times: [0.1, 0.33, 0.7, 1],
+      times: [0.1, 0.3, 0.65, 1],
       ease: "easeOut",
     },
   },
@@ -55,11 +55,11 @@ const lineVariants = {
   }),
   hover: (i: number) => {
     return {
-      strokeDashoffset: i === 1 ? [1.05, 0] : [1.05, 0.4],
+      strokeDashoffset: i === 1 ? [1, 0] : [1, 0.4],
       transition: {
         delay: i === 1 ? 0 : 0.04,
         duration: DURATION,
-        times: [0.85, 1],
+        times: [0.7, 0.9],
       },
     };
   },
@@ -67,19 +67,19 @@ const lineVariants = {
     const strokeDashoffset = idleStrokeDashoffset[index];
     const idleLineTransition = getIdleLineTransition(initialDelay);
     return {
-      strokeDashoffset: [strokeDashoffset, 1.05, 1.05, strokeDashoffset],
+      strokeDashoffset: [strokeDashoffset, 1, strokeDashoffset],
       transition: {
-        times: [0.2, 0.2, 0.55, 0.85],
+        times: [0.6, 0.6, 0.9],
         ...idleLineTransition,
       },
     };
   },
   click: (i: number) => {
     return {
-      strokeDashoffset: i === 1 ? [1.05, 0] : [1.05, 0.4],
+      strokeDashoffset: i === 1 ? [1, 0] : [1, 0.4],
       transition: {
-        delay: i === 1 ? 0 : 0.05,
-        times: [0.5, 0.8],
+        delay: i === 1 ? 0 : 0.04,
+        times: [0.4, 0.6],
         duration: DURATION,
       },
     };

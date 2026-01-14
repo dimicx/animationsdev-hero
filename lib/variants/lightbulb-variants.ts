@@ -8,7 +8,7 @@ const wholeVariants = {
   initial: {
     transform: "translateY(0%) rotate(0deg) scale(1)",
   },
-  animate: {
+  hover: {
     transform: [
       "translateY(0px) rotate(0deg) scale(1)",
       "translateY(6%) rotate(1.5deg) scale(0.99)",
@@ -40,7 +40,7 @@ const backgroundVariants = {
   initial: {
     transform: "scale(1)",
   },
-  animate: {
+  hover: {
     transform: ["scale(1)", "scale(0.98)", "scale(1.02)", "scale(1)"],
     transition: {
       duration: DURATION,
@@ -63,7 +63,7 @@ const bulbVariants = {
     opacity: 1,
     transform: "translateY(0%) translateX(0%)",
   },
-  animate: {
+  hover: {
     opacity: [0.3, 0.3, 1],
     transform: [
       "translateY(0%) translateX(0%)",
@@ -104,7 +104,7 @@ const stemVariants = {
   initial: {
     opacity: 1,
   },
-  animate: {
+  hover: {
     opacity: [0.3, 0.3, 1],
     transition: {
       duration: DURATION,
@@ -136,7 +136,7 @@ const bulbMaskVariants = {
     transform: "translateY(0%) translateX(0%) rotate(0deg)",
     opacity: 1,
   },
-  animate: {
+  hover: {
     transform: [
       "translateY(15%) translateX(15%) rotate(15deg)",
       "translateY(-8%) translateX(-8%) rotate(-8deg)",
@@ -183,7 +183,7 @@ const getIdleLineTransition = (initialDelay: boolean): Transition => ({
 
 const lineVariants = {
   initial: { pathLength: 1, strokeOpacity: 0.5 },
-  animate: {
+  hover: {
     pathLength: [0.01, 1],
     strokeOpacity: [0, 0.5],
     transition: {

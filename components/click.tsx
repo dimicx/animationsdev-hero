@@ -4,7 +4,7 @@ import {
   createFloatingAnimation,
   createRotationAnimation,
   UNIVERSAL_DELAY,
-} from "@/lib/animation-variants";
+} from "@/lib/animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import { useMobileTap } from "@/lib/hooks/use-mobile-tap";
@@ -33,21 +33,15 @@ const handPaths = [
 ];
 
 export function Click({
-  isMobile,
   isDraggingRef,
 }: {
-  isMobile: boolean;
   isDraggingRef: React.RefObject<boolean>;
 }) {
   const shouldReduceMotion = useReducedMotion();
   const [scope, animateVariant, animate] = useAnimateVariant();
   const handPathProgress = useMotionValue(0);
   const handPath = useTransform(handPathProgress, [0, 1], handPaths);
-  const {
-    isReadyRef: isReadyForClickRef,
-    markTapped,
-    reset: resetMobileTap,
-  } = useMobileTap({ isMobile });
+  const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const handPathAnimationRef = useRef<
     AnimationPlaybackControlsWithThen | undefined
   >(undefined);
@@ -143,17 +137,17 @@ export function Click({
   }, [playAnimationState]);
 
   useEffect(() => {
+    if (shouldReduceMotion) return;
     startIdleAnimations();
 
     return () => {
       handPathAnimationRef.current?.stop();
     };
-  }, [startIdleAnimations]);
+  }, [startIdleAnimations, shouldReduceMotion]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    shouldReduceMotion,
     onHoverStart: async () => {
       await playAnimationState("hover", {
         keyframes: [0, 1, 0],
@@ -162,7 +156,7 @@ export function Click({
       hasAnimationCompletedRef.current = true;
     },
     onHoverEnd: async () => {
-      resetMobileTap();
+      resetTap();
       hasAnimationCompletedRef.current = false;
       await playAnimationState("initial");
       startIdleAnimations();
@@ -171,11 +165,11 @@ export function Click({
 
   const onClick = useCallback(() => {
     if (shouldReduceMotion) return;
-    if (!hasAnimationCompletedRef.current) return;
     if (!isReadyForClickRef.current) {
       markTapped();
       return;
     }
+    if (!hasAnimationCompletedRef.current) return;
     playAnimationState("click", {
       keyframes: [0, 1, 0],
       times: [0.1, 0.33, 0.53],

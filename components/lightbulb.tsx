@@ -2,7 +2,7 @@ import {
   createFloatingAnimation,
   createRotationAnimation,
   UNIVERSAL_DELAY,
-} from "@/lib/animation-variants";
+} from "@/lib/animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import { useMobileTap } from "@/lib/hooks/use-mobile-tap";
@@ -22,24 +22,18 @@ import {
 import { useCallback, useEffect, useRef } from "react";
 
 export function Lightbulb({
-  isMobile,
   isDraggingRef,
 }: {
-  isMobile: boolean;
   isDraggingRef?: React.RefObject<boolean>;
 }) {
   const shouldReduceMotion = useReducedMotion();
   const [scope, animateVariant] = useAnimateVariant();
   const hasAnimationCompletedRef = useRef(false);
   const isFirstIdleRef = useRef(true);
-  const {
-    isReadyRef: isReadyForClickRef,
-    markTapped,
-    reset: resetMobileTap,
-  } = useMobileTap({ isMobile });
+  const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
 
   const animateLightbulbVariant = useCallback(
-    (variant: "initial" | "animate" | "idle" | "click") => {
+    (variant: "initial" | "hover" | "idle" | "click") => {
       const initialDelay = variant === "idle" && isFirstIdleRef.current;
 
       const variantMap = {
@@ -75,16 +69,15 @@ export function Lightbulb({
   }, [animateLightbulbVariant, shouldReduceMotion]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
-    delay: isMobile ? 0 : UNIVERSAL_DELAY,
+    delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    shouldReduceMotion,
     onHoverStart: async () => {
-      await animateLightbulbVariant("animate");
+      await animateLightbulbVariant("hover");
       hasAnimationCompletedRef.current = true;
     },
     onHoverEnd: () => {
       hasAnimationCompletedRef.current = false;
-      resetMobileTap();
+      resetTap();
       animateLightbulbVariant("initial");
       animateLightbulbVariant("idle");
     },
@@ -92,11 +85,11 @@ export function Lightbulb({
 
   const onClick = useCallback(() => {
     if (shouldReduceMotion) return;
-    if (!hasAnimationCompletedRef.current) return;
     if (!isReadyForClickRef.current) {
       markTapped();
       return;
     }
+    if (!hasAnimationCompletedRef.current) return;
     animateLightbulbVariant("click");
   }, [
     animateLightbulbVariant,
@@ -111,7 +104,6 @@ export function Lightbulb({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
-      className="origin-bottom!"
     >
       <motion.g
         style={{ willChange: "transform" }}

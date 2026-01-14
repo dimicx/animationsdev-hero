@@ -9,7 +9,7 @@ import {
   createFloatingAnimation,
   createRotationAnimation,
   UNIVERSAL_DELAY,
-} from "@/lib/animation-variants";
+} from "@/lib/animations";
 import {
   bounceAcceleratedXFast,
   bounceEaseFast,
@@ -53,12 +53,10 @@ const MEDIUM_BUBBLE_SCALE = 0.12;
 const SMALL_BUBBLE_SCALE = 0.15;
 
 export function Bounce({
-  isMobile,
   onDragStart,
   onDragEnd: onDragEndCallback,
   isDraggingRef,
 }: {
-  isMobile: boolean;
   onDragStart?: () => void;
   onDragEnd?: () => void;
   isDraggingRef?: React.RefObject<boolean>;
@@ -100,7 +98,7 @@ export function Bounce({
   }, []);
 
   const animateSpringPathVariant = useCallback(
-    (variant: "initial" | "animate" | "click") => {
+    (variant: "initial" | "hover" | "click") => {
       const variantMap = {
         "secondary-circle": secondaryCircleVariants,
         background: backgroundVariants,
@@ -256,14 +254,14 @@ export function Bounce({
   ]);
 
   useEffect(() => {
+    if (shouldReduceMotion) return;
     startAnimations();
     return stopAllAnimations;
-  }, [startAnimations, stopAllAnimations]);
+  }, [startAnimations, stopAllAnimations, shouldReduceMotion]);
 
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
-    delay: isMobile ? 0 : UNIVERSAL_DELAY,
+    delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    shouldReduceMotion,
     onHoverStart: () => {
       // Stop all existing animations to prevent stacking
       stopAllAnimations();
@@ -276,8 +274,8 @@ export function Bounce({
         ballVariants.initial
       );
       if (anim) runningAnimationsRef.current.push(anim);
-      animateSpringPathVariant("animate");
-      animatePathVariant("animate");
+      animateSpringPathVariant("hover");
+      animatePathVariant("hover");
       forwardCompleted.current = false;
 
       // Reset progress
@@ -374,7 +372,7 @@ export function Bounce({
   }, [animateSpringPathVariant, shouldReduceMotion, animate, animateVariant]);
 
   return (
-    <motion.g ref={scope} className="origin-bottom-left!">
+    <motion.g ref={scope}>
       {/* small bubbles - point towards pointer */}
       <g>
         {/* medium bubble */}

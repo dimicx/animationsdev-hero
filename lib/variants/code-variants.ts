@@ -2,7 +2,7 @@ const wholeVariants = {
   initial: {
     transform: "rotate(0deg) scale(1)",
   },
-  animate: {
+  hover: {
     transform: [
       "rotate(0deg) scale(1)",
       "rotate(8deg) scale(0.99)",
@@ -34,7 +34,7 @@ const caretLeftVariants = {
   initial: {
     transform: "translateX(0px) translateY(0px)",
   },
-  animate: {
+  hover: {
     transform: [
       "translateX(0px) translateY(0px)",
       "translateX(2px) translateY(-1px)",
@@ -53,7 +53,7 @@ const caretRightVariants = {
   initial: {
     transform: "translateX(0px) translateY(0px)",
   },
-  animate: {
+  hover: {
     transform: [
       "translateX(0px) translateY(0px)",
       "translateX(-2px) translateY(1px)",
@@ -72,7 +72,7 @@ const slashVariants = {
   initial: {
     transform: "translateX(0px) translateY(0px) rotate(0deg)",
   },
-  animate: {
+  hover: {
     transform: [
       "translateX(0px) translateY(0px) rotate(0deg)",
       "translateX(2px) translateY(0px) rotate(-8deg)",
@@ -91,7 +91,7 @@ const codePathVariants = {
   initial: {
     transform: "translateX(0px) translateY(0px) rotate(0deg) scale(1)",
   },
-  animate: {
+  hover: {
     transform: [
       "translateX(0px) translateY(0px) rotate(0deg) scale(1)",
       "translateX(12px) translateY(-2px) rotate(1deg) scale(1)",
@@ -122,7 +122,7 @@ const opacityVariants = {
   initial: {
     opacity: 0.4,
   },
-  animate: {
+  hover: {
     opacity: 0.4,
     transition: {
       duration: 0.2,
@@ -147,7 +147,7 @@ const pulseVariants = {
   initial: {
     opacity: 1,
   },
-  animate: {
+  hover: {
     opacity: [1, 0.65, 1],
     transition: {
       duration: 2,

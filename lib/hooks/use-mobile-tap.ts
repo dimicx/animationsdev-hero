@@ -1,35 +1,28 @@
 import { useCallback, useEffect, useRef } from "react";
-
-interface UseMobileTapOptions {
-  /** Whether the device is mobile */
-  isMobile: boolean;
-}
+import { useMediaQuery } from "usehooks-ts";
 
 interface UseMobileTapReturn {
   /** Whether ready for click action (always true on desktop) */
-  isReady: boolean;
+  isReadyForClickRef: React.RefObject<boolean>;
   /** Mark first tap complete, enabling click action */
   markTapped: () => void;
   /** Reset ready state */
-  reset: () => void;
-  /** Ref for checking ready state in callbacks */
-  isReadyRef: React.RefObject<boolean>;
+  resetTap: () => void;
 }
 
 /**
  * Hook for handling mobile double-tap pattern.
  * On mobile: first tap triggers hover, second tap triggers click action.
- * On desktop: isReady is always true, allowing immediate clicks.
+ * On desktop: isReadyForClickRef is always true, allowing immediate clicks.
  *
- * @param isMobile - Whether the device is mobile
- * @returns Object with isReady state, markTapped, reset functions, and isReadyRef
+ * @returns Object with markTapped, resetTap functions, and isReadyForClickRef
  *
  * @example
  * ```tsx
- * const { isReady, markTapped, reset, isReadyRef } = useMobileTap({ isMobile });
+ * const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
  *
  * const handleClick = () => {
- *   if (!isReady) {
+ *   if (!isReadyForClickRef.current) {
  *     markTapped(); // First tap on mobile
  *     return;
  *   }
@@ -37,37 +30,33 @@ interface UseMobileTapReturn {
  * };
  * ```
  */
-export function useMobileTap({
-  isMobile,
-}: UseMobileTapOptions): UseMobileTapReturn {
+export function useMobileTap(): UseMobileTapReturn {
+  const isMobile = useMediaQuery("(pointer: coarse)");
   // Start as true (desktop default), will be corrected by effect on mobile
-  const isReadyRef = useRef(true);
+  const isReadyForClickRef = useRef(true);
 
   // Sync ref when isMobile changes (handles SSR hydration where isMobile starts false)
   useEffect(() => {
     if (isMobile) {
-      isReadyRef.current = false;
+      isReadyForClickRef.current = false;
     }
   }, [isMobile]);
 
   const markTapped = useCallback(() => {
     if (isMobile) {
-      isReadyRef.current = true;
+      isReadyForClickRef.current = true;
     }
   }, [isMobile]);
 
-  const reset = useCallback(() => {
+  const resetTap = useCallback(() => {
     if (isMobile) {
-      isReadyRef.current = false;
+      isReadyForClickRef.current = false;
     }
   }, [isMobile]);
 
   return {
-    get isReady() {
-      return isReadyRef.current;
-    },
+    isReadyForClickRef,
     markTapped,
-    reset,
-    isReadyRef,
+    resetTap,
   };
 }

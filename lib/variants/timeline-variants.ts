@@ -7,7 +7,7 @@ const scaleVariants = {
   initial: {
     transform: "scale(1)",
   },
-  animate: {
+  hover: {
     transform: ["scale(1)", "scale(0.97)", "scale(1.02)", "scale(1)"],
     transition: {
       duration: 0.4,
@@ -29,7 +29,7 @@ const timelineOneVariants = {
   initial: {
     pathLength: 1,
   },
-  animate: {
+  hover: {
     pathLength: [1, 0.4, 0.4, 0.4, 1],
     transition: {
       duration: TIMELINE_DURATION,
@@ -62,7 +62,7 @@ const timelineTwoVariants = {
     pathLength: 1,
     transform: "translateY(0%) translateX(0%)",
   },
-  animate: {
+  hover: {
     pathLength: [1, 0.4, 0.4, 0.4, 1],
     transform: [
       "translateY(0%) translateX(0%)",
@@ -104,7 +104,7 @@ const timelineThreeVariants = {
     pathLength: 1,
     transform: "translateY(0%) translateX(0%)",
   },
-  animate: {
+  hover: {
     pathLength: [1, 0.25, 0.25, 0.25, 1],
     transform: [
       "translateY(0%) translateX(0%)",
@@ -145,7 +145,7 @@ const timelineContainerVariants = {
   initial: {
     transform: "rotate(0deg)",
   },
-  animate: {
+  hover: {
     transform: ["rotate(0deg)", "rotate(-12deg)", "rotate(-9deg)"],
     transition: {
       duration: 0.7,

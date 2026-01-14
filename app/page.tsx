@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 
 export default function Home() {
   return (
-    <>
+    <div className="min-h-dvh">
       <header className="sticky top-4 z-50 flex w-full items-center justify-end gap-4 p-4 pt-0 sm:top-6 sm:p-6 sm:pt-0">
         <ThemeToggle />
         <GithubLink />
@@ -13,7 +13,7 @@ export default function Home() {
       <main className="mx-auto mt-6! mb-8 w-full max-w-[732px] px-4 text-gray-1200 sm:mt-32 md:mb-12 md:mt-20">
         <Scene />
       </main>
-    </>
+    </div>
   );
 }
 

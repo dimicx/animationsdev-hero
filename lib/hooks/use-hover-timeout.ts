@@ -1,4 +1,6 @@
+import { useReducedMotion } from "motion/react";
 import { useCallback, useRef } from "react";
+import { useMediaQuery } from "usehooks-ts";
 
 interface UseHoverTimeoutProps {
   /** Delay in milliseconds before hover animation starts */
@@ -9,8 +11,6 @@ interface UseHoverTimeoutProps {
   onHoverEnd: () => void;
   /** Optional ref to check if hover is disabled */
   disabledRef?: React.RefObject<boolean>;
-  /** Optional ref to check if reduce motion is enabled */
-  shouldReduceMotion?: boolean | null;
 }
 
 /**
@@ -29,13 +29,16 @@ export function useHoverTimeout({
   onHoverStart,
   onHoverEnd,
   disabledRef,
-  shouldReduceMotion = false,
 }: UseHoverTimeoutProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const isMobile = useMediaQuery("(pointer: coarse)");
   const mouseEnterTimeRef = useRef<number>(0);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const _delay = isMobile ? 0 : delay;
+
   const handleMouseEnter = useCallback(() => {
-    if (disabledRef?.current) return;
+    if (disabledRef?.current || shouldReduceMotion) return;
 
     mouseEnterTimeRef.current = Date.now();
 
@@ -46,13 +49,13 @@ export function useHoverTimeout({
 
     // Delay starting hover animation until we're sure it's not a quick pass-through
     hoverTimeoutRef.current = setTimeout(() => {
-      if (disabledRef?.current) return;
+      if (disabledRef?.current || shouldReduceMotion) return;
       onHoverStart();
-    }, delay);
-  }, [delay, onHoverStart, disabledRef]);
+    }, _delay);
+  }, [_delay, onHoverStart, disabledRef, shouldReduceMotion]);
 
   const handleMouseLeave = useCallback(() => {
-    if (disabledRef?.current) return;
+    if (disabledRef?.current || shouldReduceMotion) return;
 
     const hoverDuration = Date.now() - mouseEnterTimeRef.current;
 
@@ -63,14 +66,10 @@ export function useHoverTimeout({
     }
 
     // Only process if hover was long enough (animation actually started)
-    if (hoverDuration >= delay) {
+    if (hoverDuration >= _delay) {
       onHoverEnd();
     }
-  }, [delay, onHoverEnd, disabledRef]);
-
-  if (shouldReduceMotion) {
-    return { handleMouseEnter: () => {}, handleMouseLeave: () => {} };
-  }
+  }, [_delay, onHoverEnd, disabledRef, shouldReduceMotion]);
 
   return { handleMouseEnter, handleMouseLeave };
 }
