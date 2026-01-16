@@ -14,6 +14,7 @@ import {
   stemVariants,
   wholeVariants,
 } from "@/lib/variants/lightbulb-variants";
+import { revealVariants } from "@/lib/variants/reveal-variants";
 import {
   AnimationPlaybackControlsWithThen,
   motion,
@@ -104,6 +105,8 @@ export function Lightbulb({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
+      variants={revealVariants}
+      className="origin-bottom! will-change-transform"
     >
       <motion.g
         style={{ willChange: "transform" }}
