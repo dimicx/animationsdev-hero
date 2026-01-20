@@ -240,8 +240,7 @@ export function Click({
             strokeOpacity="0.5"
             strokeWidth="3.7"
             strokeLinecap="round"
-            strokeDasharray="1px 1.1px"
-            strokeDashoffset="1.05px"
+            strokeDasharray="1 1.1"
             pathLength="1"
             className="stroke-[#989898] dark:stroke-[#D6D6D6]"
           />
@@ -257,8 +256,7 @@ export function Click({
             strokeOpacity="0.5"
             strokeWidth="3.7"
             strokeLinecap="round"
-            strokeDasharray="1px 1.1px"
-            strokeDashoffset="1.05px"
+            strokeDasharray="1 1.1"
             pathLength="1"
             className="stroke-[#989898] dark:stroke-[#D6D6D6]"
           />
@@ -274,8 +272,7 @@ export function Click({
             strokeOpacity="0.5"
             strokeWidth="3.7"
             strokeLinecap="round"
-            strokeDasharray="1px 1.1px"
-            strokeDashoffset="1.05px"
+            strokeDasharray="1 1.1"
             pathLength="1"
             className="stroke-[#989898] dark:stroke-[#D6D6D6]"
           />
