@@ -28,9 +28,3 @@ body {
 svg [data-animate] {
   will-change: transform, opacity;
 }
-
-@supports (-webkit-hyphens: none) {
-  .no-animate-safari {
-    transform: none !important;
-  }
-}
