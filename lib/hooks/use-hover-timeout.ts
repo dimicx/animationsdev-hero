@@ -40,20 +40,14 @@ export function useHoverTimeout({
   const isMobile = useMediaQuery("(pointer: coarse)");
   const mouseEnterTimeRef = useRef<number>(0);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const _delay = isMobile ? 0 : delay;
 
   const handleMouseEnter = useCallback(() => {
     if (disabledRef?.current || shouldReduceMotion) return;
 
-    // Cancel any pending resume (user hovered back quickly)
-    if (resumeTimeoutRef.current) {
-      clearTimeout(resumeTimeoutRef.current);
-      resumeTimeoutRef.current = null;
-    }
-
     // Pause all ambient animations immediately (Safari only - to prevent frame drops)
+    // This also cancels any pending resume timer in the store
     if (isSafari) {
       ambientAnimationsStore.pauseAll();
     }
@@ -76,11 +70,9 @@ export function useHoverTimeout({
     if (disabledRef?.current || shouldReduceMotion) return;
 
     // Resume all ambient animations after a short delay (Safari only)
+    // Timer is managed by the store to handle cross-component hover transitions
     if (isSafari) {
-      resumeTimeoutRef.current = setTimeout(() => {
-        ambientAnimationsStore.resumeAll();
-        resumeTimeoutRef.current = null;
-      }, 200);
+      ambientAnimationsStore.resumeAllWithDelay(200);
     }
 
     const hoverDuration = Date.now() - mouseEnterTimeRef.current;
