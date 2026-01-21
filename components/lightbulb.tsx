@@ -1,8 +1,5 @@
-import {
-  createFloatingAnimation,
-  createRotationAnimation,
-  UNIVERSAL_DELAY,
-} from "@/lib/animations";
+import { UNIVERSAL_DELAY } from "@/lib/animations";
+import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import { useMobileTap } from "@/lib/hooks/use-mobile-tap";
@@ -31,6 +28,12 @@ export function Lightbulb({
   const hasAnimationCompletedRef = useRef(false);
   const isFirstIdleRef = useRef(true);
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
+
+  const { floatingRef, rotationRef, pause, resume } = useAmbientAnimations({
+    floating: { to: 1, duration: 3 },
+    rotation: { to: 5, duration: 10 },
+    shouldReduceMotion,
+  });
 
   const animateLightbulbVariant = useCallback(
     (variant: "initial" | "hover" | "idle" | "click") => {
@@ -75,6 +78,8 @@ export function Lightbulb({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    onImmediateEnter: pause,
+    onImmediateLeave: resume,
     onHoverStart: async () => {
       await animateLightbulbVariant("hover");
       hasAnimationCompletedRef.current = true;
@@ -109,32 +114,21 @@ export function Lightbulb({
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
     >
-      <motion.g
-        {...createFloatingAnimation({
-          to: 1,
-          duration: 3,
-          shouldReduceMotion,
-        })}
-        className="will-change-transform no-animate-safari"
-      >
+      <g ref={floatingRef} className="will-change-transform">
         <motion.g
           data-animate="background"
           initial={backgroundVariants.initial}
         >
-          <motion.g
+          <g
+            ref={rotationRef}
             style={{ willChange: "transform" }}
-            {...createRotationAnimation({
-              to: 5,
-              duration: 10,
-              shouldReduceMotion,
-            })}
-            className="filter-[url(#filter5_i_359_1453)] dark:filter-[url(#filter5_i_368_1560)] filter-animated no-animate-safari"
+            className="filter-[url(#filter5_i_359_1453)] dark:filter-[url(#filter5_i_368_1560)] filter-animated"
           >
             <path
               d="M367.266 21.417c-2.316-9.36 10.658-14.171 15.564-5.87 2.973 5.03 10.083 5.68 13.821 1.188l4.123-4.955c8.221-9.88 24.263-3.102 22.91 9.68l-.678 6.41c-.615 5.811 4.807 10.455 10.487 9.08 9.371-2.268 14.965 10.389 6.64 15.252-5.132 2.998-5.591 10.24-.88 13.862l5.654 4.347c10.746 8.261 3.501 25.412-9.914 23.466l-7.058-1.023c-5.881-.853-10.753 4.524-9.325 10.293 2.316 9.359-10.658 14.171-15.564 5.871-2.974-5.031-10.083-5.681-13.822-1.189l-4.123 4.954c-8.221 9.88-24.263 3.102-22.91-9.679l.678-6.41c.615-5.812-4.807-10.456-10.487-9.08-9.371 2.267-14.965-10.39-6.639-15.253 5.131-2.998 5.59-10.239.879-13.861l-5.654-4.347c-10.746-8.262-3.5-25.412 9.915-23.467l7.057 1.024c5.882.853 10.753-4.524 9.326-10.293"
               className="fill-[#F8F8F8] dark:fill-[#252525]"
             ></path>
-          </motion.g>
+          </g>
         </motion.g>
 
         <motion.g
@@ -223,7 +217,7 @@ export function Lightbulb({
             />
           </g>
         </motion.g>
-      </motion.g>
+      </g>
     </g>
   );
 }

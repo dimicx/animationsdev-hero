@@ -5,11 +5,8 @@ import {
   LIGHT_MODE_COLORS,
   SPRING_CONFIGS,
 } from "@/lib/animation-configs";
-import {
-  createFloatingAnimation,
-  createRotationAnimation,
-  UNIVERSAL_DELAY,
-} from "@/lib/animations";
+import { UNIVERSAL_DELAY } from "@/lib/animations";
+import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import {
   bounceAcceleratedXFast,
   bounceEaseFast,
@@ -71,6 +68,28 @@ export function Bounce({
   const forwardCompleteTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
+
+  // Refs for ambient animations
+  const mainFloatingRef = useRef<SVGGElement>(null);
+  const mainRotationRef = useRef<SVGGElement>(null);
+  const mediumBubbleFloatRef = useRef<SVGGElement>(null);
+  const smallBubbleFloatRef = useRef<SVGGElement>(null);
+
+  const { pause, resume } = useAmbientAnimations({
+    animations: [
+      { ref: mainFloatingRef, type: "floating", to: 2, duration: 5 },
+      { ref: mainRotationRef, type: "rotation", to: 2, duration: 6, delay: 1 },
+      { ref: mediumBubbleFloatRef, type: "floating", to: -1.5, duration: 3 },
+      {
+        ref: smallBubbleFloatRef,
+        type: "floating",
+        to: -1,
+        duration: 2.5,
+        delay: 0.5,
+      },
+    ],
+    shouldReduceMotion,
+  });
 
   // Stop all running animations to prevent stacking
   const stopAllAnimations = useCallback(() => {
@@ -262,6 +281,8 @@ export function Bounce({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    onImmediateEnter: pause,
+    onImmediateLeave: resume,
     onHoverStart: () => {
       // Stop all existing animations to prevent stacking
       stopAllAnimations();
@@ -376,14 +397,7 @@ export function Bounce({
       {/* small bubbles - point towards pointer */}
       <g>
         {/* medium bubble */}
-        <motion.g
-          {...createFloatingAnimation({
-            to: -1.5,
-            duration: 3,
-            shouldReduceMotion,
-          })}
-          className="will-change-transform no-animate-safari"
-        >
+        <g ref={mediumBubbleFloatRef} className="will-change-transform">
           <motion.g
             ref={mediumBubbleRef}
             style={{
@@ -393,10 +407,7 @@ export function Bounce({
               willChange: "transform",
             }}
           >
-            <g
-              data-animate="bubbles"
-              data-index="0"
-            >
+            <g data-animate="bubbles" data-index="0">
               <circle
                 cx="201.927"
                 cy="293.495"
@@ -405,18 +416,10 @@ export function Bounce({
               />
             </g>
           </motion.g>
-        </motion.g>
+        </g>
 
         {/* small bubble */}
-        <motion.g
-          {...createFloatingAnimation({
-            to: -1,
-            duration: 2.5,
-            delay: 0.5,
-            shouldReduceMotion,
-          })}
-          className="will-change-transform no-animate-safari"
-        >
+        <g ref={smallBubbleFloatRef} className="will-change-transform">
           <motion.g
             ref={smallBubbleRef}
             style={{
@@ -426,10 +429,7 @@ export function Bounce({
               willChange: "transform",
             }}
           >
-            <g
-              data-animate="bubbles"
-              data-index="1"
-            >
+            <g data-animate="bubbles" data-index="1">
               <circle
                 cx="184.926"
                 cy="314.008"
@@ -438,7 +438,7 @@ export function Bounce({
               />
             </g>
           </motion.g>
-        </motion.g>
+        </g>
 
         {/* transparent hit area for dragging */}
         <motion.g
@@ -461,27 +461,14 @@ export function Bounce({
         </motion.g>
       </g>
 
-      <motion.g
+      <g
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
-        {...createFloatingAnimation({
-          to: 2,
-          duration: 5,
-          shouldReduceMotion,
-        })}
-        className="will-change-transform no-animate-safari"
       >
-        <motion.g
-          {...createRotationAnimation({
-            to: 2,
-            duration: 6,
-            delay: 1,
-            shouldReduceMotion,
-          })}
-          className="will-change-transform no-animate-safari"
-        >
-          <motion.g style={{ x: mainDx, y: mainDy, willChange: "transform" }}>
+        <g ref={mainFloatingRef} className="will-change-transform">
+          <g ref={mainRotationRef} className="will-change-transform">
+            <motion.g style={{ x: mainDx, y: mainDy, willChange: "transform" }}>
             <motion.g data-animate="background" initial={backgroundVariants.initial}>
               <g className="filter-[url(#filter0_i_359_1453)] dark:filter-[url(#filter0_ii_368_1560)] filter-animated">
                 <path
@@ -549,8 +536,9 @@ export function Bounce({
               </motion.g>
             </motion.g>
           </motion.g>
-        </motion.g>
-      </motion.g>
+        </g>
+      </g>
+    </g>
     </motion.g>
   );
 }

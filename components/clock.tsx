@@ -1,9 +1,6 @@
 import { SPRING_CONFIGS } from "@/lib/animation-configs";
-import {
-  createFloatingAnimation,
-  createRotationAnimation,
-  UNIVERSAL_DELAY,
-} from "@/lib/animations";
+import { UNIVERSAL_DELAY } from "@/lib/animations";
+import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import { useMobileTap } from "@/lib/hooks/use-mobile-tap";
@@ -35,6 +32,12 @@ export function Clock({
   const hasClickedRef = useRef(false);
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const isFirstIdleRef = useRef(true);
+
+  const { floatingRef, rotationRef, pause, resume } = useAmbientAnimations({
+    floating: { to: 1.5, duration: 3 },
+    rotation: { to: 1, duration: 4 },
+    shouldReduceMotion,
+  });
 
   const animateClockVariant = useCallback(
     (variant: "initial" | "hover" | "click" | "scale-click") => {
@@ -142,6 +145,8 @@ export function Clock({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    onImmediateEnter: pause,
+    onImmediateLeave: resume,
     onHoverStart: () => {
       animateClockVariant("hover");
     },
@@ -207,31 +212,20 @@ export function Clock({
       onMouseLeave={handleMouseLeave}
       onClick={handleClockClick}
     >
-      <motion.g
-        {...createFloatingAnimation({
-          to: 1.5,
-          duration: 3,
-          shouldReduceMotion,
-        })}
-        className="will-change-transform no-animate-safari"
-      >
+      <g ref={floatingRef} className="will-change-transform">
         <motion.g
           data-animate="background"
           initial={backgroundVariants.initial}
         >
-          <motion.g
-            {...createRotationAnimation({
-              to: 1,
-              duration: 4,
-              shouldReduceMotion,
-            })}
-            className="filter-[url(#filter7_i_359_1453)] dark:filter-[url(#filter7_i_368_1560)] filter-animated no-animate-safari will-change-transform"
+          <g
+            ref={rotationRef}
+            className="filter-[url(#filter7_i_359_1453)] dark:filter-[url(#filter7_i_368_1560)] filter-animated will-change-transform"
           >
             <path
               d="M553.22 118.392c42.396 5.809 72.84 39.157 68 74.487-1.536 11.213-6.442 21.277-13.78 29.607-6.142 6.973-8.217 17.405-2.728 24.902l1.828 2.496a6.7 6.7 0 0 1 1.082 2.304c1.428 5.683-4.672 10.293-9.749 7.368l-20.818-11.989a16.37 16.37 0 0 0-9.304-2.147l-2.455.17c-9.352 1.811-19.359 2.145-29.605.741-42.395-5.809-72.839-39.158-67.998-74.487s43.132-59.26 85.527-53.452"
               className="fill-[#F8F8F8] dark:fill-[#252525]"
             ></path>
-          </motion.g>
+          </g>
         </motion.g>
 
         <motion.g
@@ -313,7 +307,7 @@ export function Clock({
             </g>
           </motion.g>
         </motion.g>
-      </motion.g>
+      </g>
     </motion.g>
   );
 }

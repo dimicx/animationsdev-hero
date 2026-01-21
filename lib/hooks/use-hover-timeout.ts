@@ -11,6 +11,10 @@ interface UseHoverTimeoutProps {
   onHoverEnd: () => void;
   /** Optional ref to check if hover is disabled */
   disabledRef?: React.RefObject<boolean>;
+  /** Optional callback fired immediately on mouseenter (before delay) */
+  onImmediateEnter?: () => void;
+  /** Optional callback fired immediately on mouseleave (unconditionally) */
+  onImmediateLeave?: () => void;
 }
 
 /**
@@ -29,6 +33,8 @@ export function useHoverTimeout({
   onHoverStart,
   onHoverEnd,
   disabledRef,
+  onImmediateEnter,
+  onImmediateLeave,
 }: UseHoverTimeoutProps) {
   const shouldReduceMotion = useReducedMotion();
   const isMobile = useMediaQuery("(pointer: coarse)");
@@ -39,6 +45,9 @@ export function useHoverTimeout({
 
   const handleMouseEnter = useCallback(() => {
     if (disabledRef?.current || shouldReduceMotion) return;
+
+    // Fire immediate callback before any delay
+    onImmediateEnter?.();
 
     mouseEnterTimeRef.current = Date.now();
 
@@ -52,10 +61,13 @@ export function useHoverTimeout({
       if (disabledRef?.current || shouldReduceMotion) return;
       onHoverStart();
     }, _delay);
-  }, [_delay, onHoverStart, disabledRef, shouldReduceMotion]);
+  }, [_delay, onHoverStart, disabledRef, shouldReduceMotion, onImmediateEnter]);
 
   const handleMouseLeave = useCallback(() => {
     if (disabledRef?.current || shouldReduceMotion) return;
+
+    // Fire immediate callback unconditionally (not gated by hover duration)
+    onImmediateLeave?.();
 
     const hoverDuration = Date.now() - mouseEnterTimeRef.current;
 
@@ -69,7 +81,7 @@ export function useHoverTimeout({
     if (hoverDuration >= _delay) {
       onHoverEnd();
     }
-  }, [_delay, onHoverEnd, disabledRef, shouldReduceMotion]);
+  }, [_delay, onHoverEnd, disabledRef, shouldReduceMotion, onImmediateLeave]);
 
   return { handleMouseEnter, handleMouseLeave };
 }

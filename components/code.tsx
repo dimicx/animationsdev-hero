@@ -4,7 +4,8 @@ import {
   DEFAULT_LIGHT_FILL,
   LIGHT_MODE_COLORS,
 } from "@/lib/animation-configs";
-import { createFloatingAnimation, UNIVERSAL_DELAY } from "@/lib/animations";
+import { UNIVERSAL_DELAY } from "@/lib/animations";
+import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import { useMobileTap } from "@/lib/hooks/use-mobile-tap";
@@ -43,6 +44,11 @@ export function Code({
   const hasAnimationCompletedRef = useRef(false);
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const hasClickedRef = useRef(false);
+
+  const { floatingRef, pause, resume } = useAmbientAnimations({
+    floating: { to: 1.5, duration: 3 },
+    shouldReduceMotion,
+  });
 
   const codePathProgress = useSpring(0, {
     visualDuration: 0.34,
@@ -124,6 +130,8 @@ export function Code({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
+    onImmediateEnter: pause,
+    onImmediateLeave: resume,
     onHoverStart: async () => {
       codePathProgress.set(2);
       await animateCodeVariant("hover");
@@ -166,14 +174,7 @@ export function Code({
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
-      <motion.g
-        {...createFloatingAnimation({
-          to: 1.5,
-          duration: 3,
-          shouldReduceMotion,
-        })}
-        className="will-change-transform no-animate-safari"
-      >
+      <g ref={floatingRef} className="will-change-transform">
         <g data-animate="whole">
           <g className="filter-[url(#filter8_i_359_1453)] dark:filter-[url(#filter8_i_368_1560)] filter-animated">
             <path
@@ -227,7 +228,7 @@ export function Code({
             />
           </g>
         </g>
-      </motion.g>
+      </g>
     </motion.g>
   );
 }
