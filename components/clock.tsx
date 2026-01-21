@@ -212,7 +212,7 @@ export function Clock({
       onMouseLeave={handleMouseLeave}
       onClick={handleClockClick}
       variants={revealVariants}
-      className="origin-bottom-right!"
+      className="origin-bottom-right! will-change-transform"
     >
       <g ref={floatingRef} className="will-change-transform">
         <motion.g

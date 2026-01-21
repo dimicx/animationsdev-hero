@@ -174,7 +174,7 @@ export function Code({
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
       variants={revealVariants}
-      className="origin-bottom-left!"
+      className="origin-bottom-left! will-change-transform"
     >
       <g ref={floatingRef} className="will-change-transform">
         <g data-animate="whole">

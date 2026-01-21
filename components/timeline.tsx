@@ -180,7 +180,7 @@ export function Timeline({
     <motion.g 
       ref={scope}
       variants={revealVariants}
-      className="origin-bottom!"
+      className="origin-bottom! will-change-transform"
     >
       {/* buffer zone to reset timelines early */}
       <rect

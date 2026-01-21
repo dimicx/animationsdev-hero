@@ -396,7 +396,7 @@ export function Bounce({
   return (
     <motion.g ref={scope}
       variants={revealVariants}
-      className="origin-bottom-left!"
+      className="origin-bottom-left! will-change-transform"
     >
       {/* small bubbles - point towards pointer */}
       <motion.g
@@ -414,7 +414,7 @@ export function Bounce({
       >
         {/* medium bubble */}
         <g ref={mediumBubbleFloatRef} className="will-change-transform">
-          <motion.g variants={bubbleRevealVariants}>
+          <motion.g variants={bubbleRevealVariants} className="will-change-transform">
             <motion.g
               ref={mediumBubbleRef}
               style={{
@@ -438,7 +438,7 @@ export function Bounce({
 
         {/* small bubble */}
         <g ref={smallBubbleFloatRef} className="will-change-transform">
-          <motion.g variants={bubbleRevealVariants}>
+          <motion.g variants={bubbleRevealVariants} className="will-change-transform">
             <motion.g
               ref={smallBubbleRef}
               style={{

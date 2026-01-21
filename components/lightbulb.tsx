@@ -114,7 +114,7 @@ export function Lightbulb({
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
       variants={revealVariants}
-      className="origin-bottom!"
+      className="origin-bottom! will-change-transform"
     >
       <g ref={floatingRef} className="will-change-transform">
         <motion.g
