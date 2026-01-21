@@ -18,6 +18,7 @@ import {
   slashVariants,
   wholeVariants,
 } from "@/lib/variants/code-variants";
+import { revealVariants } from "@/lib/variants/reveal-variants";
 import {
   motion,
   useReducedMotion,
@@ -172,6 +173,8 @@ export function Code({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
+      variants={revealVariants}
+      className="origin-bottom-left!"
     >
       <g ref={floatingRef} className="will-change-transform">
         <g data-animate="whole">

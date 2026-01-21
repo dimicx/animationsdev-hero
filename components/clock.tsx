@@ -11,6 +11,7 @@ import {
   clockAndBellsVariants,
   clockVariants,
 } from "@/lib/variants/clock-variants";
+import { revealVariants } from "@/lib/variants/reveal-variants";
 import {
   AnimationPlaybackControlsWithThen,
   motion,
@@ -210,6 +211,8 @@ export function Clock({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClockClick}
+      variants={revealVariants}
+      className="origin-bottom-right!"
     >
       <g ref={floatingRef} className="will-change-transform">
         <motion.g

@@ -2,6 +2,7 @@ import { UNIVERSAL_DELAY } from "@/lib/animations";
 import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
+import { revealVariants } from "@/lib/variants/reveal-variants";
 import {
   scaleVariants,
   timelineContainerVariants,
@@ -176,7 +177,11 @@ export function Timeline({
   }, [animateTimelineVariant, animateContainerVariant, shouldReduceMotion]);
 
   return (
-    <motion.g ref={scope}>
+    <motion.g 
+      ref={scope}
+      variants={revealVariants}
+      className="origin-bottom!"
+    >
       {/* buffer zone to reset timelines early */}
       <rect
         x="150"

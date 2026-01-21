@@ -34,6 +34,13 @@ export function Scene() {
           className="h-auto max-w-full overflow-visible!"
           role="img"
           aria-label="Interactive animation showcasing various microinteractions"
+          variants={{
+            animate: {
+              transition: { staggerChildren: 0.05 },
+            },
+          }}
+          initial="initial"
+          animate="animate"
         >
           <Code isDraggingRef={isDraggingRef} />
           <Bounce

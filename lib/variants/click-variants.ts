@@ -1,7 +1,7 @@
 import { Transition } from "motion/react";
 
 const REPEAT_DELAY = 6;
-const INITIAL_DELAY = 2;
+const INITIAL_DELAY = 2.5;
 const DURATION = 0.55;
 const IDLE_DURATION = 0.75;
 

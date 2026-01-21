@@ -20,6 +20,7 @@ import {
   backgroundVariants,
   ballVariants,
   BOUNCE_DURATION,
+  bubbleRevealVariants,
   bubblesVariants,
   pathVariants,
   secondaryCircleVariants,
@@ -34,6 +35,7 @@ import {
   useTransform,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
+import { revealVariants } from "@/lib/variants/reveal-variants";
 
 // Ball positions - aligned with path touchpoints
 const START_X = 212;
@@ -392,50 +394,69 @@ export function Bounce({
   }, [animateSpringPathVariant, shouldReduceMotion, animate, animateVariant]);
 
   return (
-    <motion.g ref={scope}>
+    <motion.g ref={scope}
+      variants={revealVariants}
+      className="origin-bottom-left!"
+    >
       {/* small bubbles - point towards pointer */}
-      <g>
+      <motion.g
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.1,
+              delayChildren: 0.225,
+            },
+          },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
         {/* medium bubble */}
         <g ref={mediumBubbleFloatRef} className="will-change-transform">
-          <motion.g
-            ref={mediumBubbleRef}
-            style={{
-              x: mediumDx,
-              y: mediumDy,
-              transformOrigin: "201.927px 293.495px",
-              willChange: "transform",
-            }}
-          >
-            <g data-animate="bubbles" data-index="0">
-              <circle
-                cx="201.927"
-                cy="293.495"
-                r="9.417"
-                className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)] filter-animated"
-              />
-            </g>
+          <motion.g variants={bubbleRevealVariants}>
+            <motion.g
+              ref={mediumBubbleRef}
+              style={{
+                x: mediumDx,
+                y: mediumDy,
+                transformOrigin: "201.927px 293.495px",
+                willChange: "transform",
+              }}
+            >
+              <g data-animate="bubbles" data-index="0">
+                <circle
+                  cx="201.927"
+                  cy="293.495"
+                  r="9.417"
+                  className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)] filter-animated"
+                />
+              </g>
+            </motion.g>
           </motion.g>
         </g>
 
         {/* small bubble */}
         <g ref={smallBubbleFloatRef} className="will-change-transform">
-          <motion.g
-            ref={smallBubbleRef}
-            style={{
-              x: smallDx,
-              y: smallDy,
-              transformOrigin: "184.926px 314.008px",
-              willChange: "transform",
-            }}
-          >
-            <g data-animate="bubbles" data-index="1">
-              <circle
-                cx="184.926"
-                cy="314.008"
-                r="4.913"
-                className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)] filter-animated"
-              />
-            </g>
+          <motion.g variants={bubbleRevealVariants}>
+            <motion.g
+              ref={smallBubbleRef}
+              style={{
+                x: smallDx,
+                y: smallDy,
+                transformOrigin: "184.926px 314.008px",
+                willChange: "transform",
+              }}
+            >
+              <g data-animate="bubbles" data-index="1">
+                <circle
+                  cx="184.926"
+                  cy="314.008"
+                  r="4.913"
+                  className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)] filter-animated"
+                />
+              </g>
+            </motion.g>
           </motion.g>
         </g>
 
@@ -458,7 +479,7 @@ export function Bounce({
         >
           <circle cx="193" cy="303" r="30" fill="transparent" />
         </motion.g>
-      </g>
+      </motion.g>
 
       <g
         onMouseEnter={handleMouseEnter}

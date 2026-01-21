@@ -14,6 +14,7 @@ import {
   lineVariants,
   REPEAT_DELAY,
 } from "@/lib/variants/click-variants";
+import { revealVariants } from "@/lib/variants/reveal-variants";
 import {
   AnimationPlaybackControlsWithThen,
   easeOut,
@@ -186,6 +187,8 @@ export function Click({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
+      variants={revealVariants}
+      className="origin-bottom!"
     >
       <g ref={floatingRef} className="will-change-transform">
         <motion.g

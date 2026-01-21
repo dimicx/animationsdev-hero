@@ -11,6 +11,7 @@ import {
   stemVariants,
   wholeVariants,
 } from "@/lib/variants/lightbulb-variants";
+import { revealVariants } from "@/lib/variants/reveal-variants";
 import {
   AnimationPlaybackControlsWithThen,
   motion,
@@ -107,11 +108,13 @@ export function Lightbulb({
   ]);
 
   return (
-    <g
+    <motion.g
       ref={scope}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
+      variants={revealVariants}
+      className="origin-bottom!"
     >
       <g ref={floatingRef} className="will-change-transform">
         <motion.g
@@ -217,6 +220,6 @@ export function Lightbulb({
           </g>
         </motion.g>
       </g>
-    </g>
+    </motion.g>
   );
 }
