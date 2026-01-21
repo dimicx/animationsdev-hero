@@ -29,7 +29,8 @@ export function Lightbulb({
   const isFirstIdleRef = useRef(true);
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
 
-  const { floatingRef, rotationRef, pause, resume } = useAmbientAnimations({
+  const { floatingRef, rotationRef } = useAmbientAnimations({
+    id: "lightbulb",
     floating: { to: 1, duration: 3 },
     rotation: { to: 5, duration: 10 },
     shouldReduceMotion,
@@ -78,8 +79,6 @@ export function Lightbulb({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    onImmediateEnter: pause,
-    onImmediateLeave: resume,
     onHoverStart: async () => {
       await animateLightbulbVariant("hover");
       hasAnimationCompletedRef.current = true;

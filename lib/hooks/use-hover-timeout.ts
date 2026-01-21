@@ -1,6 +1,12 @@
 import { useReducedMotion } from "motion/react";
 import { useCallback, useRef } from "react";
 import { useMediaQuery } from "usehooks-ts";
+import { ambientAnimationsStore } from "@/lib/stores/ambient-animations-store";
+
+// Safari detection - check once at module load
+const isSafari =
+  typeof window !== "undefined" &&
+  /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 interface UseHoverTimeoutProps {
   /** Delay in milliseconds before hover animation starts */
@@ -11,10 +17,6 @@ interface UseHoverTimeoutProps {
   onHoverEnd: () => void;
   /** Optional ref to check if hover is disabled */
   disabledRef?: React.RefObject<boolean>;
-  /** Optional callback fired immediately on mouseenter (before delay) */
-  onImmediateEnter?: () => void;
-  /** Optional callback fired immediately on mouseleave (unconditionally) */
-  onImmediateLeave?: () => void;
 }
 
 /**
@@ -33,21 +35,28 @@ export function useHoverTimeout({
   onHoverStart,
   onHoverEnd,
   disabledRef,
-  onImmediateEnter,
-  onImmediateLeave,
 }: UseHoverTimeoutProps) {
   const shouldReduceMotion = useReducedMotion();
   const isMobile = useMediaQuery("(pointer: coarse)");
   const mouseEnterTimeRef = useRef<number>(0);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const _delay = isMobile ? 0 : delay;
 
   const handleMouseEnter = useCallback(() => {
     if (disabledRef?.current || shouldReduceMotion) return;
 
-    // Fire immediate callback before any delay
-    onImmediateEnter?.();
+    // Cancel any pending resume (user hovered back quickly)
+    if (resumeTimeoutRef.current) {
+      clearTimeout(resumeTimeoutRef.current);
+      resumeTimeoutRef.current = null;
+    }
+
+    // Pause all ambient animations immediately (Safari only - to prevent frame drops)
+    if (isSafari) {
+      ambientAnimationsStore.pauseAll();
+    }
 
     mouseEnterTimeRef.current = Date.now();
 
@@ -61,13 +70,18 @@ export function useHoverTimeout({
       if (disabledRef?.current || shouldReduceMotion) return;
       onHoverStart();
     }, _delay);
-  }, [_delay, onHoverStart, disabledRef, shouldReduceMotion, onImmediateEnter]);
+  }, [_delay, onHoverStart, disabledRef, shouldReduceMotion]);
 
   const handleMouseLeave = useCallback(() => {
     if (disabledRef?.current || shouldReduceMotion) return;
 
-    // Fire immediate callback unconditionally (not gated by hover duration)
-    onImmediateLeave?.();
+    // Resume all ambient animations after a short delay (Safari only)
+    if (isSafari) {
+      resumeTimeoutRef.current = setTimeout(() => {
+        ambientAnimationsStore.resumeAll();
+        resumeTimeoutRef.current = null;
+      }, 200);
+    }
 
     const hoverDuration = Date.now() - mouseEnterTimeRef.current;
 
@@ -81,7 +95,7 @@ export function useHoverTimeout({
     if (hoverDuration >= _delay) {
       onHoverEnd();
     }
-  }, [_delay, onHoverEnd, disabledRef, shouldReduceMotion, onImmediateLeave]);
+  }, [_delay, onHoverEnd, disabledRef, shouldReduceMotion]);
 
   return { handleMouseEnter, handleMouseLeave };
 }

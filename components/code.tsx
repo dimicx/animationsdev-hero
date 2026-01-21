@@ -45,7 +45,8 @@ export function Code({
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const hasClickedRef = useRef(false);
 
-  const { floatingRef, pause, resume } = useAmbientAnimations({
+  const { floatingRef } = useAmbientAnimations({
+    id: "code",
     floating: { to: 1.5, duration: 3 },
     shouldReduceMotion,
   });
@@ -130,8 +131,6 @@ export function Code({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    onImmediateEnter: pause,
-    onImmediateLeave: resume,
     onHoverStart: async () => {
       codePathProgress.set(2);
       await animateCodeVariant("hover");

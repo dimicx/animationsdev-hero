@@ -45,7 +45,8 @@ export function Click({
   const hasAnimationCompletedRef = useRef(false);
   const isFirstIdleRef = useRef(true);
 
-  const { floatingRef, rotationRef, pause, resume } = useAmbientAnimations({
+  const { floatingRef, rotationRef } = useAmbientAnimations({
+    id: "click",
     floating: { to: 1, duration: 3, delay: 0.5 },
     rotation: { to: 2, duration: 5 },
     shouldReduceMotion,
@@ -151,8 +152,6 @@ export function Click({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    onImmediateEnter: pause,
-    onImmediateLeave: resume,
     onHoverStart: async () => {
       await playAnimationState("hover", {
         keyframes: [0, 1, 0],

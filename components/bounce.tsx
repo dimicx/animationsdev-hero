@@ -75,7 +75,8 @@ export function Bounce({
   const mediumBubbleFloatRef = useRef<SVGGElement>(null);
   const smallBubbleFloatRef = useRef<SVGGElement>(null);
 
-  const { pause, resume } = useAmbientAnimations({
+  useAmbientAnimations({
+    id: "bounce",
     animations: [
       { ref: mainFloatingRef, type: "floating", to: 2, duration: 5 },
       { ref: mainRotationRef, type: "rotation", to: 2, duration: 6, delay: 1 },
@@ -281,8 +282,6 @@ export function Bounce({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    onImmediateEnter: pause,
-    onImmediateLeave: resume,
     onHoverStart: () => {
       // Stop all existing animations to prevent stacking
       stopAllAnimations();

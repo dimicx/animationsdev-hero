@@ -1,5 +1,6 @@
 import { animate, AnimationPlaybackControls } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
+import { ambientAnimationsStore } from "@/lib/stores/ambient-animations-store";
 
 interface FloatingConfig {
   to: number;
@@ -22,12 +23,14 @@ interface AnimationConfig {
 }
 
 interface SimpleConfig {
+  id: string;
   floating?: FloatingConfig;
   rotation?: RotationConfig;
   shouldReduceMotion?: boolean | null;
 }
 
 interface MultiConfig {
+  id: string;
   animations: AnimationConfig[];
   shouldReduceMotion?: boolean | null;
 }
@@ -173,6 +176,14 @@ export function useAmbientAnimations(config: UseAmbientAnimationsConfig) {
   const resume = useCallback(() => {
     controlsRef.current.forEach((ctrl) => ctrl.play());
   }, []);
+
+  // Register with global store for coordinated pause/resume
+  useEffect(() => {
+    ambientAnimationsStore.register(config.id, { pause, resume });
+    return () => {
+      ambientAnimationsStore.unregister(config.id);
+    };
+  }, [config.id, pause, resume]);
 
   if (isMultiConfig(config)) {
     return { pause, resume };

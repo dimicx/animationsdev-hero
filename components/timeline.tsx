@@ -37,7 +37,8 @@ export function Timeline({
   const svgRef = useRef<SVGGElement>(null);
   const hasAnimationCompletedRef = useRef(false);
 
-  const { floatingRef, rotationRef, pause, resume } = useAmbientAnimations({
+  const { floatingRef, rotationRef } = useAmbientAnimations({
+    id: "timeline",
     floating: { to: 2.5, duration: 2.5 },
     rotation: { to: 360, duration: 90 },
     shouldReduceMotion,
@@ -136,8 +137,6 @@ export function Timeline({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    onImmediateEnter: pause,
-    onImmediateLeave: resume,
     onHoverStart: async () => {
       hasEnteredMainAreaRef.current = true;
       animateContainerVariant("hover");

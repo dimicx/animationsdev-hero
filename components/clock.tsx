@@ -33,7 +33,8 @@ export function Clock({
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const isFirstIdleRef = useRef(true);
 
-  const { floatingRef, rotationRef, pause, resume } = useAmbientAnimations({
+  const { floatingRef, rotationRef } = useAmbientAnimations({
+    id: "clock",
     floating: { to: 1.5, duration: 3 },
     rotation: { to: 1, duration: 4 },
     shouldReduceMotion,
@@ -145,8 +146,6 @@ export function Clock({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    onImmediateEnter: pause,
-    onImmediateLeave: resume,
     onHoverStart: () => {
       animateClockVariant("hover");
     },
