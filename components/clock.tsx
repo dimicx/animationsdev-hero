@@ -34,13 +34,18 @@ export function Clock({
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const isFirstIdleRef = useRef(true);
 
-  const { floatingRef, rotationRef } = useAmbientAnimations({
+  const floatingRef = useRef<SVGGElement>(null);
+  const rotationRef = useRef<SVGGElement>(null);
+
+  useAmbientAnimations({
     id: "clock",
-    floating: { to: 1.5, duration: 3 },
-    rotation: { to: 1, duration: 4 },
+    animations: [
+      { ref: floatingRef, type: "floating", to: 1.5, duration: 3 },
+      { ref: rotationRef, type: "rotation", to: 1, duration: 4 },
+    ],
     shouldReduceMotion,
   });
-
+  
   const animateClockVariant = useCallback(
     (variant: "initial" | "hover" | "click" | "scale-click") => {
       const animations: (AnimationPlaybackControlsWithThen | undefined)[] = [];

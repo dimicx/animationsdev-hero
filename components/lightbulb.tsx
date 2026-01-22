@@ -30,10 +30,15 @@ export function Lightbulb({
   const isFirstIdleRef = useRef(true);
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
 
-  const { floatingRef, rotationRef } = useAmbientAnimations({
+  const floatingRef = useRef<SVGGElement>(null);
+  const rotationRef = useRef<SVGGElement>(null);
+
+  useAmbientAnimations({
     id: "lightbulb",
-    floating: { to: 1, duration: 3 },
-    rotation: { to: 5, duration: 10 },
+    animations: [
+      { ref: floatingRef, type: "floating", to: 1, duration: 3 },
+      { ref: rotationRef, type: "rotation", to: 5, duration: 10 },
+    ],
     shouldReduceMotion,
   });
 

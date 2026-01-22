@@ -38,10 +38,15 @@ export function Timeline({
   const svgRef = useRef<SVGGElement>(null);
   const hasAnimationCompletedRef = useRef(false);
 
-  const { floatingRef, rotationRef } = useAmbientAnimations({
+  const floatingRef = useRef<SVGGElement>(null);
+  const rotationRef = useRef<SVGGElement>(null);
+
+  useAmbientAnimations({
     id: "timeline",
-    floating: { to: 2.5, duration: 2.5 },
-    rotation: { to: 360, duration: 90 },
+    animations: [
+      { ref: floatingRef, type: "floating", to: 2.5, duration: 2.5 },
+      { ref: rotationRef, type: "rotation", to: 360, duration: 90 },
+    ],
     shouldReduceMotion,
   });
 

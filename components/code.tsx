@@ -45,9 +45,13 @@ export function Code({
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const hasClickedRef = useRef(false);
 
-  const { floatingRef } = useAmbientAnimations({
+  const floatingRef = useRef<SVGGElement>(null);
+
+  useAmbientAnimations({
     id: "code",
-    floating: { to: 1.5, duration: 3 },
+    animations: [
+      { ref: floatingRef, type: "floating", to: 1.5, duration: 3 },
+    ],
     shouldReduceMotion,
   });
 
