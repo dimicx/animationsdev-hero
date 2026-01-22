@@ -45,10 +45,15 @@ export function Click({
   const hasAnimationCompletedRef = useRef(false);
   const isFirstIdleRef = useRef(true);
 
-  const { floatingRef, rotationRef } = useAmbientAnimations({
+  const floatingRef = useRef<SVGGElement>(null);
+  const rotationRef = useRef<SVGGElement>(null);
+
+  useAmbientAnimations({
     id: "click",
-    floating: { to: 1, duration: 3, delay: 0.5 },
-    rotation: { to: 2, duration: 5 },
+    animations: [
+      { ref: floatingRef, type: "floating", to: 1, duration: 3, delay: 0.5 },
+      { ref: rotationRef, type: "rotation", to: 2, duration: 5 },
+    ],
     shouldReduceMotion,
   });
 
