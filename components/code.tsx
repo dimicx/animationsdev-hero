@@ -42,7 +42,6 @@ export function Code({
   const colorIndexRef = useRef<number | null>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const [scope, animateVariant, animate] = useAnimateVariant();
-  const hasAnimationCompletedRef = useRef(false);
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const hasClickedRef = useRef(false);
 
@@ -97,8 +96,6 @@ export function Code({
       return;
     }
 
-    if (!hasAnimationCompletedRef.current) return;
-
     hasClickedRef.current = true;
 
     animateVariant("[data-animate='pulse']", pulseVariants.initial);
@@ -132,13 +129,11 @@ export function Code({
   const { handleMouseEnter, handleMouseLeave } = useHoverTimeout({
     delay: UNIVERSAL_DELAY,
     disabledRef: isDraggingRef,
-    onHoverStart: async () => {
+    onHoverStart: () => {
+      animateCodeVariant("hover");
       codePathProgress.set(2);
-      await animateCodeVariant("hover");
-      hasAnimationCompletedRef.current = true;
     },
     onHoverEnd: () => {
-      hasAnimationCompletedRef.current = false;
       resetTap();
       animateCodeVariant("initial");
       animateCodeVariant("idle");

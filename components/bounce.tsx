@@ -25,6 +25,7 @@ import {
   pathVariants,
   secondaryCircleVariants,
 } from "@/lib/variants/bounce-variants";
+import { revealVariants } from "@/lib/variants/reveal-variants";
 import {
   AnimationPlaybackControls,
   motion,
