@@ -203,7 +203,7 @@ export function Timeline({
           <motion.g data-animate="scale" initial={scaleVariants.initial}>
             <g
               ref={rotationRef}
-              className="filter-[url(#filter6_i_359_1453)] dark:filter-[url(#filter6_i_368_1560)] filter-animated will-change-transform"
+              className="filter-[url(#filter6_i_359_1453)] dark:filter-[url(#filter6_i_368_1560)] will-change-transform"
             >
               <path
                 d="M216.15 23.607c6.663-4.711 15.869-3.23 20.717 3.333a15 15 0 0 0 9.525 5.869c8.042 1.38 13.504 8.937 12.292 17.006a15 15 0 0 0 2.585 10.885c4.711 6.662 3.23 15.868-3.333 20.717a15 15 0 0 0-5.869 9.524c-1.38 8.042-8.937 13.505-17.006 12.292a15 15 0 0 0-10.885 2.585c-6.662 4.711-15.869 3.23-20.717-3.333a15 15 0 0 0-9.524-5.869c-8.042-1.38-13.505-8.937-12.292-17.006a15 15 0 0 0-2.585-10.885c-4.711-6.662-3.23-15.868 3.333-20.716a15 15 0 0 0 5.869-9.525c1.379-8.042 8.937-13.505 17.006-12.292a15 15 0 0 0 10.884-2.585"

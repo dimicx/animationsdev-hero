@@ -411,7 +411,7 @@ export function Bounce({
                 cx="201.927"
                 cy="293.495"
                 r="9.417"
-                className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)] filter-animated"
+                className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)]"
               />
             </g>
           </motion.g>
@@ -433,7 +433,7 @@ export function Bounce({
                 cx="184.926"
                 cy="314.008"
                 r="4.913"
-                className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)] filter-animated"
+                className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)]"
               />
             </g>
           </motion.g>
@@ -469,7 +469,7 @@ export function Bounce({
           <g ref={mainRotationRef} className="will-change-transform">
             <motion.g style={{ x: mainDx, y: mainDy, willChange: "transform" }}>
             <motion.g data-animate="background" initial={backgroundVariants.initial}>
-              <g className="filter-[url(#filter0_i_359_1453)] dark:filter-[url(#filter0_ii_368_1560)] filter-animated">
+              <g className="filter-[url(#filter0_i_359_1453)] dark:filter-[url(#filter0_ii_368_1560)]">
                 <path
                   d="M245.555 146.249c9.49-1.097 18.358 3.212 23.526 10.486 3.964-6.087 10.509-10.43 18.289-11.329 12.356-1.429 23.659 6.309 27.111 17.822 13.829-1.544 26.315 8.383 27.914 22.219a25.17 25.17 0 0 1-3.739 16.399 25.17 25.17 0 0 1 7.38 15.112c1.6 13.834-8.29 26.347-22.105 28-.733 11.998-9.972 22.111-22.329 23.54-7.78.899-15.142-1.835-20.39-6.857-3.372 8.261-11.023 14.481-20.513 15.578-8.436.975-16.381-2.322-21.672-8.176a25.19 25.19 0 0 1-16.205 8.564c-12.356 1.428-23.66-6.31-27.112-17.823-13.827 1.541-26.31-8.385-27.909-22.218a25.17 25.17 0 0 1 3.736-16.398 25.17 25.17 0 0 1-7.381-15.114c-1.6-13.834 8.29-26.347 22.104-28.001.733-11.998 9.974-22.111 22.331-23.539a25.2 25.2 0 0 1 17.73 4.639c3.816-6.907 10.799-11.929 19.234-12.904"
                   className="fill-[#F8F8F8] dark:fill-[#252525]"
@@ -489,7 +489,7 @@ export function Bounce({
                 />
               </g>
               <g>
-                <g className="filter-[url(#filter3_i_359_1453)] dark:filter-[url(#filter3_i_368_1560)] filter-animated">
+                <g className="filter-[url(#filter3_i_359_1453)] dark:filter-[url(#filter3_i_368_1560)]">
                   <circle
                     cx="289.63"
                     cy="228.535"
