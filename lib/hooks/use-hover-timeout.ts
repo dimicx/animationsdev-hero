@@ -1,6 +1,12 @@
 import { useReducedMotion } from "motion/react";
 import { useCallback, useRef } from "react";
 import { useMediaQuery } from "usehooks-ts";
+import { ambientAnimationsStore } from "@/lib/stores/ambient-animations-store";
+
+// Safari detection - check once at module load
+const isSafari =
+  typeof window !== "undefined" &&
+  /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 interface UseHoverTimeoutProps {
   /** Delay in milliseconds before hover animation starts */
@@ -40,6 +46,12 @@ export function useHoverTimeout({
   const handleMouseEnter = useCallback(() => {
     if (disabledRef?.current || shouldReduceMotion) return;
 
+    // Pause all ambient animations immediately (Safari only - to prevent frame drops)
+    // This also cancels any pending resume timer in the store
+    if (isSafari) {
+      ambientAnimationsStore.pauseAll();
+    }
+
     mouseEnterTimeRef.current = Date.now();
 
     // Clear any pending timeout
@@ -56,6 +68,12 @@ export function useHoverTimeout({
 
   const handleMouseLeave = useCallback(() => {
     if (disabledRef?.current || shouldReduceMotion) return;
+
+    // Resume all ambient animations after a short delay (Safari only)
+    // Timer is managed by the store to handle cross-component hover transitions
+    if (isSafari) {
+      ambientAnimationsStore.resumeAllWithDelay(200);
+    }
 
     const hoverDuration = Date.now() - mouseEnterTimeRef.current;
 

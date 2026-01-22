@@ -1,8 +1,5 @@
-import {
-  createFloatingAnimation,
-  createRotationAnimation,
-  UNIVERSAL_DELAY,
-} from "@/lib/animations";
+import { UNIVERSAL_DELAY } from "@/lib/animations";
+import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import { useMobileTap } from "@/lib/hooks/use-mobile-tap";
@@ -33,6 +30,13 @@ export function Lightbulb({
   const isFirstIdleRef = useRef(true);
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
 
+  const { floatingRef, rotationRef } = useAmbientAnimations({
+    id: "lightbulb",
+    floating: { to: 1, duration: 3 },
+    rotation: { to: 5, duration: 10 },
+    shouldReduceMotion,
+  });
+
   const animateLightbulbVariant = useCallback(
     (variant: "initial" | "hover" | "idle" | "click") => {
       const initialDelay = variant === "idle" && isFirstIdleRef.current;
@@ -58,6 +62,10 @@ export function Lightbulb({
           animateVariant(`[data-animate='${selector}']`, resolved)
         );
       });
+
+      if (variant === "idle") {
+        isFirstIdleRef.current = false;
+      }
 
       return Promise.all(animations);
     },
@@ -108,48 +116,32 @@ export function Lightbulb({
       variants={revealVariants}
       className="origin-bottom! will-change-transform"
     >
-      <motion.g
-        style={{ willChange: "transform" }}
-        {...createFloatingAnimation({
-          to: 1,
-          duration: 3,
-          shouldReduceMotion,
-        })}
-      >
+      <g ref={floatingRef} className="will-change-transform">
         <motion.g
           data-animate="background"
           initial={backgroundVariants.initial}
-          style={{ willChange: "transform" }}
         >
-          <motion.g
+          <g
+            ref={rotationRef}
             style={{ willChange: "transform" }}
-            {...createRotationAnimation({
-              to: 5,
-              duration: 10,
-              shouldReduceMotion,
-            })}
             className="filter-[url(#filter5_i_359_1453)] dark:filter-[url(#filter5_i_368_1560)] filter-animated"
           >
             <path
               d="M367.266 21.417c-2.316-9.36 10.658-14.171 15.564-5.87 2.973 5.03 10.083 5.68 13.821 1.188l4.123-4.955c8.221-9.88 24.263-3.102 22.91 9.68l-.678 6.41c-.615 5.811 4.807 10.455 10.487 9.08 9.371-2.268 14.965 10.389 6.64 15.252-5.132 2.998-5.591 10.24-.88 13.862l5.654 4.347c10.746 8.261 3.501 25.412-9.914 23.466l-7.058-1.023c-5.881-.853-10.753 4.524-9.325 10.293 2.316 9.359-10.658 14.171-15.564 5.871-2.974-5.031-10.083-5.681-13.822-1.189l-4.123 4.954c-8.221 9.88-24.263 3.102-22.91-9.679l.678-6.41c.615-5.812-4.807-10.456-10.487-9.08-9.371 2.267-14.965-10.39-6.639-15.253 5.131-2.998 5.59-10.239.879-13.861l-5.654-4.347c-10.746-8.262-3.5-25.412 9.915-23.467l7.057 1.024c5.882.853 10.753-4.524 9.326-10.293"
               className="fill-[#F8F8F8] dark:fill-[#252525]"
             ></path>
-          </motion.g>
+          </g>
         </motion.g>
 
         <motion.g
           data-animate="whole"
           initial={wholeVariants.initial}
-          style={{ willChange: "transform" }}
         >
           <g>
             <defs>
               <mask id="bulb-mask">
                 <rect width="100%" height="100%" fill="white" />
-                <motion.g
-                  data-animate="bulb-mask"
-                  style={{ willChange: "transform" }}
-                >
+                <motion.g data-animate="bulb-mask">
                   <path
                     d="M398.773 55.476a1.843 1.843 0 0 0-2.181 2.97l.181.144a3.08 3.08 0 0 1 .974 3.108 1.842 1.842 0 1 0 3.565.932 6.76 6.76 0 0 0-2.539-7.154"
                     fill="black"
@@ -163,7 +155,6 @@ export function Lightbulb({
               initial={stemVariants.initial}
               d="M379.934 77.108c.307-.725 1.318-.824 1.845-.24a12.15 12.15 0 0 0 4.303 3.05 12.14 12.14 0 0 0 5.185.959c.787-.03 1.42.764 1.114 1.49l-.784 1.854-.009.024c-.924 2.187-4.46 2.783-7.896 1.332-3.436-1.452-5.473-4.403-4.551-6.59z"
               className="fill-[#989898] dark:fill-[#D6D6D6]"
-              style={{ willChange: "transform" }}
             ></motion.path>
             {/* bulb */}
             {/* shine applied as mask to the bulb path (#bulb-mask) */}
@@ -173,7 +164,6 @@ export function Lightbulb({
               d="M398.989 49.368c6.408 2.708 9.141 10.328 5.95 16.51a10 10 0 0 1-4.121 4.208l-.94.508a10.6 10.6 0 0 0-4.718 5.197l-.318.752a1.95 1.95 0 0 1-1.353 1.14 10.12 10.12 0 0 1-10.967-4.634 1.95 1.95 0 0 1-.126-1.765l.318-.752a10.6 10.6 0 0 0 .437-7.005l-.291-1.028a10 10 0 0 1 .144-5.888c2.208-6.597 9.576-9.95 15.985-7.242"
               mask="url(#bulb-mask)"
               className="fill-[#989898] dark:fill-[#D6D6D6]"
-              style={{ willChange: "transform" }}
             ></motion.path>
           </g>
 
@@ -182,7 +172,6 @@ export function Lightbulb({
             <motion.line
               data-animate="line"
               initial={lineVariants.initial}
-              style={{ willChange: "transform, opacity" }}
               x1="376.711"
               y1="53.2909"
               x2="376.62"
@@ -203,7 +192,6 @@ export function Lightbulb({
               strokeWidth="3.7"
               strokeLinecap="round"
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
-              style={{ willChange: "transform, opacity" }}
             />
             <motion.line
               data-animate="line"
@@ -216,7 +204,6 @@ export function Lightbulb({
               strokeWidth="3.7"
               strokeLinecap="round"
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
-              style={{ willChange: "transform, opacity" }}
             />
             <motion.line
               data-animate="line"
@@ -229,11 +216,10 @@ export function Lightbulb({
               strokeWidth="3.7"
               strokeLinecap="round"
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
-              style={{ willChange: "transform, opacity" }}
             />
           </g>
         </motion.g>
-      </motion.g>
+      </g>
     </motion.g>
   );
 }

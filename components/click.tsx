@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  createFloatingAnimation,
-  createRotationAnimation,
-  UNIVERSAL_DELAY,
-} from "@/lib/animations";
+import { UNIVERSAL_DELAY } from "@/lib/animations";
+import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import { useMobileTap } from "@/lib/hooks/use-mobile-tap";
@@ -48,6 +45,13 @@ export function Click({
   >(undefined);
   const hasAnimationCompletedRef = useRef(false);
   const isFirstIdleRef = useRef(true);
+
+  const { floatingRef, rotationRef } = useAmbientAnimations({
+    id: "click",
+    floating: { to: 1, duration: 3, delay: 0.5 },
+    rotation: { to: 2, duration: 5 },
+    shouldReduceMotion,
+  });
 
   // Consolidated animation orchestration
   const playAnimationState = useCallback(
@@ -186,47 +190,28 @@ export function Click({
       variants={revealVariants}
       className="origin-bottom! will-change-transform"
     >
-      <motion.g
-        style={{ willChange: "transform" }}
-        {...createFloatingAnimation({
-          to: 1,
-          duration: 3,
-          delay: 0.5,
-          shouldReduceMotion,
-        })}
-      >
+      <g ref={floatingRef} className="will-change-transform">
         <motion.g
           data-animate="background"
           initial={backgroundVariants.initial}
-          style={{ willChange: "transform" }}
         >
-          <motion.g
-            style={{ willChange: "transform" }}
-            {...createRotationAnimation({
-              to: 2,
-              duration: 5,
-              shouldReduceMotion,
-            })}
-            className="filter-[url(#filter4_i_359_1453)] dark:filter-[url(#filter4_i_368_1560)] filter-animated"
+          <g
+            ref={rotationRef}
+            className="filter-[url(#filter4_i_359_1453)] dark:filter-[url(#filter4_i_368_1560)] filter-animated will-change-transform"
           >
             <path
               d="M14.904 133.163c4.089 9.715 8.508 20.268 10.663 25.567.817 2.007.064 4.171-1.78 5.308l-11.056 6.815a4.914 4.914 0 0 0-1.142 7.392l7.762 8.998a4.914 4.914 0 0 1 .01 6.407L1.339 214.677c-3.036 3.542.11 8.924 4.686 8.017l25.492-5.055a4.914 4.914 0 0 1 5.704 3.56l3.912 14.74c.895 3.376 4.929 4.765 7.714 2.657l11.864-8.979a4.91 4.91 0 0 1 5.978.037l14.675 11.394c2.88 2.237 7.106.668 7.829-2.905l3.374-16.668a4.914 4.914 0 0 1 6.233-3.73l16.687 5.028c4.467 1.346 8.12-3.709 5.439-7.528l-14.585-20.776a4.914 4.914 0 0 1 .897-6.614l16.079-13.25c2.857-2.355 2.183-6.903-1.235-8.328l-12.919-5.383a4.915 4.915 0 0 1-2.879-5.719l5.329-21.472c1.13-4.551-4.15-7.947-7.823-5.032L84.2 144.218c-2.559 2.031-6.35 1.045-7.596-1.975l-6.553-15.882c-1.48-3.585-6.337-4.123-8.565-.947l-9.606 13.693a4.913 4.913 0 0 1-6.477 1.434l-23.506-13.552c-4.082-2.353-8.82 1.832-6.993 6.174"
               className="fill-[#F8F8F8] dark:fill-[#252525]"
             />
-          </motion.g>
+          </g>
         </motion.g>
-        <motion.g
-          data-animate="hand"
-          initial={handVariants.initial}
-          className="transform-border"
-          style={{ willChange: "transform" }}
-        >
+        <g data-animate="hand">
           <motion.path
             d={handPath}
             className="fill-[#989898] dark:fill-[#D6D6D6]"
             style={{ willChange: "d" }}
           ></motion.path>
-        </motion.g>
+        </g>
         <g>
           <motion.line
             data-animate="ray"
@@ -277,7 +262,7 @@ export function Click({
             className="stroke-[#989898] dark:stroke-[#D6D6D6]"
           />
         </g>
-      </motion.g>
+      </g>
     </motion.g>
   );
 }

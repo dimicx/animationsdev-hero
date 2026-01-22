@@ -5,11 +5,8 @@ import {
   LIGHT_MODE_COLORS,
   SPRING_CONFIGS,
 } from "@/lib/animation-configs";
-import {
-  createFloatingAnimation,
-  createRotationAnimation,
-  UNIVERSAL_DELAY,
-} from "@/lib/animations";
+import { UNIVERSAL_DELAY } from "@/lib/animations";
+import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import {
   bounceAcceleratedXFast,
   bounceEaseFast,
@@ -39,6 +36,7 @@ import {
   useTransform,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
+import { revealVariants } from "@/lib/variants/reveal-variants";
 
 // Ball positions - aligned with path touchpoints
 const START_X = 212;
@@ -73,6 +71,29 @@ export function Bounce({
   const forwardCompleteTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
+
+  // Refs for ambient animations
+  const mainFloatingRef = useRef<SVGGElement>(null);
+  const mainRotationRef = useRef<SVGGElement>(null);
+  const mediumBubbleFloatRef = useRef<SVGGElement>(null);
+  const smallBubbleFloatRef = useRef<SVGGElement>(null);
+
+  useAmbientAnimations({
+    id: "bounce",
+    animations: [
+      { ref: mainFloatingRef, type: "floating", to: 2, duration: 5 },
+      { ref: mainRotationRef, type: "rotation", to: 2, duration: 6, delay: 1 },
+      { ref: mediumBubbleFloatRef, type: "floating", to: -1.5, duration: 3 },
+      {
+        ref: smallBubbleFloatRef,
+        type: "floating",
+        to: -1,
+        duration: 2.5,
+        delay: 0.5,
+      },
+    ],
+    shouldReduceMotion,
+  });
 
   // Stop all running animations to prevent stacking
   const stopAllAnimations = useCallback(() => {
@@ -374,8 +395,7 @@ export function Bounce({
   }, [animateSpringPathVariant, shouldReduceMotion, animate, animateVariant]);
 
   return (
-    <motion.g
-      ref={scope}
+    <motion.g ref={scope}
       variants={revealVariants}
       className="origin-bottom-left! will-change-transform"
     >
@@ -394,77 +414,52 @@ export function Bounce({
         animate="visible"
       >
         {/* medium bubble */}
-        <motion.g
-          style={{ willChange: "transform" }}
-          {...createFloatingAnimation({
-            to: -1.5,
-            duration: 3,
-            shouldReduceMotion,
-          })}
-        >
-          <motion.g
-            ref={mediumBubbleRef}
-            style={{
-              x: mediumDx,
-              y: mediumDy,
-              transformOrigin: "201.927px 293.495px",
-              willChange: "transform",
-            }}
-          >
-            <motion.g variants={bubbleRevealVariants}>
-              <motion.g
-                data-animate="bubbles"
-                data-index="0"
-                initial={bubblesVariants.initial}
-                style={{ willChange: "transform" }}
-              >
+        <g ref={mediumBubbleFloatRef} className="will-change-transform">
+          <motion.g variants={bubbleRevealVariants} className="will-change-transform">
+            <motion.g
+              ref={mediumBubbleRef}
+              style={{
+                x: mediumDx,
+                y: mediumDy,
+                transformOrigin: "201.927px 293.495px",
+                willChange: "transform",
+              }}
+            >
+              <g data-animate="bubbles" data-index="0">
                 <circle
                   cx="201.927"
                   cy="293.495"
                   r="9.417"
                   className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter1_i_359_1453)] dark:filter-[url(#filter1_ii_368_1560)] filter-animated"
                 />
-              </motion.g>
+              </g>
             </motion.g>
           </motion.g>
-        </motion.g>
+        </g>
 
         {/* small bubble */}
-        <motion.g
-          style={{ willChange: "transform" }}
-          {...createFloatingAnimation({
-            to: -1,
-            duration: 2.5,
-            delay: 0.5,
-            shouldReduceMotion,
-          })}
-        >
-          <motion.g
-            ref={smallBubbleRef}
-            style={{
-              x: smallDx,
-              y: smallDy,
-              transformOrigin: "184.926px 314.008px",
-              willChange: "transform",
-            }}
-          >
-            <motion.g variants={bubbleRevealVariants}>
-              <motion.g
-                data-animate="bubbles"
-                data-index="1"
-                initial={bubblesVariants.initial}
-                style={{ willChange: "transform" }}
-              >
+        <g ref={smallBubbleFloatRef} className="will-change-transform">
+          <motion.g variants={bubbleRevealVariants} className="will-change-transform">
+            <motion.g
+              ref={smallBubbleRef}
+              style={{
+                x: smallDx,
+                y: smallDy,
+                transformOrigin: "184.926px 314.008px",
+                willChange: "transform",
+              }}
+            >
+              <g data-animate="bubbles" data-index="1">
                 <circle
                   cx="184.926"
                   cy="314.008"
                   r="4.913"
                   className="fill-[#F8F8F8] dark:fill-[#252525] filter-[url(#filter2_i_359_1453)] dark:filter-[url(#filter2_ii_368_1560)] filter-animated"
                 />
-              </motion.g>
+              </g>
             </motion.g>
           </motion.g>
-        </motion.g>
+        </g>
 
         {/* transparent hit area for dragging */}
         <motion.g
@@ -487,32 +482,15 @@ export function Bounce({
         </motion.g>
       </motion.g>
 
-      <motion.g
+      <g
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
-        style={{ willChange: "transform" }}
-        {...createFloatingAnimation({
-          to: 2,
-          duration: 5,
-          shouldReduceMotion,
-        })}
       >
-        <motion.g
-          style={{ willChange: "transform" }}
-          {...createRotationAnimation({
-            to: 2,
-            duration: 6,
-            delay: 1,
-            shouldReduceMotion,
-          })}
-        >
-          <motion.g style={{ x: mainDx, y: mainDy, willChange: "transform" }}>
-            <motion.g
-              data-animate="background"
-              initial={backgroundVariants.initial}
-              style={{ willChange: "transform" }}
-            >
+        <g ref={mainFloatingRef} className="will-change-transform">
+          <g ref={mainRotationRef} className="will-change-transform">
+            <motion.g style={{ x: mainDx, y: mainDy, willChange: "transform" }}>
+            <motion.g data-animate="background" initial={backgroundVariants.initial}>
               <g className="filter-[url(#filter0_i_359_1453)] dark:filter-[url(#filter0_ii_368_1560)] filter-animated">
                 <path
                   d="M245.555 146.249c9.49-1.097 18.358 3.212 23.526 10.486 3.964-6.087 10.509-10.43 18.289-11.329 12.356-1.429 23.659 6.309 27.111 17.822 13.829-1.544 26.315 8.383 27.914 22.219a25.17 25.17 0 0 1-3.739 16.399 25.17 25.17 0 0 1 7.38 15.112c1.6 13.834-8.29 26.347-22.105 28-.733 11.998-9.972 22.111-22.329 23.54-7.78.899-15.142-1.835-20.39-6.857-3.372 8.261-11.023 14.481-20.513 15.578-8.436.975-16.381-2.322-21.672-8.176a25.19 25.19 0 0 1-16.205 8.564c-12.356 1.428-23.66-6.31-27.112-17.823-13.827 1.541-26.31-8.385-27.909-22.218a25.17 25.17 0 0 1 3.736-16.398 25.17 25.17 0 0 1-7.381-15.114c-1.6-13.834 8.29-26.347 22.104-28.001.733-11.998 9.974-22.111 22.331-23.539a25.2 25.2 0 0 1 17.73 4.639c3.816-6.907 10.799-11.929 19.234-12.904"
@@ -528,10 +506,8 @@ export function Bounce({
                   strokeLinecap="round"
                   strokeWidth="4.913"
                   opacity="0.4"
-                  strokeDasharray="1px 1.1px"
-                  strokeDashoffset="1.05px"
+                  strokeDasharray="1 1.01"
                   pathLength="1"
-                  style={{ willChange: "stroke-dashoffset" }}
                 />
               </g>
               <g>
@@ -554,7 +530,6 @@ export function Bounce({
                   strokeWidth="4.913"
                   transform="rotate(-6.595 289.63 228.535)"
                   className="[--stroke-color:#989898] dark:[--stroke-color:#D6D6D6] [--stroke-highlight:#98989866] dark:[--stroke-highlight:#D6D6D666] [--bg-fill:#F8F8F8] dark:[--bg-fill:#252525]"
-                  style={{ willChange: "stroke, opacity" }}
                 ></motion.circle>
               </g>
 
@@ -582,8 +557,9 @@ export function Bounce({
               </motion.g>
             </motion.g>
           </motion.g>
-        </motion.g>
-      </motion.g>
+        </g>
+      </g>
+    </g>
     </motion.g>
   );
 }
