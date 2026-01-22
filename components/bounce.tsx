@@ -6,7 +6,6 @@ import {
   SPRING_CONFIGS,
 } from "@/lib/animation-configs";
 import { UNIVERSAL_DELAY } from "@/lib/animations";
-import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import {
   bounceAcceleratedXFast,
   bounceEaseFast,
@@ -14,6 +13,7 @@ import {
   getSquashStretchScaleYFast,
   settleSineFast,
 } from "@/lib/bounce-physics";
+import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import {
@@ -36,7 +36,6 @@ import {
   useTransform,
 } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
-import { revealVariants } from "@/lib/variants/reveal-variants";
 
 // Ball positions - aligned with path touchpoints
 const START_X = 212;
