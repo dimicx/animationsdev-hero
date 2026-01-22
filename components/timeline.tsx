@@ -1,8 +1,5 @@
-import {
-  createFloatingAnimation,
-  createRotationAnimation,
-  UNIVERSAL_DELAY,
-} from "@/lib/animations";
+import { UNIVERSAL_DELAY } from "@/lib/animations";
+import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import {
@@ -39,6 +36,13 @@ export function Timeline({
   const hasEnteredMainAreaRef = useRef(false);
   const svgRef = useRef<SVGGElement>(null);
   const hasAnimationCompletedRef = useRef(false);
+
+  const { floatingRef, rotationRef } = useAmbientAnimations({
+    id: "timeline",
+    floating: { to: 2.5, duration: 2.5 },
+    rotation: { to: 360, duration: 90 },
+    shouldReduceMotion,
+  });
 
   const animateTimelineVariant = useCallback(
     (variant: "initial" | "hover" | "click" | "idle") => {
@@ -185,7 +189,7 @@ export function Timeline({
         onMouseLeave={handleBufferLeave}
       />
 
-      <motion.g
+      <g
         ref={svgRef}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={() => {
@@ -195,45 +199,27 @@ export function Timeline({
         onMouseMove={!isMobile ? handleMouseMove : undefined}
         onClick={handleClick}
       >
-        <motion.g
-          style={{ willChange: "transform" }}
-          {...createFloatingAnimation({
-            to: 2.5,
-            duration: 2.5,
-            shouldReduceMotion,
-          })}
-        >
-          <motion.g
-            data-animate="scale"
-            initial={scaleVariants.initial}
-            style={{ willChange: "transform" }}
-          >
-            <motion.g
-              style={{ willChange: "transform" }}
-              {...createRotationAnimation({
-                to: 360,
-                duration: 90,
-                shouldReduceMotion,
-              })}
-              className="filter-[url(#filter6_i_359_1453)] dark:filter-[url(#filter6_i_368_1560)] filter-animated"
+        <g ref={floatingRef} className="will-change-transform">
+          <motion.g data-animate="scale" initial={scaleVariants.initial}>
+            <g
+              ref={rotationRef}
+              className="filter-[url(#filter6_i_359_1453)] dark:filter-[url(#filter6_i_368_1560)] filter-animated will-change-transform"
             >
               <path
                 d="M216.15 23.607c6.663-4.711 15.869-3.23 20.717 3.333a15 15 0 0 0 9.525 5.869c8.042 1.38 13.504 8.937 12.292 17.006a15 15 0 0 0 2.585 10.885c4.711 6.662 3.23 15.868-3.333 20.717a15 15 0 0 0-5.869 9.524c-1.38 8.042-8.937 13.505-17.006 12.292a15 15 0 0 0-10.885 2.585c-6.662 4.711-15.869 3.23-20.717-3.333a15 15 0 0 0-9.524-5.869c-8.042-1.38-13.505-8.937-12.292-17.006a15 15 0 0 0-2.585-10.885c-4.711-6.662-3.23-15.868 3.333-20.716a15 15 0 0 0 5.869-9.525c1.379-8.042 8.937-13.505 17.006-12.292a15 15 0 0 0 10.884-2.585"
                 className="fill-[#F8F8F8] dark:fill-[#252525]"
               ></path>
-            </motion.g>
+            </g>
           </motion.g>
 
           <motion.g
             data-animate="scale"
             initial={scaleVariants.initial}
-            style={{ willChange: "transform" }}
           >
             {/* center line - isolated from container to prevent bounding box issues */}
             <motion.g
               data-animate="timeline-container"
               initial={timelineContainerVariants.initial}
-              style={{ willChange: "transform" }}
             >
               <motion.path
                 strokeLinecap="round"
@@ -253,7 +239,6 @@ export function Timeline({
             data-animate="timeline-container"
             initial={timelineContainerVariants.initial}
             className="transform-view origin-center"
-            style={{ willChange: "transform" }}
           >
             <g>
               <mask
@@ -298,7 +283,6 @@ export function Timeline({
                   strokeWidth="6.55"
                   strokeLinecap="round"
                   className="stroke-[#989898] dark:stroke-[#D6D6D6]"
-                  style={{ willChange: "transform, opacity" }}
                 />
                 <motion.line
                   data-animate="timeline-two"
@@ -311,7 +295,6 @@ export function Timeline({
                   strokeWidth="6.55"
                   strokeLinecap="round"
                   className="stroke-[#989898] dark:stroke-[#D6D6D6]"
-                  style={{ willChange: "transform, opacity" }}
                 />
                 <motion.line
                   data-animate="timeline-three"
@@ -324,7 +307,6 @@ export function Timeline({
                   strokeWidth="6.5"
                   strokeLinecap="round"
                   className="stroke-[#989898] dark:stroke-[#D6D6D6]"
-                  style={{ willChange: "transform, opacity" }}
                 />
               </g>
             </g>
@@ -372,7 +354,6 @@ export function Timeline({
                   strokeWidth="6.55"
                   strokeLinecap="round"
                   className="stroke-[#989898] dark:stroke-[#D6D6D6]"
-                  style={{ willChange: "transform, opacity" }}
                 />
                 <motion.line
                   data-animate="timeline-two"
@@ -385,7 +366,6 @@ export function Timeline({
                   strokeWidth="6.55"
                   strokeLinecap="round"
                   className="stroke-[#989898] dark:stroke-[#D6D6D6]"
-                  style={{ willChange: "transform, opacity" }}
                 />
                 <motion.line
                   data-animate="timeline-three"
@@ -398,13 +378,12 @@ export function Timeline({
                   strokeWidth="6.5"
                   strokeLinecap="round"
                   className="stroke-[#989898] dark:stroke-[#D6D6D6]"
-                  style={{ willChange: "transform, opacity" }}
                 />
               </g>
             </g>
           </motion.g>
-        </motion.g>
-      </motion.g>
+        </g>
+      </g>
     </motion.g>
   );
 }

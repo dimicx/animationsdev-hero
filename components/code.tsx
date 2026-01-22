@@ -4,7 +4,8 @@ import {
   DEFAULT_LIGHT_FILL,
   LIGHT_MODE_COLORS,
 } from "@/lib/animation-configs";
-import { createFloatingAnimation, UNIVERSAL_DELAY } from "@/lib/animations";
+import { UNIVERSAL_DELAY } from "@/lib/animations";
+import { useAmbientAnimations } from "@/lib/hooks/use-ambient-animations";
 import { useAnimateVariant } from "@/lib/hooks/use-animate-variant";
 import { useHoverTimeout } from "@/lib/hooks/use-hover-timeout";
 import { useMobileTap } from "@/lib/hooks/use-mobile-tap";
@@ -43,6 +44,12 @@ export function Code({
   const hasAnimationCompletedRef = useRef(false);
   const { isReadyForClickRef, markTapped, resetTap } = useMobileTap();
   const hasClickedRef = useRef(false);
+
+  const { floatingRef } = useAmbientAnimations({
+    id: "code",
+    floating: { to: 1.5, duration: 3 },
+    shouldReduceMotion,
+  });
 
   const codePathProgress = useSpring(0, {
     visualDuration: 0.34,
@@ -166,25 +173,15 @@ export function Code({
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
-      <motion.g
-        style={{ willChange: "transform" }}
-        {...createFloatingAnimation({
-          to: 1.5,
-          duration: 3,
-          shouldReduceMotion,
-        })}
-      >
-        <motion.g data-animate="whole" style={{ willChange: "transform" }}>
+      <g ref={floatingRef} className="will-change-transform">
+        <g data-animate="whole">
           <g className="filter-[url(#filter8_i_359_1453)] dark:filter-[url(#filter8_i_368_1560)] filter-animated">
             <path
               d="M425.217 236.652C443.467 233.369 460.923 245.503 464.206 263.753C467.489 282.003 455.355 299.459 437.105 302.742L408.026 307.972C401.42 309.172 394.605 308.353 388.471 305.622C388.141 306.321 387.71 306.967 387.192 307.54C384.266 310.776 380.349 312.95 376.055 313.722L374.302 314.037C372.384 314.382 370.829 312.493 371.537 310.677L372.153 309.096C373.031 306.846 373.268 304.396 372.841 302.018L369.037 280.871C365.754 262.621 377.888 245.165 396.138 241.883L425.217 236.652Z"
               className="fill-[#F8F8F8] dark:fill-[#252525]"
             />
           </g>
-          <motion.g
-            data-animate="caret-left"
-            style={{ willChange: "transform" }}
-          >
+          <g data-animate="caret-left">
             <path
               d="M400.254 282.746L392.234 277.171C392.045 277.04 391.951 276.975 391.905 276.888C391.863 276.812 391.847 276.725 391.86 276.639C391.873 276.542 391.939 276.448 392.07 276.259L397.645 268.239"
               strokeWidth="2.457"
@@ -192,11 +189,8 @@ export function Code({
               strokeLinejoin="round"
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
             />
-          </motion.g>
-          <motion.g
-            data-animate="caret-right"
-            style={{ willChange: "transform" }}
-          >
+          </g>
+          <g data-animate="caret-right">
             <path
               d="M429.881 262.438L437.901 268.013C438.09 268.144 438.184 268.209 438.23 268.296C438.271 268.372 438.287 268.46 438.275 268.545C438.262 268.642 438.196 268.736 438.065 268.925L432.49 276.945"
               strokeWidth="2.457"
@@ -204,20 +198,15 @@ export function Code({
               strokeLinejoin="round"
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
             />
-          </motion.g>
-          <motion.g
-            data-animate="code-path"
-            style={{ willChange: "transform" }}
-          >
+          </g>
+          <g data-animate="code-path">
             <motion.g
               data-animate="pulse"
               initial={pulseVariants.initial}
-              style={{ willChange: "opacity" }}
             >
               <motion.g
                 data-animate="opacity"
                 initial={opacityVariants.initial}
-                style={{ willChange: "opacity" }}
               >
                 <motion.path
                   ref={pathRef}
@@ -227,8 +216,8 @@ export function Code({
                 />
               </motion.g>
             </motion.g>
-          </motion.g>
-          <motion.g data-animate="slash" style={{ willChange: "transform" }}>
+          </g>
+          <g data-animate="slash">
             <path
               d="M423.804 261.037L423.126 271.144L422.447 281.25"
               strokeWidth="2.457"
@@ -236,9 +225,9 @@ export function Code({
               strokeLinejoin="round"
               className="stroke-[#989898] dark:stroke-[#D6D6D6]"
             />
-          </motion.g>
-        </motion.g>
-      </motion.g>
+          </g>
+        </g>
+      </g>
     </motion.g>
   );
 }

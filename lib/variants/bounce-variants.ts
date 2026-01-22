@@ -7,7 +7,7 @@ const pathVariants = {
     strokeDashoffset: 0,
   },
   hover: {
-    strokeDashoffset: [0, 1.05],
+    strokeDashoffset: [0, 1],
     transition: {
       delay: 0.1,
       duration: BOUNCE_DURATION - 0.15,
